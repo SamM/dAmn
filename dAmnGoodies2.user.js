@@ -1,0 +1,471 @@
+
+// ==UserScript==
+// @name           dAmnGoodies
+// @description    Novelty features for dAmn chat.
+// @author         Sam Mulqueen <sammulqueen.nz@gmail.com>
+// @version        2.0.0
+// @include        http://chat.deviantart.com/chat/*
+// ==/UserScript==
+
+function init(){
+	
+	Array.prototype.each = function(fn, thisv){
+		if(this.length){
+			for(var i=0; i<this.length; i++)
+				fn.call(thisv||this, this[i], i);
+		}
+	}
+	
+	var dAmnGoodies = function(){
+		this.version = "2.0.0";
+		
+		var DG = this;
+		
+		this.username = dAmn_Client_Username;
+		
+		this.goodies = {};
+		this.goodie = function(name, data, setUp){
+			var newData;
+			this.goodies[name] = this.goodies[name] || data || {};
+			if(typeof setUp == 'function')
+				newData = setUp.call(this, data);
+			if(typeof newData == 'object')
+				this.goodies[name] = newData;
+			return this;
+		}
+		
+		this.save = function(){
+			$.jStorage.set("dAmnGoodies", DG.goodies);
+			return this;
+		}
+		
+		this.load = function(){
+			var loaded = $.jStorage.get("dAmnGoodies");
+			
+			if(!loaded || typeof loaded != 'object')  loaded = {};
+			
+			DG.goodies = loaded;
+			return this;
+		}
+		
+		this.init = function(){
+			
+			this.load();
+			
+			// Goodies
+			this.goodie('goodies', {enabled: true}, function(){
+				dAmnX.command.bind('goodies', 1, function(args){
+					var a = args.split(' ');
+					switch(a[0]){
+					case 'save':
+						dAmnX.notice('dAmnGoodies preferences were saved');
+						DG.save();
+					break;
+					case 'load':
+						DG.load();
+						dAmnX.notice('dAmnGoodies preferences were loaded');
+					break;
+					default:
+						dAmnX.error('goodies', 'Unknown command. Try: load, save');
+					break;
+					}
+				});
+				
+			});
+			
+			// Nicknames
+			this.goodie('nickname', {nicks: {}, enabled: true}, function(data){
+				// Setup /nick command
+				dAmnX.command.bind('nick', 1, function(args){
+					var a = args.split(" ");
+					switch(a[0]){
+						case 'on':
+						dAmnX.notice('Nicknames ON');
+						DG.goodies.nickname.enabled = true;
+						DG.save();
+						break;
+						case 'off':
+						dAmnX.notice('Nicknames OFF');
+						DG.goodies.nickname.enabled = false;
+						DG.save();
+						break;
+						case 'get':
+						var user = DG.goodies.nickname.nicks[a[1].toLowerCase()];
+						dAmnX.notice(user?a[1]+' = '+user:"none")
+						break;
+						case 'set':
+						var nick = a.length>3?args.slice(a[0].length+1+a[1].length+1):a[2];
+						DG.goodies.nickname.nicks[a[1].toLowerCase()] = nick;
+						DG.save();
+						dAmnX.notice("Nickname for "+a[1]+" is set to "+nick);
+						break;
+						case 'unset':
+						delete DG.goodies.nickname.nicks[a[1].toLowerCase()];
+						DG.save();
+						dAmnX.notice("Nickname for "+a[1]+" is unset");
+						break;
+						case 'list':
+						var nicks = DG.goodies.nickname.nicks;
+						var notice = [];
+						for(var user in nicks) notice.push(user+"="+nicks[user]);
+						dAmnX.notice(notice.length?notice.join("; "):"No nicknames are set");
+						break;
+						default:
+						dAmnX.error('nick', 'unknown command '+a[0]);
+						break;
+					}
+				});
+				
+			});
+			
+			// Mimic
+			this.goodie('mimic', {mimicking: [], enabled: true, announce: true}, function(data){
+
+				dAmnX.command.bind('mimic', 1, function(args){
+					var a = args.split(" ");
+					var g = DG.goodies.mimic,
+						list = g.mimicking;
+						
+					switch(a[0]){
+						case "status":
+							dAmnX.notice('Mimicking is '+(g.enabled?"enabled":"disabled"));
+							break;
+						case "announce":
+							if(g.announce){
+								dAmnX.notice('Announcements are turned OFF');
+								g.announce = false;
+							}else{
+								dAmnX.notice('Announcements are turned ON. YEAH BABY!');
+								g.announce = true;
+							}
+							DG.save();
+							break;
+						case "off":
+							g.enabled = false;
+							DG.save();
+							dAmnX.notice('Mimic is enabled')
+							break;
+						case "on":
+							g.enabled = on;
+							DG.save();
+							dAmnX.notice('Mimic is disabled')
+							break;
+						case "start":
+							if(list.indexOf(a[1].toLowerCase())>-1) 
+								dAmnX.error('mimic', 'You are already mimicking '+a[1]);
+							else {
+								DG.goodies.mimic.mimicking.push(a[1].toLowerCase());
+								DG.save();
+								dAmnX.notice('Started to mimic '+a[1])
+								if(g.announce)
+									dAmnX.send.action(false, 'started to mimic '+a[1]);
+							}
+							break;
+						case "stop":
+							if(list.indexOf(a[1].toLowerCase())==-1) 
+								dAmnX.error('mimic', 'You are not mimicking '+a[1]);
+							else {
+								var l = [];
+								DG.goodies.mimic.mimicking.each(function(u){ if(u != a[1].toLowerCase()) l.push(u); })
+								DG.goodies.mimic.mimicking = l;
+								DG.save();
+								dAmnX.notice('Stopped mimicking '+a[1])
+								if(g.announce)
+									dAmnX.send.action(false, 'stopped mimicking '+a[1]);
+							}
+							break;
+						case "list":
+							dAmnX.notice('You mimic'+(list.length?": "+list.join(", "):' none'))
+							break;
+						case "clear":
+							DG.goodies.mimic.mimicking = [];
+							DG.save();
+							dAmnX.notice('Not mimicking anyone')
+							break;
+						default:
+							dAmnX.error('mimic', 'unknown command '+a[0]);
+							break;
+					}
+					
+				});
+				
+				dAmnX.after('msg', function(body, done){
+					if(DG.goodies.mimic.enabled){
+						var b = body.pkt.body.split("\n"),
+							from = b[1].split("=")[1],
+							msg = b[3];
+						if(DG.username != from && DG.goodies.mimic.mimicking.indexOf(from.toLowerCase())>-1)
+							dAmnX.send.msg(dAmnX.channelNs(), msg)
+					}
+					done(body);
+				});
+				
+				dAmnX.after('action', function(body, done){
+					if(DG.goodies.mimic.enabled){
+						var b = body.pkt.body.split("\n"),
+							from = b[1].split("=")[1],
+							msg = b[3];
+						if(DG.username != from && DG.goodies.mimic.mimicking.indexOf(from.toLowerCase())>-1)
+							dAmnX.send.action(dAmnX.channelNs(), msg)
+					}
+					
+					done(body);
+				});
+				
+			});
+			
+			// Bob
+			this.goodie('bob', {on: false}, function(){
+								
+				dAmnX.command.bind('bob', 0, function(){
+					if(DG.goodies.bob.on){
+						DG.goodies.bob.on = false;
+						dAmnX.notice('No More Bob');
+					}else{
+						DG.goodies.bob.on = true;
+						dAmnX.notice('BOB!');
+					}
+					DG.save();
+				});
+				
+				dAmnX.before('msg', function(body, done){
+					if(DG.goodies.bob.on){
+						var b = body.pkt.body.split("\n");
+						b[1] = "from=Bob";
+						body.pkt.body = b.join("\n");
+						console.log(body);
+					}
+					done(body);
+				});
+				
+				dAmnX.before('action', function(body, done){
+					if(DG.goodies.bob.on){
+						var b = body.pkt.body.split("\n");
+						b[1] = "from=Bob";
+						body.pkt.body = b.join("\n");
+					}
+					done(body);
+				});
+				
+				dAmnX.before('event', function(body, done){
+					if(DG.goodies.bob.on){
+						body.pkt.param = 'Bob';
+						body.pkt.args.by = 'Bob';
+					}
+					done(body);
+				});
+				
+				dAmnX.before('selfEvent', function(body, done){
+					if(DG.goodies.bob.on && body.ev == 'kicked'){
+						body.arg1 = 'Bob';
+					}
+					done(body);
+				});
+				
+			});
+			
+			// klaT
+			this.goodie('klat', {on: false}, function(){
+								
+				dAmnX.command.bind('klat', 0, function(){
+					if(DG.goodies.klat.on){
+						DG.goodies.klat.on = false;
+						dAmnX.notice('Backward talking off');
+					}else{
+						DG.goodies.klat.on = true;
+						dAmnX.notice('sdrawkcab klat ot emit stI');
+					}
+					DG.save();
+				});
+				
+				dAmnX.before('send', function(body, done){
+					if(DG.goodies.klat.on){
+						if(body.cmd == 'msg' || body.cmd == 'action'){
+							body.str = body.str.split("").reverse().join("");
+						}
+					}
+					done(body);
+				});
+				
+			});
+			
+			// Anti-kick
+			this.goodie('antikick', {on: true}, function(){
+								
+				dAmnX.command.bind('antikick', 0, function(){
+					if(DG.goodies.antikick.on){
+						DG.goodies.antikick.on = false;
+						dAmnX.notice('You can be kicked');
+					}else{
+						DG.goodies.antikick.on = true;
+						dAmnX.notice('You will automatically return after you are kicked');
+					}
+					DG.save();
+				});
+				
+				dAmnX.before('selfKicked', function(body, done){
+					if(DG.goodies.antikick.on){
+						dAmnX.send.join(body.self.ns);
+					}
+					done(body);
+				});
+				
+			});
+			
+			// Multi
+			this.goodie('multi', {}, function(){
+				dAmnX.command.bind('multi', 1, function(args){
+				try{
+					var a = args.split(' ');
+					if(a.length == 1){
+						dAmnX.error('multi', 'Supply more parameters')
+						return;
+					}
+					
+					var list, text, ns = dAmnX.channelNs();
+					if(a[1][0]=="("){
+						list = args.slice(args.indexOf("("));
+						var endbrac = list.indexOf(")")
+						list = list.slice(0,endbrac);
+						text = list.slice(endbrac+2);
+						list = (list == "")?[]:list.split(' ');
+					}else{
+						if(a[1] == "") list = [];
+						else list = [a[1]];
+						text = args.slice(a[0].length+1+a[1].length+1)
+					}
+					
+					if(!list.length){
+						dAmnX.error('multi', 'List empty')
+						return;
+					}
+					
+					function listOfUsernames(){
+						var l = [];
+						var mems = dAmnX.getChannel().members.members;
+						list.each(function(user){
+							if(user[0]=="*"){
+								var privlev = user.slice(user[1]=="*"?2:1);
+								for(var member in mems){
+									if(mems[member].info.pc == privlev) l.push(member);
+								}
+							}else if(user=="{}"){
+								for(var member in mems)
+									l.push(member);
+							}else{
+								l.push(user);
+							}
+						});
+						return l;
+					}
+					
+					function listOfChannels(){
+						return list;
+					}
+					
+					var users = listOfUsernames();
+					
+					switch(a[0]){
+						case 'msg':
+						if(users.length)
+							dAmnX.send.msg(ns, users.join(", ")+(text.length?": "+text:""));
+						break;
+						case 'action':
+						if(users.length)
+							dAmnX.send.action(ns, users.join(", ")+" "+text);
+						break;
+						case 'ban':
+						if(users.length)
+							users.each(function(user){ dAmnX.send.ban(ns, user); });
+						break;
+						case 'clear':
+						list.each(function(chan){
+							chan = dAmnX.channelNs(chan);
+							dAmnX.send.clear(chan);
+						});
+						break;
+						case 'demote':
+						if(users.length) users.each(function(user){
+							dAmnX.send.demote(ns, user, text);
+						});
+						break;
+						case 'display':
+						if(users.length) dAmnX.notice(users.join(" "));
+						break;
+						case 'join':
+						list.each(function(chan){
+							chan = dAmnX.channelNs(chan);
+							dAmnX.send.join(ns);
+						});
+						break;
+						case 'kick':
+						if(users.length) users.each(function(user){
+							dAmnX.send.kick(ns, user, text);
+						});
+						break;
+						case 'part':
+						list.each(function(chan){
+							chan = dAmnX.channelNs(chan);
+							dAmnX.send.part(chan);
+						});
+						break;
+						case 'promote':
+						if(users.length) users.each(function(user){
+							dAmnX.send.promote(ns, user, text);
+						});
+						break;
+						case 'title':
+						list.each(function(chan){
+							chan = dAmnX.channelNs(chan);
+							dAmnX.send.title(chan, text);
+						});
+						break;
+						case 'topic':
+						list.each(function(chan){
+							chan = dAmnX.channelNs(chan);
+							dAmnX.send.topic(chan, text);
+						});
+						break;
+						case 'unban':
+						if(users.length) users.each(function(user){
+							dAmnX.send.unban(ns, user);
+						});
+						break;
+						case 'whois': // ??
+						if(users.length) users.each(function(user){
+							dAmnX.send.whois(ns, user);
+						});
+						break;
+					}
+				}catch(ex){
+					console.log(ex);
+				}
+				});
+				
+				if(!$.jStorage) alert('No jStorage!');
+				else this.save();
+				
+			})
+		
+		}
+		
+		
+		var now = Date.now();
+		(function waitForDamnX(){
+			if(typeof dAmnX != 'undefined' && dAmnX.isReady) DG.init();
+			else if(now + 15000 <= Date.now()) alert('Error loading dAmnGoodies: dAmnX not installed');
+			else window.setTimeout(waitForDamnX, 50);
+		})();
+	};
+	
+	return new dAmnGoodies();
+}
+
+function execute_script(script, id){
+	var el = document.createElement('script');
+	if(id) el.id = id;
+	el.appendChild(document.createTextNode(script));
+	document.getElementsByTagName("head")[0].appendChild(el);
+	return el;
+}
+execute_script("var dAmnGoodies = window.dAmnGoodies = ("+init.toString()+")();", "dAmnGoodies_Script")
