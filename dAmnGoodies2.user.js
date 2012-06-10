@@ -121,18 +121,18 @@ function init(){
 				});
 				
 				dAmnX.before('send', function(body, done){
-					var msg = body.str+" ";
+					var msg = " "+body.str+" ";
 					
 					if(DG.goodies.nickname.enabled){
 						var nicks = DG.goodies.nickname.nicks;
 						for(var nick in nicks){
-							var reg = new RegExp(nick+'([^A-Za-z0-9_-])','gi'),
+							var reg = new RegExp('([^A-Za-z0-9_-])'+nick+'([^A-Za-z0-9_-])','gi'),
 								match = reg.exec(msg);
 							if(match)
-								msg = msg.replace(reg, DG.abbr(nick, nicks[nick])+match[1]);
+								msg = msg.replace(reg, match[1]+DG.abbr(nick, nicks[nick])+match[2]);
 						}
 						
-						body.str = msg;
+						body.str = msg.slice(1,-1);
 					}
 					
 					done(body);
@@ -272,7 +272,7 @@ function init(){
 							from = b[1].split("=")[1],
 							msg = b[3];
 						if(dAmn_Client_Username.toLowerCase() != from.toLowerCase() && DG.goodies.mimic.mimicking.indexOf(from.toLowerCase())>-1)
-							dAmnX.send.msg(dAmnX.channelNs(), msg)
+							dAmnX.send.msg(dAmnX.channelNs(), dAmnX.parseMsg(msg))
 					}
 					done(body);
 				});
