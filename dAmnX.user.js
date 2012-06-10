@@ -346,7 +346,7 @@ var dAmnX = function(){
 		var dAmnChat_Send_DX = dAmnChat_Send;
 		dAmnChat_Send = function(cmd, channel, str) {
 			var self = this;
-			DX.action('send', {'cmd': cmd, 'channel': channel, 'str': str, 'stop': false, 'self': this}, function(body, done){ if(!body.stop) self.Send_DX(body.cmd, body.channel, body.str); done(body); });
+			DX.action('send', {'cmd': cmd, 'channel': channel, 'str': str, 'str2': str, 'stop': false, 'self': this}, function(body, done){ if(!body.stop) self.Send_DX(body.cmd, body.channel, body.str); done(body); });
 		};
 		dAmnChat.prototype.Send = dAmnChat_Send;
 		dAmnChat.prototype.Send_DX = dAmnChat_Send_DX;
@@ -402,7 +402,7 @@ var dAmnX = function(){
 							self.history_pos = -1;
 							
 							if(self.cmds[cmd][0] && !args){
-								DX.onError(cmd, "insufficient parameters");
+								DX.error(cmd, "insufficient parameters");
 							}else{
 								DX.action('command', {'command': cmd, 'args': args||'', 'self': self}, function(b,c){ el.value = DX.command.trigger(b.command, b.args) || ''; c(b) });
 							}
