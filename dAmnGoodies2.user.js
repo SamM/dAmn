@@ -103,7 +103,7 @@ function init(){
 							var result = args.slice(a[0].length+a[1].length+2);
 							DG.goodies.swap.pairs[a[1]] = result;
 							DG.save();
-							dAmnX.notice(a[1]+' set to: '+result);
+							//dAmnX.notice(a[1]+' set to: '+result);
 						break;
 						case "unset":
 							delete DG.goodies.swap.pairs[a[1]];

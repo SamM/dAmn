@@ -176,14 +176,14 @@ var dAmnX = function(){
    		trigger: function(cmd, args){
    			cmd = cmd.toLowerCase();
    			if(cmd in DX.command.commands){
-   				return DX.command.commands[cmd][1](args);
+			   				return DX.command.commands[cmd][1](typeof args == 'string'?args:'');
    			}
 			return null;
    		},
         change: function(cmd, fn, params){
             if(DX.command.commands[cmd]){
-                DX.command.commands[cmd] = [params, fn];
-            }else{
+			    DX.command.commands[cmd] = [params, fn];
+	            }else{
                 DX.command.bind(cmd, fn, params);
             }
         }
@@ -404,7 +404,7 @@ var dAmnX = function(){
 							if(self.cmds[cmd][0] && !args){
 								DX.onError(cmd, "insufficient parameters");
 							}else{
-								DX.action('command', {'command': cmd, 'args': args, 'self': self}, function(b,c){ el.value = DX.command.trigger(b.command, b.args) || ''; c(b) });
+								DX.action('command', {'command': cmd, 'args': args||'', 'self': self}, function(b,c){ el.value = DX.command.trigger(b.command, b.args) || ''; c(b) });
 							}
 							
 							el.focus();
