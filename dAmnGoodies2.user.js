@@ -101,11 +101,14 @@ function init(){
 						break;
 						case "set":
 							var result = args.slice(a[0].length+a[1].length+2);
+							var str = a[1];
+							if(a[1] == "{space}") a[1] = " ";
 							DG.goodies.swap.pairs[a[1]] = result;
 							DG.save();
 							dAmnX.notice(a[1]+' => '+result);
 						break;
 						case "unset":
+							if(a[1] == "{space}") a[1] = " ";
 							delete DG.goodies.swap.pairs[a[1]];
 							dAmnX.notice(a[1]+' is unset')
 							DG.save();
@@ -118,7 +121,7 @@ function init(){
 						break;
 						case "clear":
 							DG.goodies.swap.pairs = {};
-							dAmnX.notice('All were deleted')
+							dAmnX.notice('Not swapping anything')
 							DG.save();
 						break;
 						default:
@@ -204,6 +207,45 @@ function init(){
 					done(body);
 				})
 				
+				dAmnX.before('msg', function(body, done){
+					if(DG.goodies.nickname.enabled){
+						var b = body.pkt.body.split("\n");
+						var from = b[1].split("=")[1],
+							nick = DG.goodies.nickname.nicks[from];
+						if(nick) b[1] = "from="+nick;
+						body.pkt.body = b.join("\n");
+					}
+					done(body);
+				});
+				
+				dAmnX.before('action', function(body, done){
+					if(DG.goodies.nickname.enabled){
+						var b = body.pkt.body.split("\n");
+						var from = b[1].split("=")[1].toLowerCase(),
+							nick = DG.goodies.nickname.nicks[from];
+						if(nick) b[1] = "from="+nick;
+						body.pkt.body = b.join("\n");
+					}
+					done(body);
+				});
+				
+				dAmnX.before('event', function(body, done){
+					if(DG.goodies.nickname.enabled){
+						var nick = DG.goodies.nickname.nicks[body.pkt.param.toLowerCase()];
+						if(nick) body.pkt.param = nick;
+						nick = DG.goodies.nickname.nicks[body.pkt.args.by.toLowerCase()];
+						if(nick) body.pkt.args.by = nick;
+					}
+					done(body);
+				});
+				
+				dAmnX.before('selfEvent', function(body, done){
+					if(DG.goodies.nickname.enabled && body.ev == 'kicked'){
+						var nick = DG.goodies.nickname.nicks[body.arg1.toLowerCase()]
+						if(nick) body.arg1 = nick;
+					}
+					done(body);
+				});
 			});
 			
 			// Bob
