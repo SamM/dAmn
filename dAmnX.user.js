@@ -366,6 +366,7 @@ var dAmnX = function(){
 		var dAmnChatInput_onKey_DX 	= dAmnChatInput_onKey;
 		dAmnChatInput_onKey = function(e,kc,force)
 		{
+			try{
 			var self = this,
 				el = this.chatinput_el;
 				
@@ -416,6 +417,10 @@ var dAmnX = function(){
 
 	        }
 			return this.onKey_DX(e,kc,force);
+		}catch(ex){
+			console.log(ex);
+			return false;
+		}
 		};
 		
 		dAmnChatInput.prototype.onKey = dAmnChatInput_onKey;

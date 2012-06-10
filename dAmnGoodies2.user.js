@@ -77,6 +77,34 @@ function init(){
 				return "<abbr title=\""+title+"\">"+(innerText||'')+"</abbr>";
 			}
 			
+			// Swap
+			
+			this.goodie('swap', {pairs: {'dAmnGoodies': ':thumb110193573:'}, enabled: true}, function(){
+				dAmnX.command.bind('swap', 1, function(args){
+					var a = a.split(" "),
+						pairs = DG.goodies.pairs;
+					switch(a[0]){
+						case "get":
+							var result = pairs[a[1]];
+							if(result) dAmnX.notice(result);
+							else dAmnX.notice('');
+						break;
+						case "set":
+						break;
+						case "unset":
+						break;
+						case "list":
+							var msg = "";
+						break;
+						case "clear":
+						break;
+						default:
+							dAmnX.error('swap', 'Unknown command. Try: get, set, unset, list, clear');
+						break;
+					}
+				});
+			});
+			
 			// Nicknames
 			this.goodie('nickname', {nicks: {}, enabled: true}, function(data){
 				// Setup /nick command
@@ -317,7 +345,7 @@ function init(){
 			});
 			
 			// Anti-kick
-			this.goodie('antikick', {on: true}, function(){
+			this.goodie('antikick', {enabled: true}, function(){
 								
 				dAmnX.command.bind('antikick', 0, function(){
 					if(DG.goodies.antikick.on){
@@ -473,7 +501,11 @@ function init(){
 				else this.save();
 				
 			})
-		
+			
+			// https:// fix
+			this.goodie('httpsfix', {enabled: true}, function(){
+				
+			})
 		}
 		
 		

@@ -1,4 +1,4 @@
-// Fix: Added line 2911
+// Fix: Added line 2911 & changed 2453
 // ==UserScript==
 // @name           SuperdAmn
 // @namespace      24bps.com
@@ -2450,7 +2450,7 @@ var superdAmn = window.superdAmn = {
 			for(var b in SDB.buttons[ns]){
 				if(SDB.buttons[ns][b].klass == "emotes" && SD.P.pickerright && bbr){
 					bbr.appendChild(SDB.buttons[ns][b].el)
-				} else {
+				} if(bb && SDB.buttons[ns][b].el) else {
 					bb.appendChild(SDB.buttons[ns][b].el)
 				}
 			}
