@@ -115,7 +115,7 @@ function init(){
 						break;
 						case "list":
 							var msg = [];
-							for(var it in pairs)
+							for(var it in DG.goodies.swap.pairs)
 								msg.push(it);
 							dAmnX.notice(msg.join(" "));
 						break;
