@@ -73,6 +73,10 @@ function init(){
 				
 			});
 			
+			this.abbr = function(title, innerText){
+				return "<abbr title=\""+title+"\">"+(innerText||'')+"</abbr>";
+			}
+			
 			// Nicknames
 			this.goodie('nickname', {nicks: {}, enabled: true}, function(data){
 				// Setup /nick command
@@ -116,6 +120,24 @@ function init(){
 					}
 				});
 				
+				dAmnX.before('send', function(body, done){
+					var msg = body.str+" ";
+					
+					if(DG.goodies.nickname.enabled){
+						var nicks = DG.goodies.nickname.nicks;
+						for(var nick in nicks){
+							var reg = new RegExp(nick+'([^A-Za-z0-9_-])','gi'),
+								match = reg.exec(msg);
+							if(match)
+								msg = msg.replace(reg, DG.abbr(nick, nicks[nick])+match[1]);
+						}
+						
+						body.str = msg;
+					}
+					
+					done(body);
+				})
+				
 			});
 			
 			// Mimic
@@ -146,7 +168,7 @@ function init(){
 							dAmnX.notice('Mimic is enabled')
 							break;
 						case "on":
-							g.enabled = on;
+							g.enabled = true;
 							DG.save();
 							dAmnX.notice('Mimic is disabled')
 							break;
