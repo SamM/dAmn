@@ -79,7 +79,7 @@ function init(){
 			
 			// Swap
 			
-			this.goodie('swap', {pairs: {'dAmnGoodies': ':thumb110193573:'}, enabled: true}, function(){
+			this.goodie('swap', {pairs: {'dAmnGoodies': ':thumb110193573:', 'https://': 'http://'}, enabled: true}, function(){
 				dAmnX.command.bind('swap', 1, function(args){
 					var a = args.split(" "),
 						pairs = DG.goodies.pairs;
