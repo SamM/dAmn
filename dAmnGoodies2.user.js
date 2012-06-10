@@ -140,102 +140,6 @@ function init(){
 				
 			});
 			
-			// Mimic
-			this.goodie('mimic', {mimicking: [], enabled: true, announce: true}, function(data){
-
-				dAmnX.command.bind('mimic', 1, function(args){
-					var a = args.split(" ");
-					var g = DG.goodies.mimic,
-						list = g.mimicking;
-						
-					switch(a[0]){
-						case "status":
-							dAmnX.notice('Mimicking is '+(g.enabled?"enabled":"disabled"));
-							break;
-						case "announce":
-							if(g.announce){
-								dAmnX.notice('Announcements are turned OFF');
-								g.announce = false;
-							}else{
-								dAmnX.notice('Announcements are turned ON. YEAH BABY!');
-								g.announce = true;
-							}
-							DG.save();
-							break;
-						case "off":
-							g.enabled = false;
-							DG.save();
-							dAmnX.notice('Mimic is enabled')
-							break;
-						case "on":
-							g.enabled = true;
-							DG.save();
-							dAmnX.notice('Mimic is disabled')
-							break;
-						case "start":
-							if(list.indexOf(a[1].toLowerCase())>-1) 
-								dAmnX.error('mimic', 'You are already mimicking '+a[1]);
-							else {
-								DG.goodies.mimic.mimicking.push(a[1].toLowerCase());
-								DG.save();
-								dAmnX.notice('Started to mimic '+a[1])
-								if(g.announce)
-									dAmnX.send.action(false, 'started to mimic '+a[1]);
-							}
-							break;
-						case "stop":
-							if(list.indexOf(a[1].toLowerCase())==-1) 
-								dAmnX.error('mimic', 'You are not mimicking '+a[1]);
-							else {
-								var l = [];
-								DG.goodies.mimic.mimicking.each(function(u){ if(u != a[1].toLowerCase()) l.push(u); })
-								DG.goodies.mimic.mimicking = l;
-								DG.save();
-								dAmnX.notice('Stopped mimicking '+a[1])
-								if(g.announce)
-									dAmnX.send.action(false, 'stopped mimicking '+a[1]);
-							}
-							break;
-						case "list":
-							dAmnX.notice('You mimic'+(list.length?": "+list.join(", "):' none'))
-							break;
-						case "clear":
-							DG.goodies.mimic.mimicking = [];
-							DG.save();
-							dAmnX.notice('Not mimicking anyone')
-							break;
-						default:
-							dAmnX.error('mimic', 'unknown command '+a[0]);
-							break;
-					}
-					
-				});
-				
-				dAmnX.after('msg', function(body, done){
-					if(DG.goodies.mimic.enabled){
-						var b = body.pkt.body.split("\n"),
-							from = b[1].split("=")[1],
-							msg = b[3];
-						if(DG.username != from && DG.goodies.mimic.mimicking.indexOf(from.toLowerCase())>-1)
-							dAmnX.send.msg(dAmnX.channelNs(), msg)
-					}
-					done(body);
-				});
-				
-				dAmnX.after('action', function(body, done){
-					if(DG.goodies.mimic.enabled){
-						var b = body.pkt.body.split("\n"),
-							from = b[1].split("=")[1],
-							msg = b[3];
-						if(DG.username != from && DG.goodies.mimic.mimicking.indexOf(from.toLowerCase())>-1)
-							dAmnX.send.action(dAmnX.channelNs(), msg)
-					}
-					
-					done(body);
-				});
-				
-			});
-			
 			// Bob
 			this.goodie('bob', {on: false}, function(){
 								
@@ -281,6 +185,107 @@ function init(){
 					if(DG.goodies.bob.on && body.ev == 'kicked'){
 						body.arg1 = 'Bob';
 					}
+					done(body);
+				});
+				
+			});
+			
+			// Mimic
+			this.goodie('mimic', {mimicking: [], enabled: true, announce: true}, function(data){
+
+				dAmnX.command.bind('mimic', 1, function(args){
+					var a = args.split(" ");
+					var g = DG.goodies.mimic,
+						list = g.mimicking;
+						
+					switch(a[0]){
+						case "status":
+							dAmnX.notice('Mimicking is '+(g.enabled?"enabled":"disabled"));
+							break;
+						case "announce":
+							if(g.announce){
+								dAmnX.notice('Announcements are turned OFF');
+								g.announce = false;
+							}else{
+								dAmnX.notice('Announcements are turned ON. YEAH BABY!');
+								g.announce = true;
+							}
+							DG.save();
+							break;
+						case "off":
+							g.enabled = false;
+							DG.save();
+							dAmnX.notice('Mimic is enabled')
+							break;
+						case "on":
+							g.enabled = true;
+							DG.save();
+							dAmnX.notice('Mimic is disabled')
+							break;
+						case "start":
+							if(dAmn_Client_Username.toLowerCase() == a[1].toLowerCase()){
+								dAmnX.error('mimic', 'You cannot mimic yourself');
+							}
+							else if(list.indexOf(a[1].toLowerCase())>-1) 
+								dAmnX.error('mimic', 'You are already mimicking '+a[1]);
+							else {
+								DG.goodies.mimic.mimicking.push(a[1].toLowerCase());
+								DG.save();
+								dAmnX.notice('Started to mimic '+a[1])
+								if(g.announce)
+									dAmnX.send.action(false, 'started to mimic '+a[1]);
+							}
+							break;
+						case "stop":
+							if(list.indexOf(a[1].toLowerCase())==-1) 
+								dAmnX.error('mimic', 'You are not mimicking '+a[1]);
+							else {
+								var l = [];
+								DG.goodies.mimic.mimicking.each(function(u){ if(u != a[1].toLowerCase()) l.push(u); })
+								DG.goodies.mimic.mimicking = l;
+								DG.save();
+								dAmnX.notice('Stopped mimicking '+a[1])
+								if(g.announce)
+									dAmnX.send.action(false, 'stopped mimicking '+a[1]);
+							}
+							break;
+						case "list":
+							dAmnX.notice('You mimic'+(list.length?": "+list.join(", "):' none'))
+							break;
+						case "clear":
+							DG.goodies.mimic.mimicking = [];
+							DG.save();
+							if(g.announce)
+								dAmnX.send.action(false, 'stopped mimicking everyone');
+							dAmnX.notice('Not mimicking anyone')
+							break;
+						default:
+							dAmnX.error('mimic', 'unknown command '+a[0]);
+							break;
+					}
+					
+				});
+				
+				dAmnX.after('msg', function(body, done){
+					if(DG.goodies.mimic.enabled){
+						var b = body.pkt.body.split("\n"),
+							from = b[1].split("=")[1],
+							msg = b[3];
+						if(dAmn_Client_Username.toLowerCase() != from.toLowerCase() && DG.goodies.mimic.mimicking.indexOf(from.toLowerCase())>-1)
+							dAmnX.send.msg(dAmnX.channelNs(), msg)
+					}
+					done(body);
+				});
+				
+				dAmnX.after('action', function(body, done){
+					if(DG.goodies.mimic.enabled){
+						var b = body.pkt.body.split("\n"),
+							from = b[1].split("=")[1],
+							msg = b[3];
+						if(dAmn_Client_Username != from && DG.goodies.mimic.mimicking.indexOf(from.toLowerCase())>-1)
+							dAmnX.send.action(dAmnX.channelNs(), msg)
+					}
+					
 					done(body);
 				});
 				
