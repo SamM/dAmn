@@ -2450,7 +2450,7 @@ var superdAmn = window.superdAmn = {
 			for(var b in SDB.buttons[ns]){
 				if(SDB.buttons[ns][b].klass == "emotes" && SD.P.pickerright && bbr){
 					bbr.appendChild(SDB.buttons[ns][b].el)
-				} if(bb && SDB.buttons[ns][b].el) else {
+				} else if(bb && SDB.buttons[ns][b].el) {
 					bb.appendChild(SDB.buttons[ns][b].el)
 				}
 			}

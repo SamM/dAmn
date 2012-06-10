@@ -84,25 +84,59 @@ function init(){
 					var a = a.split(" "),
 						pairs = DG.goodies.pairs;
 					switch(a[0]){
+						case "on":
+							DG.goodies.swap.enabled = true;
+							DG.save();
+							dAmn.notice("Swapping enabled");
+						break;
+						case "off":
+							DG.goodies.swap.enabled = false;
+							DG.save();
+							dAmn.notice("Swapping disabled");
+						break;
 						case "get":
 							var result = pairs[a[1]];
 							if(result) dAmnX.notice(result);
-							else dAmnX.notice('');
+							else dAmnX.notice(a[1]+' is not set');
 						break;
 						case "set":
+							var result = args.slice(a[0].length+a[1].length+2);
+							DG.goodies.swap.pairs[a[1]] = result;
+							DG.save();
+							dAmnX.notice(a[1]+' set to: '+result);
 						break;
 						case "unset":
+							delete DG.goodies.swap.pairs[a[1]];
+							dAmn.notice(a[1]+' is unset')
+							DG.save();
 						break;
 						case "list":
-							var msg = "";
+							var msg = [];
+							for(var it in pairs)
+								msg.push(it);
+							dAmn.notice(msg.join(" "));
 						break;
 						case "clear":
+							DG.goodies.swap.pairs = {};
+							dAmn.notice('All patterns were deleted')
+							DG.save();
 						break;
 						default:
-							dAmnX.error('swap', 'Unknown command. Try: get, set, unset, list, clear');
+							dAmnX.error('swap', 'Unknown command. Try: on, off, get, set, unset, list, clear');
 						break;
 					}
 				});
+				
+				dAmnX.before('send', function(body, done){
+					var msg = body.str;
+					if(DG.goodies.swap.enabled){
+						for(var i in DG.goodies.swap.pairs){
+							msg = msg.replace(i, DG.goodies.swap.pairs[i]);
+						}
+						body.str = msg;
+					}
+					done(body);
+				})
 			});
 			
 			// Nicknames
