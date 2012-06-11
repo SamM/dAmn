@@ -74,6 +74,19 @@ function init(){
 					}
 				});
 				
+				dAmnX.command.bind('js', 1, function(args){
+					var exec_js =  function(){
+						var js = new Function('DX','DG', args);
+						try{
+							var result = js.call(DG, dAmnX, DG);
+								dAmnX.notice(">>"+ (typeof JSON!='undefined'?JSON.stringify(result):unescape(result)));
+						}catch(ex){
+							dAmnX.error('js', ex);
+						}
+					}
+					window.setTimeout(exec_js, 50);
+				});
+				
 			});
 			
 			this.abbr = function(title, innerText){
@@ -237,7 +250,7 @@ function init(){
 				});
 				
 				dAmnX.before('event', function(body, done){
-					if(DG.goodies.nickname.enabled && false){
+					if(DG.goodies.nickname.enabled){
 						
 						var nick = DG.goodies.nickname.nicks[body.pkt.param.toLowerCase()];
 						if(nick) body.pkt.param = nick;
@@ -259,21 +272,21 @@ function init(){
 			});
 			
 			// Bob
-			this.goodie('bob', {on: false}, function(){
+			this.goodie('bob', {enabled: false}, function(){
 								
 				dAmnX.command.bind('bob', 0, function(){
-					if(DG.goodies.bob.on){
-						DG.goodies.bob.on = false;
+					if(DG.goodies.bob.enabled){
+						DG.goodies.bob.enabled = false;
 						dAmnX.notice('No More Bob');
 					}else{
-						DG.goodies.bob.on = true;
+						DG.goodies.bob.enabled = true;
 						dAmnX.notice('BOB!');
 					}
 					DG.save();
 				});
 				
 				dAmnX.before('msg', function(body, done){
-					if(DG.goodies.bob.on){
+					if(DG.goodies.bob.enabled){
 						var b = body.pkt.body.split("\n");
 						b[1] = "from=Bob";
 						body.pkt.body = b.join("\n");
@@ -283,7 +296,7 @@ function init(){
 				});
 				
 				dAmnX.before('action', function(body, done){
-					if(DG.goodies.bob.on){
+					if(DG.goodies.bob.enabled){
 						var b = body.pkt.body.split("\n");
 						b[1] = "from=Bob";
 						body.pkt.body = b.join("\n");
@@ -292,7 +305,7 @@ function init(){
 				});
 				
 				dAmnX.before('event', function(body, done){
-					if(DG.goodies.bob.on){
+					if(DG.goodies.bob.enabled){
 						body.pkt.param = 'Bob';
 						if(body.pkt.args)
 							body.pkt.args.by = 'Bob';
@@ -301,7 +314,7 @@ function init(){
 				});
 				
 				dAmnX.before('selfEvent', function(body, done){
-					if(DG.goodies.bob.on && body.ev == 'kicked'){
+					if(DG.goodies.bob.enabled && body.ev == 'kicked'){
 						body.arg1 = 'Bob';
 					}
 					done(body);
@@ -344,6 +357,9 @@ function init(){
 						case "start":
 							if(dAmn_Client_Username.toLowerCase() == a[1].toLowerCase()){
 								dAmnX.error('mimic', 'You cannot mimic yourself');
+							}
+							else if(a[1].toLowerCase() == 'bob'){
+								dAmnX.error('mimic', 'You cannot mimic Bob :-|');
 							}
 							else if(list.indexOf(a[1].toLowerCase())>-1) 
 								dAmnX.error('mimic', 'You are already mimicking '+a[1]);
