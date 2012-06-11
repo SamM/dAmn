@@ -79,7 +79,7 @@ function init(){
 						var js = new Function('DX','DG', args);
 						try{
 							var result = js.call(DG, dAmnX, DG);
-								dAmnX.notice(">>"+ (typeof JSON!='undefined'?JSON.stringify(result):unescape(result)));
+								dAmnX.notice((typeof JSON!='undefined'?JSON.stringify(result):unescape(result)));
 						}catch(ex){
 							dAmnX.error('js', ex);
 						}
@@ -648,7 +648,15 @@ function init(){
 		var now = Date.now();
 		(function waitForDamnX(){
 			if(typeof dAmnX != 'undefined' && dAmnX.isReady) DG.init();
-			else if(now + 15000 <= Date.now()) alert('Error loading dAmnGoodies: dAmnX not installed');
+			else if(now + 15000 <= Date.now()){
+				var install = confirm("dAmnGoodies requires the dAmnX userscript to operate. Click OK to install. ")
+				if(install){
+					var url = window.location.href;
+					window.location = "http://github.com/SamM/dAmn/raw/master/dAmnX.user.js";
+					//window.open('http://github.com/SamM/dAmn/raw/master/dAmnX.user.js', '_blank');
+					window.setTimeout(function(){ window.location = url; }, 10000)
+				}
+			}
 			else window.setTimeout(waitForDamnX, 50);
 		})();
 	};
