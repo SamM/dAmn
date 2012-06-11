@@ -449,8 +449,13 @@ function init(){
 			
 			// Multi
 			this.goodie('multi', {}, function(){
+				
+				dAmnX.command.bind('global', 1, function(args){
+					for(var ns in dAmnChatTabs)
+						dAmnX.send.msg(ns, args)
+				})
+				
 				dAmnX.command.bind('multi', 1, function(args){
-				try{
 					var a = args.split(' ');
 					if(a.length == 1){
 						dAmnX.error('multi', 'Supply more parameters')
@@ -495,6 +500,15 @@ function init(){
 					}
 					
 					function listOfChannels(){
+						var l = [];
+						list.each(function(chan){
+							if(chan == "{}"){
+								for(var ns in dAmnChatTabs)
+									l.push(ns);
+							}
+							else l.push(dAmnX.channelNs(chan));
+						})
+						list = l;
 						return list;
 					}
 					
@@ -503,7 +517,9 @@ function init(){
 					switch(a[0]){
 						case 'msg':
 						if(users.length)
-							dAmnX.send.msg(ns, users.join(", ")+(text.length?": "+text:""));
+							listOfChannels().each(function(chan){
+								dAmnX.send.msg(chan, text)
+							});
 						break;
 						case 'action':
 						if(users.length)
@@ -572,9 +588,6 @@ function init(){
 						});
 						break;
 					}
-				}catch(ex){
-					console.log(ex);
-				}
 				});
 				
 				if(!$.jStorage) alert('No jStorage!');
@@ -582,7 +595,7 @@ function init(){
 				
 			})
 			
-			// Safe message. Preserves text
+			// Safe message. Preserves original messages
 			
 			this.goodie('safe', {'keepSafe':0}, function(){
 				dAmnX.command.bind('safe', 1, function(args){
