@@ -183,6 +183,10 @@ function init(){
 						for(var user in nicks) notice.push(user+"="+nicks[user]);
 						dAmnX.notice(notice.length?notice.join("; "):"No nicknames are set");
 						break;
+						case 'clear':
+						DG.goodies.nickname.nicks = {};
+						dAmnX.notice("No nicknames are set");
+						DG.save();
 						default:
 						dAmnX.error('nick', 'unknown command '+a[0]);
 						break;
@@ -234,7 +238,9 @@ function init(){
 						
 						var nick = DG.goodies.nickname.nicks[body.pkt.param.toLowerCase()];
 						if(nick) body.pkt.param = nick;
-						nick = DG.goodies.nickname.nicks[body.pkt.args.by.toLowerCase()];
+						nick = null;
+						if(body.pkt.args && body.pkt.args.by)
+							nick = DG.goodies.nickname.nicks[body.pkt.args.by.toLowerCase()];
 						if(nick) body.pkt.args.by = nick;
 					}
 					done(body);
@@ -285,7 +291,8 @@ function init(){
 				dAmnX.before('event', function(body, done){
 					if(DG.goodies.bob.on){
 						body.pkt.param = 'Bob';
-						body.pkt.args.by = 'Bob';
+						if(body.pkt.args)
+							body.pkt.args.by = 'Bob';
 					}
 					done(body);
 				});
@@ -600,7 +607,8 @@ function init(){
 			
 			this.goodie('safe', {'keepSafe':0}, function(){
 				dAmnX.command.bind('safe', 0, function(args){
-					if(!isNaN(Number(args))) args = Math.abs(Number(args));
+					if(!args || args=='') args = 1
+					else if(!isNaN(Number(args))) args = Math.abs(Number(args));
 					else args = 1;
 					DG.goodies.safe.keepSafe = args;
 					dAmnX.notice(args==1?'The next message is safe':'The next '+args+' messages are safe')
@@ -636,4 +644,5 @@ function execute_script(script, id){
 	document.getElementsByTagName("head")[0].appendChild(el);
 	return el;
 }
-execute_script("var dAmnGoodies = window.dAmnGoodies = ("+init.toString()+")();", "dAmnGoodies_Script")
+if (dAmnGoodies) alert("You have multiple versions of dAmnGoodies installed");
+else execute_script("var dAmnGoodies = window.dAmnGoodies = ("+init.toString()+")();", "dAmnGoodies_Script")
