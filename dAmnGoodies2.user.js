@@ -3,11 +3,13 @@
 // @name           dAmnGoodies
 // @description    Novelty features for dAmn chat.
 // @author         Sam Mulqueen <sammulqueen.nz@gmail.com>
-// @version        2.0.0
+// @version        2.0.1
 // @include        http://chat.deviantart.com/chat/*
 // ==/UserScript==
 
 function init(){
+	
+	var DGREV = 0;
 	
 	Array.prototype.each = function(fn, thisv){
 		if(this.length){
@@ -17,7 +19,8 @@ function init(){
 	}
 	
 	var dAmnGoodies = function(){
-		this.version = "2.0.0";
+		this.version = "2.0.1";
+		this.rev = DGREV;
 		
 		var DG = this;
 		
@@ -644,5 +647,5 @@ function execute_script(script, id){
 	document.getElementsByTagName("head")[0].appendChild(el);
 	return el;
 }
-if (dAmnGoodies) alert("You have multiple versions of dAmnGoodies installed");
+if (typeof dAmnGoodies != 'undefined') alert("You have multiple versions of dAmnGoodies installed");
 else execute_script("var dAmnGoodies = window.dAmnGoodies = ("+init.toString()+")();", "dAmnGoodies_Script")
