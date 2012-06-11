@@ -17,7 +17,10 @@ function init(){
 				fn.call(thisv||this, this[i], i);
 		}
 	}
-	
+	if(dAmnGoodies){
+		alert("You have multiple versions of dAmnGoodies installed.");
+		throw "Aw hell no";
+	}
 	var dAmnGoodies = function(){
 		this.version = "2.0.1";
 		this.rev = DGREV;
@@ -51,6 +54,12 @@ function init(){
 			return this;
 		}
 		
+		this.reinstall = function(){
+			var url = window.location.href;
+			window.location = "http://github.com/SamM/dAmn/raw/master/dAmnGoodies2.user.js";
+			setTimeout(function(){ window.location = url }, 10000);
+		}
+		
 		this.init = function(){
 			
 			this.load();
@@ -68,6 +77,13 @@ function init(){
 						DG.load();
 						dAmnX.notice('dAmnGoodies preferences were loaded');
 					break;
+					case 'reinstall':
+						window.setTimeout(function(){
+						if(confirm('Would you like to install the newest version of dAmnGoodies?')){
+							dAmnX.notice('Page will refresh automatically in 10 seconds');
+							DG.reinstall();
+						}
+						}, 50);
 					default:
 						dAmnX.error('goodies', 'Unknown command. Try: load, save');
 					break;
@@ -215,10 +231,10 @@ function init(){
 					if(DG.goodies.nickname.enabled){
 						var nicks = DG.goodies.nickname.nicks;
 						for(var nick in nicks){
-							var reg = new RegExp('([^A-Za-z0-9_-])'+nick+'([^A-Za-z0-9_-])','gi'),
+							var reg = new RegExp('([ :,])'+nick+'([:]+)','gi'),
 								match = reg.exec(msg);
 							if(match)
-								msg = msg.replace(reg, match[1]+DG.abbr(nick, nicks[nick])+match[2]);
+								msg = msg.replace(reg, match[1]+DG.abbr(nick, nicks[nick])+(match[2]=="::"?"":match[2]));
 						}
 						
 						body.str = msg.slice(1,-1);
