@@ -211,7 +211,7 @@ function init(){
 					if(DG.goodies.nickname.enabled){
 						var b = body.pkt.body.split("\n");
 						var from = b[1].split("=")[1],
-							nick = DG.goodies.nickname.nicks[from];
+							nick = DG.goodies.nickname.nicks[from.toLowerCase()];
 						if(nick) b[1] = "from="+nick;
 						body.pkt.body = b.join("\n");
 					}
@@ -230,7 +230,8 @@ function init(){
 				});
 				
 				dAmnX.before('event', function(body, done){
-					if(DG.goodies.nickname.enabled){
+					if(DG.goodies.nickname.enabled && false){
+						
 						var nick = DG.goodies.nickname.nicks[body.pkt.param.toLowerCase()];
 						if(nick) body.pkt.param = nick;
 						nick = DG.goodies.nickname.nicks[body.pkt.args.by.toLowerCase()];
@@ -598,7 +599,7 @@ function init(){
 			// Safe message. Preserves original messages
 			
 			this.goodie('safe', {'keepSafe':0}, function(){
-				dAmnX.command.bind('safe', 1, function(args){
+				dAmnX.command.bind('safe', 0, function(args){
 					if(!isNaN(Number(args))) args = Math.abs(Number(args));
 					else args = 1;
 					DG.goodies.safe.keepSafe = args;
