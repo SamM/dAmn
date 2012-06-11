@@ -15,6 +15,12 @@ var dAmnX = function(){
 	this.version = "0.1.0";
 	this.isReady = true;
 	
+	this.reinstall = function(){
+		var url = window.location.href;
+		window.location = "http://github.com/SamM/dAmn/raw/master/dAmnX.user.js";
+		setTimeout(function(){ window.location = url }, 12000);
+	}
+	
 	// Actions
 	var before = [], after = [],
 		before_id=0, after_id= 0;

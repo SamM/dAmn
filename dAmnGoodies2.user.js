@@ -78,6 +78,14 @@ function init(){
 						dAmnX.notice('dAmnGoodies preferences were loaded');
 					break;
 					case 'reinstall':
+						if(a[1].toLowerCase() == "damnx")
+						window.setTimeout(function(){
+						if(confirm('Would you like to install the newest version of dAmnX?')){
+							dAmnX.notice('Page will refresh automatically in 10 seconds');
+							dAmnX.reinstall();
+						}
+						}, 50);
+						else
 						window.setTimeout(function(){
 						if(confirm('Would you like to install the newest version of dAmnGoodies?')){
 							dAmnX.notice('Page will refresh automatically in 10 seconds');
