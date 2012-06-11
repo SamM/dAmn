@@ -482,7 +482,7 @@ var dAmnX = function(){
 			var ev = b.pkt.args.p;
 
 			if(["members", "privclasses", "title", "topic"].indexOf(ev)>-1) 
-				this.action(ev, {'pkt': b.pkt, 'stop': false}, 
+				this.action(ev, {'pkt': b.pkt, 'self': b.self, 'stop': false}, 
 					function(body, done){ if(body.stop) b.stop=true; b.pkt = body.pkt; c(b); done(body); });
 			else c(b);
 		})
@@ -491,7 +491,7 @@ var dAmnX = function(){
 				ev = rp.cmd;
 
 			if(["action", "msg", "part", "kicked", "join", "privchg"].indexOf(ev)>-1)
-				this.action(ev, {'pkt': b.pkt, 'stop': false}, function(body, done){ if(body.stop) b.stop=true; b.pkt = body.pkt; c(b); done(body); });
+				this.action(ev, {'pkt': b.pkt, 'self': b.self, 'stop': false}, function(body, done){ if(body.stop) b.stop=true; b.pkt = body.pkt; c(b); done(body); });
 			else c(b);
 		});
 		this.before('send', function(b,c){

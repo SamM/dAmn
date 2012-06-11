@@ -652,7 +652,7 @@ function init(){
 						var shunned = msg.slice(6).split(" ")[0];
 						if(shunned.length){
 							var taunts = DG.goodies.shun.taunts;
-							dAmnX.send.msg(false, shunned+": "+(taunts[Math.floor(Math.random()*taunts.length)]||"SHUN"))
+							dAmnX.send.msg(body.self.ns, shunned+": "+(taunts[Math.floor(Math.random()*taunts.length)]||"SHUN"))
 						}
 					}
 					done(body)
