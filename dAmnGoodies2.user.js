@@ -627,7 +627,7 @@ function init(){
 				return str;
 			}
 			this.stripColorsTags = function(str){
-				return str.replace(/colors:[a-zA-Z0-9]+:([a-zA-Z0-9])+:/gi, "")
+				return str.replace(/colors:[a-zA-Z0-9]+:([a-zA-Z0-9])+/gi, "")
 			}
 			
 			this.goodie('shun', {enabled: true, taunts: ["Shun!","Shuuuuunnnnnnn!!!!", "SHUN!!!", "S H U N !", "SSHHUUNN!!", "shun? :o", "SSHHHUUUUNNNNN!!!!!!", "SHUN", "SHUNSHUNSHUNSHUNSHUNSHUN", "shun :|", "SHHHHUUUUUUUNNNN","I SHUN YOU", "SHUN THE NON-BELIEVER!", "Shunday? :o"]}, function(){
@@ -649,7 +649,7 @@ function init(){
 				dAmnX.before('action', function(body, done){
 					var msg = DG.stripColorsTags(DG.stripAbbrTags(dAmnX.parseMsg(body.pkt.body.split("\n")[3])));
 					if(DG.goodies.shun.enabled && msg.slice(0,6)=="shuns "){
-						var shunned = msg.slice(6);
+						var shunned = msg.slice(6).split(" ")[0];
 						if(shunned.length){
 							var taunts = DG.goodies.shun.taunts;
 							dAmnX.send.msg(false, shunned+": "+(taunts[Math.floor(Math.random()*taunts.length)]||"SHUN"))
