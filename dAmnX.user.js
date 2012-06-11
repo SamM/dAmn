@@ -3,16 +3,16 @@
 // @name           dAmnX
 // @description    A tool for dAmn that makes writing plugins simple
 // @author         Sam Mulqueen <sammulqueen.nz@gmail.com>
-// @version        0.1.0
+// @version        1.0.0
 // @include        http://chat.deviantart.com/chat/*
 // ==/UserScript==
 
-// dAmnX v0.1
+// dAmnX v1.0.0
 (function(){
 
 var dAmnX = function(){
 	var DX = this;
-	this.version = "0.1.0";
+	this.version = "1.0.0";
 	this.isReady = true;
 	
 	this.reinstall = function(){

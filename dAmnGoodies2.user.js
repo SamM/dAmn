@@ -9,8 +9,6 @@
 
 function init(){
 	
-	var DGREV = 0;
-	
 	Array.prototype.each = function(fn, thisv){
 		if(this.length){
 			for(var i=0; i<this.length; i++)
@@ -21,9 +19,12 @@ function init(){
 		alert("You have multiple versions of dAmnGoodies installed.");
 		throw "Aw hell no";
 	}
+	if(dAmnX && dAmnX.version != "1.0.0"){
+		if(confirm("This version of dAmnGoodies needs a newer version of dAmnX."))
+			dAmnX.reinstall();
+	}
 	var dAmnGoodies = function(){
-		this.version = "2.0.1";
-		this.rev = DGREV;
+		this.version = "2.0.0";
 		
 		var DG = this;
 		
@@ -111,6 +112,145 @@ function init(){
 					window.setTimeout(exec_js, 50);
 				});
 				
+				dAmnX.command.bind('global', 1, function(args){
+					for(var ns in dAmnChatTabs)
+						dAmnX.send.msg(ns, args)
+				})
+				
+				dAmnX.command.bind('multi', 1, function(args){
+					var a = args.split(' ');
+					if(a.length == 1){
+						dAmnX.error('multi', 'Supply more parameters')
+						return;
+					}
+					
+					var list, text, ns = dAmnX.channelNs();
+					if(a[1][0]=="("){
+						list = args.slice(args.indexOf("("));
+						var endbrac = list.indexOf(")")
+						list = list.slice(0,endbrac);
+						text = list.slice(endbrac+2);
+						list = (list == "")?[]:list.split(' ');
+					}else{
+						if(a[1] == "") list = [];
+						else list = [a[1]];
+						text = args.slice(a[0].length+1+a[1].length+1)
+					}
+					
+					if(!list.length){
+						dAmnX.error('multi', 'List empty')
+						return;
+					}
+					
+					function listOfUsernames(){
+						var l = [];
+						var mems = dAmnX.getChannel().members.members;
+						list.each(function(user){
+							if(user[0]=="*"){
+								var privlev = user.slice(user[1]=="*"?2:1);
+								for(var member in mems){
+									if(mems[member].info.pc == privlev) l.push(member);
+								}
+							}else if(user=="{}"){
+								for(var member in mems)
+									l.push(member);
+							}else{
+								l.push(user);
+							}
+						});
+						return l;
+					}
+					
+					function listOfChannels(){
+						var l = [];
+						list.each(function(chan){
+							if(chan == "{}"){
+								for(var ns in dAmnChatTabs)
+									l.push(ns);
+							}
+							else l.push(dAmnX.channelNs(chan));
+						})
+						list = l;
+						return list;
+					}
+					
+					var users = listOfUsernames();
+					
+					switch(a[0]){
+						case 'msg':
+							listOfChannels().each(function(chan){
+								dAmnX.send.msg(chan, text)
+							});
+						break;
+						case 'action':
+							listOfChannels().each(function(chan){
+								dAmnX.send.action(chan, text)
+							});
+						break;
+						case 'ban':
+						if(users.length)
+							users.each(function(user){ dAmnX.send.ban(ns, user); });
+						break;
+						case 'clear':
+						list.each(function(chan){
+							chan = dAmnX.channelNs(chan);
+							dAmnX.send.clear(chan);
+						});
+						break;
+						case 'demote':
+						if(users.length) users.each(function(user){
+							dAmnX.send.demote(ns, user, text);
+						});
+						break;
+						case 'display':
+						if(users.length) dAmnX.notice(users.join(" "));
+						break;
+						case 'join':
+						list.each(function(chan){
+							chan = dAmnX.channelNs(chan);
+							dAmnX.send.join(ns);
+						});
+						break;
+						case 'kick':
+						if(users.length) users.each(function(user){
+							dAmnX.send.kick(ns, user, text);
+						});
+						break;
+						case 'part':
+						list.each(function(chan){
+							chan = dAmnX.channelNs(chan);
+							dAmnX.send.part(chan);
+						});
+						break;
+						case 'promote':
+						if(users.length) users.each(function(user){
+							dAmnX.send.promote(ns, user, text);
+						});
+						break;
+						case 'title':
+						list.each(function(chan){
+							chan = dAmnX.channelNs(chan);
+							dAmnX.send.title(chan, text);
+						});
+						break;
+						case 'topic':
+						list.each(function(chan){
+							chan = dAmnX.channelNs(chan);
+							dAmnX.send.topic(chan, text);
+						});
+						break;
+						case 'unban':
+						if(users.length) users.each(function(user){
+							dAmnX.send.unban(ns, user);
+						});
+						break;
+						case 'whois': // ??
+						if(users.length) users.each(function(user){
+							dAmnX.send.whois(user);
+						});
+						break;
+					}
+				});
 			});
 			
 			this.abbr = function(title, innerText){
@@ -498,154 +638,6 @@ function init(){
 				
 			});
 			
-			// Multi
-			this.goodie('multi', {}, function(){
-				
-				dAmnX.command.bind('global', 1, function(args){
-					for(var ns in dAmnChatTabs)
-						dAmnX.send.msg(ns, args)
-				})
-				
-				dAmnX.command.bind('multi', 1, function(args){
-					var a = args.split(' ');
-					if(a.length == 1){
-						dAmnX.error('multi', 'Supply more parameters')
-						return;
-					}
-					
-					var list, text, ns = dAmnX.channelNs();
-					if(a[1][0]=="("){
-						list = args.slice(args.indexOf("("));
-						var endbrac = list.indexOf(")")
-						list = list.slice(0,endbrac);
-						text = list.slice(endbrac+2);
-						list = (list == "")?[]:list.split(' ');
-					}else{
-						if(a[1] == "") list = [];
-						else list = [a[1]];
-						text = args.slice(a[0].length+1+a[1].length+1)
-					}
-					
-					if(!list.length){
-						dAmnX.error('multi', 'List empty')
-						return;
-					}
-					
-					function listOfUsernames(){
-						var l = [];
-						var mems = dAmnX.getChannel().members.members;
-						list.each(function(user){
-							if(user[0]=="*"){
-								var privlev = user.slice(user[1]=="*"?2:1);
-								for(var member in mems){
-									if(mems[member].info.pc == privlev) l.push(member);
-								}
-							}else if(user=="{}"){
-								for(var member in mems)
-									l.push(member);
-							}else{
-								l.push(user);
-							}
-						});
-						return l;
-					}
-					
-					function listOfChannels(){
-						var l = [];
-						list.each(function(chan){
-							if(chan == "{}"){
-								for(var ns in dAmnChatTabs)
-									l.push(ns);
-							}
-							else l.push(dAmnX.channelNs(chan));
-						})
-						list = l;
-						return list;
-					}
-					
-					var users = listOfUsernames();
-					
-					switch(a[0]){
-						case 'msg':
-						if(users.length)
-							listOfChannels().each(function(chan){
-								dAmnX.send.msg(chan, text)
-							});
-						break;
-						case 'action':
-						if(users.length)
-							dAmnX.send.action(ns, users.join(", ")+" "+text);
-						break;
-						case 'ban':
-						if(users.length)
-							users.each(function(user){ dAmnX.send.ban(ns, user); });
-						break;
-						case 'clear':
-						list.each(function(chan){
-							chan = dAmnX.channelNs(chan);
-							dAmnX.send.clear(chan);
-						});
-						break;
-						case 'demote':
-						if(users.length) users.each(function(user){
-							dAmnX.send.demote(ns, user, text);
-						});
-						break;
-						case 'display':
-						if(users.length) dAmnX.notice(users.join(" "));
-						break;
-						case 'join':
-						list.each(function(chan){
-							chan = dAmnX.channelNs(chan);
-							dAmnX.send.join(ns);
-						});
-						break;
-						case 'kick':
-						if(users.length) users.each(function(user){
-							dAmnX.send.kick(ns, user, text);
-						});
-						break;
-						case 'part':
-						list.each(function(chan){
-							chan = dAmnX.channelNs(chan);
-							dAmnX.send.part(chan);
-						});
-						break;
-						case 'promote':
-						if(users.length) users.each(function(user){
-							dAmnX.send.promote(ns, user, text);
-						});
-						break;
-						case 'title':
-						list.each(function(chan){
-							chan = dAmnX.channelNs(chan);
-							dAmnX.send.title(chan, text);
-						});
-						break;
-						case 'topic':
-						list.each(function(chan){
-							chan = dAmnX.channelNs(chan);
-							dAmnX.send.topic(chan, text);
-						});
-						break;
-						case 'unban':
-						if(users.length) users.each(function(user){
-							dAmnX.send.unban(ns, user);
-						});
-						break;
-						case 'whois': // ??
-						if(users.length) users.each(function(user){
-							dAmnX.send.whois(ns, user);
-						});
-						break;
-					}
-				});
-				
-				if(!$.jStorage) alert('No jStorage!');
-				else this.save();
-				
-			})
-			
 			this.stripAbbrTags = function(str){
 				str = str.replace( /<abbr title="(.*)">.*<\/abbr>/gi, '$1' );
 				return str;
@@ -683,7 +675,7 @@ function init(){
 				});
 			})
 			
-			// Safe message. Preserves original messages
+			// Safe message. Send a message that won't be altered
 			
 			this.goodie('safe', {'keepSafe':0}, function(){
 				dAmnX.command.bind('safe', 0, function(args){
@@ -703,8 +695,11 @@ function init(){
 				})
 			})
 			
+			
+			if(!$.jStorage) alert('No jStorage!');
+			else this.save();
+			
 		}
-		
 		
 		var now = Date.now();
 		(function waitForDamnX(){
@@ -714,8 +709,7 @@ function init(){
 				if(install){
 					var url = window.location.href;
 					window.location = "http://github.com/SamM/dAmn/raw/master/dAmnX.user.js";
-					//window.open('http://github.com/SamM/dAmn/raw/master/dAmnX.user.js', '_blank');
-					window.setTimeout(function(){ window.location = url; }, 10000)
+					window.setTimeout(function(){ window.location = url; }, 12000)
 				}
 			}
 			else window.setTimeout(waitForDamnX, 50);
@@ -732,5 +726,4 @@ function execute_script(script, id){
 	document.getElementsByTagName("head")[0].appendChild(el);
 	return el;
 }
-if (typeof dAmnGoodies != 'undefined') alert("You have multiple versions of dAmnGoodies installed");
-else execute_script("var dAmnGoodies = window.dAmnGoodies = ("+init.toString()+")();", "dAmnGoodies_Script")
+execute_script("var dAmnGoodies = window.dAmnGoodies = ("+init.toString()+")();", "dAmnGoodies_Script")
