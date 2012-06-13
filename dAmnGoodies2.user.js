@@ -553,12 +553,13 @@ function init(){
 							dAmnX.notice('Mimic is disabled')
 							break;
 						case "to":
-							if(!a[1].length)
+							if(!a[1] || !a[1].length)
 								g.to = false;
 							else 
 								g.to = dAmnX.channelNs(a[1]);
 							dAmnX.notice(g.to?'Mimicking to '+g.to:'Mimicking to same channel')
 							DG.save();
+							break;
 						case "start":
 							if(dAmn_Client_Username.toLowerCase() == a[1].toLowerCase()){
 								dAmnX.error('mimic', 'You cannot mimic yourself');
@@ -594,6 +595,7 @@ function init(){
 							break;
 						case "clear":
 							DG.goodies.mimic.mimicking = [];
+							DG.goodies.mimic.to = false;
 							DG.save();
 							if(g.announce)
 								dAmnX.send.action(false, 'stopped mimicking everyone');
@@ -612,7 +614,7 @@ function init(){
 							from = b[1].split("=")[1],
 							msg = b[3];
 						if(dAmn_Client_Username.toLowerCase() != from.toLowerCase() && DG.goodies.mimic.mimicking.indexOf(from.toLowerCase())>-1)
-							dAmnX.send.msg(dAmnX.channelNs(DG.goodies.mimic.to), dAmnX.parseMsg(msg))
+							dAmnX.send.msg(dAmnX.channelNs(DG.goodies.mimic.to), dAmnX.parseMsg(DG.goodies.mimic.to?"<"+from+"> "+msg:msg))
 					}
 					done(body);
 				});
