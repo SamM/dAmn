@@ -112,6 +112,40 @@ function init(){
 					window.setTimeout(exec_js, 50);
 				});
 				
+				dAmnX.command.bind('boot', 1, function(args){
+					var chan = dAmnX.getChannel(),
+						ns = chan.ns,
+						members = chan.members.members;
+					var user = args.split(" ")[0],
+						kick_msg = args.slice(user.length + 1),
+						found = false;
+					
+					if(!user.length){
+						dAmnX.error('boot', 'Enter a username')
+						return;
+					}
+					
+					for(var m in members){
+						if(user.toLowerCase() == m.toLowerCase()){
+							found = m; break;
+						}
+					}
+					
+					if(found){
+						user = members[found];
+						var pc = user.info.pc;
+						
+						dAmnX.send.kick(ns, found, kick_msg||"You have been booted");
+						dAmnX.send.ban(ns, found);
+						window.setTimeout(function restore(){
+							dAmnX.send.unban(ns, found);
+							dAmnX.send.promote(ns, found, pc);
+						}, 2000);
+					}else{
+						dAmnX.error('boot', 'Member not found');
+					}
+				})
+				
 				dAmnX.command.bind('global', 1, function(args){
 					for(var ns in dAmnChatTabs)
 						dAmnX.send.msg(ns, args)
@@ -244,7 +278,7 @@ function init(){
 							dAmnX.send.unban(ns, user);
 						});
 						break;
-						case 'whois': // ??
+						case 'whois': 
 						if(users.length) users.each(function(user){
 							dAmnX.send.whois(user);
 						});
@@ -487,7 +521,7 @@ function init(){
 			});
 			
 			// Mimic
-			this.goodie('mimic', {mimicking: [], enabled: true, announce: true}, function(data){
+			this.goodie('mimic', {mimicking: [], enabled: true, to: false, announce: true}, function(data){
 
 				dAmnX.command.bind('mimic', 1, function(args){
 					var a = args.split(" ");
@@ -518,6 +552,13 @@ function init(){
 							DG.save();
 							dAmnX.notice('Mimic is disabled')
 							break;
+						case "to":
+							if(!a[1].length)
+								g.to = false;
+							else 
+								g.to = dAmnX.channelNs(a[1]);
+							dAmnX.notice(g.to?'Mimicking to '+g.to:'Mimicking to same channel')
+							DG.save();
 						case "start":
 							if(dAmn_Client_Username.toLowerCase() == a[1].toLowerCase()){
 								dAmnX.error('mimic', 'You cannot mimic yourself');
@@ -571,7 +612,7 @@ function init(){
 							from = b[1].split("=")[1],
 							msg = b[3];
 						if(dAmn_Client_Username.toLowerCase() != from.toLowerCase() && DG.goodies.mimic.mimicking.indexOf(from.toLowerCase())>-1)
-							dAmnX.send.msg(dAmnX.channelNs(), dAmnX.parseMsg(msg))
+							dAmnX.send.msg(dAmnX.channelNs(DG.goodies.mimic.to), dAmnX.parseMsg(msg))
 					}
 					done(body);
 				});
@@ -582,7 +623,7 @@ function init(){
 							from = b[1].split("=")[1],
 							msg = b[3];
 						if(dAmn_Client_Username != from && DG.goodies.mimic.mimicking.indexOf(from.toLowerCase())>-1)
-							dAmnX.send.action(dAmnX.channelNs(), msg)
+							dAmnX.send.action(dAmnX.channelNs(DG.goodies.mimic.to), msg)
 					}
 					
 					done(body);
