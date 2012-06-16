@@ -242,7 +242,7 @@ function init(){
 						case 'join':
 						list.each(function(chan){
 							chan = dAmnX.channelNs(chan);
-							dAmnX.send.join(ns);
+							dAmnX.send.join(chan);
 						});
 						break;
 						case 'kick':
@@ -361,7 +361,11 @@ function init(){
 			});
 			
 			// Nicknames
-			this.goodie('nickname', {nicks: {}, enabled: true}, function(data){
+			this.goodie('nickname', {nicks: {}, enabled: true, switchTags: true }, function(data){
+				if(typeof DG.goodies.nickname.switchTags == 'undefined'){
+					DG.goodies.nickname.switchTags = true;
+					DG.save();
+				}
 				// Setup /nick command
 				dAmnX.command.bind('nick', 1, function(args){
 					var a = args.split(" ");
@@ -375,6 +379,22 @@ function init(){
 						dAmnX.notice('Nicknames OFF');
 						DG.goodies.nickname.enabled = false;
 						DG.save();
+						break;
+						case 'tags':
+						var to = a[1]?a[1].toLowerCase():"";
+						if(!to || !to.length)
+							to = DG.goodies.nickname.switchTags?"off":"on";
+						if(to=="on"){
+							dAmnX.notice('Switching &lt;Nametags&gt; enabled');
+							DG.goodies.nickname.switchTags = true;
+							DG.save();
+						}else if(to=="off"){
+							dAmnX.notice('Switching &lt;Nametags&gt; disabled');
+							DG.goodies.nickname.switchTags = false;
+							DG.save();
+						}else{
+							dAmnX.error("nick", "<code>/nick tags "+to+"</code> is not a recognized command");
+						}
 						break;
 						case 'get':
 						var user = DG.goodies.nickname.nicks[a[1].toLowerCase()];
@@ -426,7 +446,7 @@ function init(){
 				})
 				
 				dAmnX.before('msg', function(body, done){
-					if(DG.goodies.nickname.enabled){
+					if(DG.goodies.nickname.enabled && DG.goodies.nickname.switchTags){
 						var b = body.pkt.body.split("\n");
 						var from = b[1].split("=")[1],
 							nick = DG.goodies.nickname.nicks[from.toLowerCase()];
@@ -437,7 +457,7 @@ function init(){
 				});
 				
 				dAmnX.before('action', function(body, done){
-					if(DG.goodies.nickname.enabled){
+					if(DG.goodies.nickname.enabled && DG.goodies.nickname.switchTags){
 						var b = body.pkt.body.split("\n");
 						var from = b[1].split("=")[1].toLowerCase(),
 							nick = DG.goodies.nickname.nicks[from];
@@ -448,7 +468,7 @@ function init(){
 				});
 				
 				dAmnX.before('event', function(body, done){
-					if(DG.goodies.nickname.enabled){
+					if(DG.goodies.nickname.enabled && DG.goodies.nickname.switchTags){
 						
 						var nick = DG.goodies.nickname.nicks[body.pkt.param.toLowerCase()];
 						if(nick) body.pkt.param = nick;
@@ -461,7 +481,7 @@ function init(){
 				});
 				
 				dAmnX.before('selfEvent', function(body, done){
-					if(DG.goodies.nickname.enabled && body.ev == 'kicked'){
+					if(DG.goodies.nickname.enabled && body.ev == 'kicked' && DG.goodies.nickname.switchTags){
 						var nick = DG.goodies.nickname.nicks[body.arg1.toLowerCase()]
 						if(nick) body.arg1 = nick;
 					}
@@ -651,6 +671,110 @@ function init(){
 					if(DG.goodies.klat.on){
 						if(body.cmd == 'msg' || body.cmd == 'action'){
 							body.str = body.str.split("").reverse().join("");
+						}
+					}
+					done(body);
+				});
+				
+			});
+			
+			
+			// Jumble
+			this.goodie('jumble', {enabled: false}, function(){
+				dAmnX.command.bind('jumble', 0, function(a, done){
+					if(DG.goodies.jumble.enabled){
+						DG.goodies.jumble.enabled = false;
+						dAmnX.notice('Jumbling disabled');
+					}else{
+						DG.goodies.jumble.enabled = true;
+						dAmnX.notice('Jumbling enabled');
+					}
+					DG.save();
+				})
+				
+				dAmnX.before('send', function(body, done){
+					if(DG.goodies.jumble.enabled){
+						if(body.cmd == 'msg' || body.cmd == 'action' && body.str.length){
+							var words = body.str.split(" "),
+								punc = ".,;:'\"/\\[](){}=+?!~`#<>",
+								sentence = [];
+							
+							for(var i=0,w,s,m,e;i<words.length;i++){
+								w=words[i];
+								s=w[0];
+								if(punc.indexOf(s)>-1) s=w.slice(0,2);
+								e=w.slice(-1);
+								if(punc.indexOf(e)>-1) e=w.slice(-2);
+								m = w.slice(s.length,-e.length);
+								if(m.length > 2){
+									m = m.split('');
+									m.sort(function() {return 0.5 - Math.random()});
+									m = m.join('');
+									w = s+m+e;
+								}
+								sentence.push(w);
+							}
+							
+							body.str = sentence.join(' ');
+						}
+					}
+					done(body);
+				});
+			});
+			
+			// Spleak
+			
+			this.goodie('spleak', {enabled: false}, function(){
+				
+				var A = "a e i o u ae ee oo ou ie ea ei eo ui ia ay ey oy oi ai au".split(" "),
+				    B = "b c d f g h j k l m n p qu r s t v w x y z br bl ch cr cl dr fr fl gr gl kl kr ph pr pl st sl spl sp str sc scr tr wr wh".split(" "),
+				    Z = " b c d f g h j k l m n p r s t w y z bs cs ds fs gs ks ls ms ns ps ph phs rs ts ws nt ck cks nts ".split(" ");
+
+				String.prototype.capitalize = function() {
+				    return this.charAt(0).toUpperCase() + this.slice(1);
+				}
+				String.prototype.isCapitalized = function() {
+					var c = this.charAt(0);
+				    return c == c.toUpperCase();
+				}
+
+				function W(s,c){
+				    var w = [];
+				    s = typeof s == 'number'?s:Math.ceil(Math.random()*4);
+				    var p;
+				    while(w.length<s){
+				        p = B[Math.floor(Math.random()*B.length)] + A[Math.floor(Math.random()*A.length)];
+				        w.push(p);
+				    }
+				    w.push(Z[Math.floor(Math.random()*Z.length)]);
+				    return w.join(c||'');
+				}
+				this.W = W;
+				
+				dAmnX.command.bind('spleak', 0, function(a, done){
+					if(DG.goodies.spleak.enabled){
+						DG.goodies.spleak.enabled = false;
+						dAmnX.notice('Spleaking now off');
+					}else{
+						DG.goodies.spleak.enabled = true;
+						dAmnX.notice('Spleaking now on');
+					}
+					DG.save();
+				})
+				
+				dAmnX.before('send', function(body, done){
+					if(DG.goodies.spleak.enabled){
+						if(body.cmd == 'msg' || body.cmd == 'action' && typeof body.str == "string" && body.str.length){
+							var str = body.str.split(" "),
+								new_str = [];
+							for(var i=0,w,l;i<str.length;i++){
+								w = W();
+								l = str[i].slice(-1);
+								if(":,.;'\"][{}()=+`~!?@#$&*".indexOf(l)>-1) w+=l;
+								if(str[i].isCapitalized()) w = w.capitalize();
+								new_str.push(w);
+							}
+							body.str = new_str.join(" ");
 						}
 					}
 					done(body);
