@@ -1,4 +1,4 @@
-// Fix: Added line 2911 & changed 2453
+// Fix: Added line 2911 & changed 2453. Fixed emote cloud errors, lines 1790 - 1800
 // ==UserScript==
 // @name           SuperdAmn
 // @namespace      24bps.com
@@ -1784,15 +1784,18 @@ var superdAmn = window.superdAmn = {
 			var SD = superdAmn
 			if(SD.P.publicemotes && SD.pe && !SD.oe(SD.pe)){
 				if(JSON.stringify(SD.spe) != this.ems){ SD.spe = JSON.parse(this.ems) }
-				var a = [], c
+				var a = [], c,d;
 				for(var em in superdAmn.pe){ a.push(em) }
 				a.sort(function(a,b){ var x = String(a).toLowerCase(); var y = String(b).toLowerCase(); return x < y ? -1 : (x > y ? 1 : 0) })
 				for(var em in a){
-					c = a[em].substr(1,1).toLowerCase()
+					d = String(a[em]);
+					if(typeof d != 'string' || ! d.length) continue;
+					c = d.substr(1,1).toLowerCase()
 					if(!c.match(/^[a-z]$/)){ c = "#" }
-					SD.spe[c][a[em]] = SD.pe[a[em]]
-					if(SD.pe[a[em]].myvote > 0){
-						SD.spe['*'][a[em]] = SD.pe[a[em]]
+					if(! SD.pe[d]) continue;
+					SD.spe[c][d] = SD.pe[d]
+					if(SD.pe[d] && SD.pe[d].myvote > 0){
+						SD.spe['*'][d] = SD.pe[d]
 					}
 				}
 			}

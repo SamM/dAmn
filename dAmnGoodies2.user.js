@@ -492,8 +492,14 @@ function init(){
 			// Bob
 			this.goodie('bob', {enabled: false}, function(){
 								
-				dAmnX.command.bind('bob', 0, function(){
-					if(DG.goodies.bob.enabled){
+				dAmnX.command.bind('bob', 0, function(args){
+					if(args.toLowerCase() == "on"){
+						DG.goodies.bob.enabled = true;
+						dAmnX.notice('BOB!');
+					}else if(args.toLowerCase() == "off"){
+						DG.goodies.bob.enabled = false;
+						dAmnX.notice('No More Bob');
+					}else if(DG.goodies.bob.enabled){
 						DG.goodies.bob.enabled = false;
 						dAmnX.notice('No More Bob');
 					}else{
@@ -508,7 +514,6 @@ function init(){
 						var b = body.pkt.body.split("\n");
 						b[1] = "from=Bob";
 						body.pkt.body = b.join("\n");
-						console.log(body);
 					}
 					done(body);
 				});
@@ -565,12 +570,12 @@ function init(){
 						case "off":
 							g.enabled = false;
 							DG.save();
-							dAmnX.notice('Mimic is enabled')
+							dAmnX.notice('Mimic is disabled')
 							break;
 						case "on":
 							g.enabled = true;
 							DG.save();
-							dAmnX.notice('Mimic is disabled')
+							dAmnX.notice('Mimic is enabled')
 							break;
 						case "to":
 							if(!a[1] || !a[1].length)
@@ -670,7 +675,7 @@ function init(){
 				dAmnX.before('send', function(body, done){
 					if(DG.goodies.klat.on){
 						if(body.cmd == 'msg' || body.cmd == 'action'){
-							body.str = body.str.split("").reverse().join("");
+							body.str = DG.stripAbbrTags(body.str).split("").reverse().join("");
 						}
 					}
 					done(body);
@@ -695,7 +700,7 @@ function init(){
 				dAmnX.before('send', function(body, done){
 					if(DG.goodies.jumble.enabled){
 						if(body.cmd == 'msg' || body.cmd == 'action' && body.str.length){
-							var words = body.str.split(" "),
+							var words = DG.stripAbbrTags(body.str).split(" "),
 								punc = ".,;:'\"/\\[](){}=+?!~`#<>",
 								sentence = [];
 							
