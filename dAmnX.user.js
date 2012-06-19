@@ -1,18 +1,17 @@
 
+
 // ==UserScript==
 // @name           dAmnX
 // @description    A tool for dAmn that makes writing plugins simple
 // @author         Sam Mulqueen <sammulqueen.nz@gmail.com>
-// @version        1.0.0
+// @version        1.0.1
 // @include        http://chat.deviantart.com/chat/*
 // ==/UserScript==
 
-// dAmnX v1.0.0
-(function(){
-
-var dAmnX = function(){
+// dAmnX v1.0.1
+function dAmnX(){
 	var DX = this;
-	this.version = "1.0.0";
+	this.version = "1.0.1";
 	this.isReady = true;
 	
 	this.reinstall = function(){
@@ -20,138 +19,65 @@ var dAmnX = function(){
 		window.location = "http://github.com/SamM/dAmn/raw/master/dAmnX.user.js";
 		setTimeout(function(){ window.location = url }, 12000);
 	}
-	
-	// Actions
-	var before = [], after = [],
-		before_id=0, after_id= 0;
-	
-	this.action = function(action, body, onAction, onDone){
-		var self = this, f = before, i = 0, 
-			j = 0, n = [], c = 0;
-		
-		if(typeof action != "string")
-			throw "first argument `action` must be a string";
-		if(typeof body == 'function'){
-			onDone = onAction;
-			onAction = body;
-			body = {};
+	// NEW: Processes (to replace Actions);
+	this.preprocessors = {};
+	this.postprocessors = {};
+	this.process = function(id, object, process, endProcessing){ 
+		if(typeof object == "function"){
+			endProcessing = process;
+			process = object;
+			object = {};
 		}
-		if(typeof body != "object")
-			body = {};
-		if(typeof onAction != "function") 
-			onAction = function(body, callback){ callback(body); };
-		if(typeof onDone != "function") 
-			onDone = function(body){ };
-			
-		body['action'] = action;
-		
-		function match_cycle(_body){
-			if(_body) body = _body;
-			if(i == f.length) (c==0?before_cycle:after_cycle)(body);
-			else {
-				var o = f[i++];
-				o.action.call(self, body, function(match){
-					if(match == true) n.push(o);
-					match_cycle();
-				});
+		if(typeof process != 'function') process = function(o,pass){ pass(o); };
+		var prep = this.preprocessors[id], post = this.postprocessors[id], self=this;
+			var i=0;
+			function preprocessing(o){
+				if(!prep || i>=prep.length) callprocess(o);
+				else {try{
+					prep[i++].call(self, o, preprocessing);
+				}catch(ex){
+					console.log('preprocessor error: '+ex);
+					preprocessing(o);
+				}
+				}
 			}
-		}
-		function before_cycle(_body){
-			if(j == n.length) end_before_cycle(_body);
-			else{
-				var o = n[j++];
-				if(typeof o.before == 'function')
-					o.before.call(self, _body, before_cycle);
-				else
-					before_cycle(_body);
+			function callprocess(o){
+				i=0;
+				process.call(self, o, Array.isArray(post)?postprocessing:new Function)
 			}
-		}
-		function end_before_cycle(_body){
-			f = after;
-			n = [];
-			j = 0;
-			i = 0;
-			c++;
-			onAction.call(self, _body, match_cycle);
-		}
-		function after_cycle(_body){
-			if(j == n.length) end_after_cycle(_body);
-			else{
-				var o = n[j++];
-				if(o && typeof o.after == 'function')
-					o.after.call(self, _body, after_cycle);
-				else
-					after_cycle(_body);
+			function postprocessing(o){
+				if(Array.isArray(post) && i<post.length) {
+					try{
+						post[i++].call(self, o, postprocessing);
+					}catch(ex){
+						console.log('postprocessor error: '+ex);
+						postprocessing(o)
+					}
+				}
 			}
-		}
-		function end_after_cycle(_body){
-			onDone.call(this, _body);
-		}
+			(Array.isArray(prep)?preprocessing:callprocess)(object);
+			return this;
 
-		match_cycle(body);
-		
+	};
+	this.preprocess = function(id, processor){
+		if(!Array.isArray(this.preprocessors[id])) 
+			this.preprocessors[id] = [];
+		var prep=this.preprocessors[id];
+		if(typeof processor != "function") return prep;
+		else prep.push(processor);
 		return this;
 	}
-	function getMatchFunction(action, after){
-		if(typeof action == "object")
-			action = (function(a){ 
-				return function(body, done){
-					var match = true;
-					for(var i in a){
-						match = match && (typeof a[i]=="function" ? !!a[i](body[i]) : (typeof body[i] != 'undefined' && body[i] == a[i]));
-					}
-					done(match);
-				};
-			})(action);
-		else if(typeof action != "function")
-			action = (function(a){
-				return function(body, done){ done(body.action == a); };
-			})(action);
-		return action;
-	}
-	this.before = function(action, onBefore){
-		if(typeof onBefore!='function')
-			throw "second argument `onBefore` must be a function";
-		
-		var id = before_id++;
-			
-		before.push({ 'id': id, 'action': getMatchFunction(action), 'before': onBefore });
-		
-		return id;
-	}
-	this.after = function(action, onAfter){
-		if(typeof onAfter!='function')
-			throw "second argument `reaction` must be a function";
-
-		var id = after_id++;
-			
-		after.push({ 'id': id, 'action': getMatchFunction(action, 1), 'after': onAfter });
-		
-		return id;
-	}
-	this.before.destroy = function(id){
-		var f = before, n = [], removed = false;
-		for(var i=0;i<f.length;i++){
-			if(id == f[i].id) removed = true;
-			else n.push(f[i]);
+	this.postprocess = function(id, processor){ 
+		if(!Array.isArray(this.postprocessors[id])) 
+			this.postprocessors[id] = [];
+		var post=this.postprocessors[id]
+		if(typeof processor != "function"){
+			return post;
+		}else{
+			if(!Array.isArray(post)) post=[];
+			post.push(processor);
 		}
-		if(removed) before = n;
-		return removed;
-	}
-	this.after.destroy = function(id){
-		var f = after, n = [], removed = false;
-		for(var i=0;i<f.length;i++){
-			if(id == f[i].id) removed = true;
-			else n.push(f[i]);
-		}
-		if(removed) after = n;
-		return removed;
-	}
-	this.before.clear = function(){
-		before = [];
-	}
-	this.after.clear = function(){
-		after = [];
+		return this;
 	}
 	
 	//
@@ -312,7 +238,7 @@ var dAmnX = function(){
 		var dAmnChat_onData_DX = dAmnChat_onData;
 		dAmnChat_onData = function (pkt) {
 			var self = this;
-			DX.action('onData', {'pkt': pkt, 'stop':false, 'self': this}, function(body, done){ if(!body.stop) self.onData_DX(body.pkt); done(body); });
+			DX.process('onData', {'pkt': pkt, 'stop':false, 'self': this}, function(body, done){ if(!body.stop) self.onData_DX(body.pkt); done(body); });
 		};
 		dAmnChat.prototype.onData = dAmnChat_onData;
 		dAmnChat.prototype.onData_DX = dAmnChat_onData_DX;
@@ -320,7 +246,7 @@ var dAmnX = function(){
 		var dAmnChat_onClose_DX = dAmnChat_onClose;
 		dAmnChat_onClose = function(){
 			var self = this;
-			DX.action('onClose', {'self': this}, function(body, done){ self.onClose_DX(); done(body); });
+			DX.process('onClose', {'self': this}, function(body, done){ self.onClose_DX(); done(body); });
 		};
 		dAmnChat.prototype.onClose = dAmnChat_onClose;
 		dAmnChat.prototype.onClose_DX = dAmnChat_onClose_DX;
@@ -328,7 +254,7 @@ var dAmnX = function(){
 		var dAmnChat_onResize_DX = dAmnChat_onResize;
 		dAmnChat_onResize = function(real) {
 			var self = this;
-			DX.action('onResize', {'real': real, 'stop': false, 'self': this}, function(body, done){ if(!body.stop) self.onResize_DX(body.real); done(body); });
+			DX.process('onResize', {'real': real, 'stop': false, 'self': this}, function(body, done){ if(!body.stop) self.onResize_DX(body.real); done(body); });
 		};
 		dAmnChat.prototype.onResize = dAmnChat_onResize;
 		dAmnChat.prototype.onResize_DX = dAmnChat_onResize_DX;
@@ -336,7 +262,7 @@ var dAmnX = function(){
 		var dAmnChat_onDisconnect_DX = dAmnChat_onDisconnect;
 		dAmnChat_onDisconnect = function(reason) {
 			var self = this;
-			DX.action('onDisconnect', {'reason': reason, 'self': this}, function(body, done){ self.onDisconnect_DX(body.reason); done(body); });
+			DX.process('onDisconnect', {'reason': reason, 'self': this}, function(body, done){ self.onDisconnect_DX(body.reason); done(body); });
 		};
 		dAmnChat.prototype.onDisconnect = dAmnChat_onDisconnect;
 		dAmnChat.prototype.onDisconnect_DX = dAmnChat_onDisconnect_DX;
@@ -344,7 +270,7 @@ var dAmnX = function(){
 		var dAmnChat_onShutdown_DX = dAmnChat_onShutdown;
 		dAmnChat_onShutdown = function() {
 			var self = this;
-			DX.action('onShutdown', {'self': this}, function(body, done){ self.onShutdown_DX(); done(body); });
+			DX.process('onShutdown', {'self': this}, function(body, done){ self.onShutdown_DX(); done(body); });
 		};
 		dAmnChat.prototype.onShutdown = dAmnChat_onShutdown;
 		dAmnChat.prototype.onShutdown_DX = dAmnChat_onShutdown_DX;
@@ -352,7 +278,7 @@ var dAmnX = function(){
 		var dAmnChat_Send_DX = dAmnChat_Send;
 		dAmnChat_Send = function(cmd, channel, str) {
 			var self = this;
-			DX.action('send', {'cmd': cmd, 'channel': channel, 'str': str, 'str2': str, 'stop': false, 'self': this}, function(body, done){ if(!body.stop) self.Send_DX(body.cmd, body.channel, body.str); done(body); });
+			DX.process('send', {'cmd': cmd, 'channel': channel, 'str': str, 'str2': str, 'stop': false, 'self': this}, function(body, done){ if(!body.stop) self.Send_DX(body.cmd, body.channel, body.str); done(body); });
 		};
 		dAmnChat.prototype.Send = dAmnChat_Send;
 		dAmnChat.prototype.Send_DX = dAmnChat_Send_DX;
@@ -360,13 +286,13 @@ var dAmnX = function(){
 		dAmnChanChat.prototype.Clear_DX = dAmnChanChat.prototype.Clear;
 		dAmnChanChat.prototype.Clear = function() {
 			var self = this;
-			DX.action('clear', {'self': this}, function(body, done){ self.Clear_DX(); done(body); });
+			DX.process('clear', {'self': this}, function(body, done){ self.Clear_DX(); done(body); });
 		};
 
 		var dAmnChatTabs_activate_DX = dAmnChatTabs_activate;
 		dAmnChatTabs_activate = function( id , real ) {
 			var self = this;
-			DX.action('onTabActivate', {'id': id, 'real': real, 'self': this}, function(body, done){ dAmnChatTabs_activate_DX(body.id, body.real); done(body); });
+			DX.process('onTabActivate', {'id': id, 'real': real, 'self': this}, function(body, done){ dAmnChatTabs_activate_DX(body.id, body.real); done(body); });
 		};
 		
 		var dAmnChatInput_onKey_DX 	= dAmnChatInput_onKey;
@@ -376,7 +302,7 @@ var dAmnX = function(){
 			var self = this,
 				el = this.chatinput_el;
 				
-			DX.action('onKey', {'e': e, 'keyCode': kc, 'force': force, 'self': this});
+			DX.process('onKey', {'e': e, 'keyCode': kc, 'force': force, 'self': this});
 			
 			if(kc != 9){
 				if (!self.multiline) {
@@ -410,7 +336,7 @@ var dAmnX = function(){
 							if(self.cmds[cmd][0] && !args){
 								DX.error(cmd, "insufficient parameters");
 							}else{
-								DX.action('command', {'command': cmd, 'args': args||'', 'self': self}, function(b,c){ el.value = DX.command.trigger(b.command, b.args) || ''; c(b) });
+								DX.process('command', {'command': cmd, 'args': args||'', 'self': self}, function(b,c){ el.value = DX.command.trigger(b.command, b.args) || ''; c(b) });
 							}
 							
 							el.focus();
@@ -435,22 +361,31 @@ var dAmnX = function(){
 		dAmnChanChat.prototype.Init_DX 	= dAmnChanChat.prototype.Init;
 		dAmnChanChat.prototype.Init 	= function( cr, name, parent_el ){
 			var self = this;
-			DX.action('init', {'cr': cr, 'name': name, 'parent_el': parent_el, 'self': this},  function(b,c){ self.Init_DX(b.cr, b.name, b.parent_el); c(b); })
+			DX.process('init', {'cr': cr, 'name': name, 'parent_el': parent_el, 'self': this},  function(b,c){ self.Init_DX(b.cr, b.name, b.parent_el); c(b); })
 		};
 		
 		dAmnChanMainChat.prototype.onEvent_DX = dAmnChanMainChat.prototype.onEvent;
 		dAmnChanMainChat.prototype.onEvent = function(pkt){
 			var self = this;
-			DX.action('event', {'pkt': pkt, 'self': this}, 
+			DX.process('event', {'pkt': pkt, 'self': this}, 
 				function(body, done){ self.onEvent_DX(body.pkt); done(body) });
 		}
 		
 		dAmnChanMainChat.prototype.onSelfEvent_DX = dAmnChanMainChat.prototype.onSelfEvent;
 		dAmnChanMainChat.prototype.onSelfEvent = function( ev, arg1, arg2 ){
 			var self = this;
-			DX.action('selfEvent', {'ev': ev, 'arg1': arg1, 'arg2': arg2, 'self': this}, 
+			DX.process('selfEvent', {'ev': ev, 'arg1': arg1, 'arg2': arg2, 'self': this}, 
 				function(body, done){ self.onSelfEvent_DX(body.ev, body.arg1, body.arg2); done(body) });
 		}
+		
+		var dAmnChatbase_dAmnCB_DX = dAmnChatbase_dAmnCB;
+		dAmnChatbase_dAmnCB = function(cmd,arg)
+		{
+			DX.process('dAmnChatbase', {'cmd': cmd, 'arg': arg, self: this}, function(o,d){
+				dAmnChatbase_dAmnCB_DX(o.cmd, o.arg);
+				d(o);
+			});
+		};
 		
 	}).call(this);
 	
@@ -458,17 +393,22 @@ var dAmnX = function(){
 		//
 		// Events
 		//
-		this.before('onTabActivate', function(body, done){ 
+		this.preprocess('onTabActivate', function(body, done){ 
 			if(body.id != dAmnChatTab_active) 
-				DX.action('onSwitchTab', {'id': body.id, 'real': body.real, 'self': body.self}, function(b,c){ c(b) }); 
+				DX.process('onSwitchTab', {'id': body.id, 'real': body.real, 'self': body.self}, function(b,c){ c(b) }); 
 			done(body);
 		})
-		this.after("init", function(b,c){
+		this.preprocess('dAmnChatbase', function(o,d){
+			if(["login", "connect", "shutdown", "disconnect"].indexOf(o.cmd)>-1)
+				DX.process(o.cmd, {'arg': o.arg, 'self': o.self}, function(body, done){o.arg = body.arg; d(o); done(body); });
+			else d(o);
+		});
+		this.postprocess("init", function(b,c){
 			for(var cmd in DX.command.commands)
 				b.self.input.cmds[cmd] = [DX.command.commands[cmd][0], 'dAmnX'];
 			c(b);
 		});
-		this.before('onData', function(b,c){
+		this.preprocess('onData', function(b,c){
 			var ev = null;
 			switch (b.pkt.cmd) {
 				case 'join': 	ev="selfJoin"; break;
@@ -480,40 +420,40 @@ var dAmnX = function(){
 				case 'property': ev="property"; break;
 				case 'recv': 	ev="recv"; break;
 			}
-			if(ev) this.action(ev, {'pkt': b.pkt, 'self': b.self, 'stop': false}, 
+			if(ev) this.process(ev, {'pkt': b.pkt, 'self': b.self, 'stop': false}, 
 				function(body, done){ if(body.stop) b.stop=true; b.pkt = body.pkt; c(b); done(body); });
 			else c(b);
 		});
-		this.before('property', function(b,c){
+		this.preprocess('property', function(b,c){
 			var ev = b.pkt.args.p;
 
 			if(["members", "privclasses", "title", "topic"].indexOf(ev)>-1) 
-				this.action(ev, {'pkt': b.pkt, 'self': b.self, 'stop': false}, 
+				this.process(ev, {'pkt': b.pkt, 'self': b.self, 'stop': false}, 
 					function(body, done){ if(body.stop) b.stop=true; b.pkt = body.pkt; c(b); done(body); });
 			else c(b);
 		})
-		this.before('recv', function(b,c){
+		this.preprocess('recv', function(b,c){
 			var rp = dAmn_ParsePacket(b.pkt.body),
 				ev = rp.cmd;
 
 			if(["action", "msg", "part", "kicked", "join", "privchg"].indexOf(ev)>-1)
-				this.action(ev, {'pkt': b.pkt, 'self': b.self, 'stop': false}, function(body, done){ if(body.stop) b.stop=true; b.pkt = body.pkt; c(b); done(body); });
+				this.process(ev, {'pkt': b.pkt, 'self': b.self, 'stop': false}, function(body, done){ if(body.stop) b.stop=true; b.pkt = body.pkt; c(b); done(body); });
 			else c(b);
 		});
-		this.before('send', function(b,c){
+		this.preprocess('send', function(b,c){
 	        var ev = b.cmd,
 				ev2 = "send"+ev[0].toUpperCase() + ev.slice(1);
 
 			if(["action", "msg", "npmsg"].indexOf(ev)>-1)
-				this.action(ev2, {'channel': b.channel, 'str': b.str, 'stop': false}, 
+				this.process(ev2, {'channel': b.channel, 'str': b.str, 'stop': false}, 
 					function(body, done){ if(body.stop) b.stop=true; b.channel = body.channel; b.str = body.str; c(b); done(body); });
 			else c(b);
 	    });
-		this.before('title', function(b,c){
+		this.preprocess('title', function(b,c){
 			this.titles[b.pkt.param] = this.parseMsg(b.pkt.body);
 			c(b);
 		});
-		this.before('topic', function(b,c){
+		this.preprocess('topic', function(b,c){
 			this.topics[b.pkt.param] = this.parseMsg(b.pkt.body);
 			c(b);
 		});
@@ -646,10 +586,8 @@ var dAmnX = function(){
 			msg = msg.replace(/&thumb\t([^\t]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t/g,':thumb$1:');
 
         return msg;
-    }
-	
-};
-
+	}
+}
 //
 // Append script to document and initialize dAmnX
 //
@@ -665,4 +603,3 @@ var jStorage_script=execute_script("("+function(){(function(a){function k(){var 
 
 var DX_script = execute_script("var dAmnX = window.dAmnX = new (" + dAmnX.toString() + ")();", "dAmnX_Script");
 
-})();

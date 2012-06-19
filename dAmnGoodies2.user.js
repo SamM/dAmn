@@ -1,9 +1,10 @@
 
+
 // ==UserScript==
 // @name           dAmnGoodies
 // @description    Novelty features for dAmn chat.
 // @author         Sam Mulqueen <sammulqueen.nz@gmail.com>
-// @version        2.0.1
+// @version        2.0.2
 // @include        http://chat.deviantart.com/chat/*
 // ==/UserScript==
 
@@ -19,12 +20,8 @@ function init(){
 		alert("You have multiple versions of dAmnGoodies installed.");
 		throw "Aw hell no";
 	}
-	if(dAmnX && dAmnX.version != "1.0.0"){
-		if(confirm("This version of dAmnGoodies needs a newer version of dAmnX."))
-			dAmnX.reinstall();
-	}
-	var dAmnGoodies = function(){
-		this.version = "2.0.0";
+	var dAmnGoodies = new (function(){
+		this.version = "2.0.2";
 		
 		var DG = this;
 		
@@ -62,6 +59,15 @@ function init(){
 		}
 		
 		this.init = function(){
+			//function VersionNumber(str){ var arr = str.split(".");for(var i=0;i<arr.length;i++)arr[i]=isNaN(Number(arr[i]))?arr[i]:Number(arr[i]); return arr; }
+			var required_version = "1.0.1";
+			if(typeof dAmnX == 'undefined'){
+				alert("dAmnX is not found.");
+			}
+			else if(dAmnX.version != required_version && [required_version,dAmnX.version].sort().indexOf(dAmnX.version)==0){
+				if(confirm("This version of dAmnGoodies needs a newer version of dAmnX."))
+					dAmnX.reinstall();
+			}
 			
 			this.load();
 			
@@ -348,7 +354,7 @@ function init(){
 				  return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
 				}
 				
-				dAmnX.before('send', function(body, done){
+				dAmnX.preprocess('send', function(body, done){
 					var msg = body.str;
 					if(DG.goodies.swap.enabled){
 						for(var i in DG.goodies.swap.pairs){
@@ -427,7 +433,7 @@ function init(){
 					}
 				});
 				
-				dAmnX.before('send', function(body, done){
+				dAmnX.preprocess('send', function(body, done){
 					var msg = " "+body.str+" ";
 					
 					if(DG.goodies.nickname.enabled){
@@ -445,7 +451,7 @@ function init(){
 					done(body);
 				})
 				
-				dAmnX.before('msg', function(body, done){
+				dAmnX.preprocess('msg', function(body, done){
 					if(DG.goodies.nickname.enabled && DG.goodies.nickname.switchTags){
 						var b = body.pkt.body.split("\n");
 						var from = b[1].split("=")[1],
@@ -456,7 +462,7 @@ function init(){
 					done(body);
 				});
 				
-				dAmnX.before('action', function(body, done){
+				dAmnX.preprocess('action', function(body, done){
 					if(DG.goodies.nickname.enabled && DG.goodies.nickname.switchTags){
 						var b = body.pkt.body.split("\n");
 						var from = b[1].split("=")[1].toLowerCase(),
@@ -467,7 +473,7 @@ function init(){
 					done(body);
 				});
 				
-				dAmnX.before('event', function(body, done){
+				dAmnX.preprocess('event', function(body, done){
 					if(DG.goodies.nickname.enabled && DG.goodies.nickname.switchTags){
 						
 						var nick = DG.goodies.nickname.nicks[body.pkt.param.toLowerCase()];
@@ -480,7 +486,7 @@ function init(){
 					done(body);
 				});
 				
-				dAmnX.before('selfEvent', function(body, done){
+				dAmnX.preprocess('selfEvent', function(body, done){
 					if(DG.goodies.nickname.enabled && body.ev == 'kicked' && DG.goodies.nickname.switchTags){
 						var nick = DG.goodies.nickname.nicks[body.arg1.toLowerCase()]
 						if(nick) body.arg1 = nick;
@@ -509,7 +515,7 @@ function init(){
 					DG.save();
 				});
 				
-				dAmnX.before('msg', function(body, done){
+				dAmnX.preprocess('msg', function(body, done){
 					if(DG.goodies.bob.enabled){
 						var b = body.pkt.body.split("\n");
 						b[1] = "from=Bob";
@@ -518,7 +524,7 @@ function init(){
 					done(body);
 				});
 				
-				dAmnX.before('action', function(body, done){
+				dAmnX.preprocess('action', function(body, done){
 					if(DG.goodies.bob.enabled){
 						var b = body.pkt.body.split("\n");
 						b[1] = "from=Bob";
@@ -527,7 +533,7 @@ function init(){
 					done(body);
 				});
 				
-				dAmnX.before('event', function(body, done){
+				dAmnX.preprocess('event', function(body, done){
 					if(DG.goodies.bob.enabled){
 						body.pkt.param = 'Bob';
 						if(body.pkt.args)
@@ -536,7 +542,7 @@ function init(){
 					done(body);
 				});
 				
-				dAmnX.before('selfEvent', function(body, done){
+				dAmnX.preprocess('selfEvent', function(body, done){
 					if(DG.goodies.bob.enabled && body.ev == 'kicked'){
 						body.arg1 = 'Bob';
 					}
@@ -633,7 +639,7 @@ function init(){
 					
 				});
 				
-				dAmnX.after('msg', function(body, done){
+				dAmnX.postprocess('msg', function(body, done){
 					if(DG.goodies.mimic.enabled){
 						var b = body.pkt.body.split("\n"),
 							from = b[1].split("=")[1],
@@ -644,7 +650,7 @@ function init(){
 					done(body);
 				});
 				
-				dAmnX.after('action', function(body, done){
+				dAmnX.postprocess('action', function(body, done){
 					if(DG.goodies.mimic.enabled){
 						var b = body.pkt.body.split("\n"),
 							from = b[1].split("=")[1],
@@ -672,7 +678,7 @@ function init(){
 					DG.save();
 				});
 				
-				dAmnX.before('send', function(body, done){
+				dAmnX.preprocess('send', function(body, done){
 					if(DG.goodies.klat.on){
 						if(body.cmd == 'msg' || body.cmd == 'action'){
 							body.str = DG.stripAbbrTags(body.str).split("").reverse().join("");
@@ -697,7 +703,7 @@ function init(){
 					DG.save();
 				})
 				
-				dAmnX.before('send', function(body, done){
+				dAmnX.preprocess('send', function(body, done){
 					if(DG.goodies.jumble.enabled){
 						if(body.cmd == 'msg' || body.cmd == 'action' && body.str.length){
 							var words = DG.stripAbbrTags(body.str).split(" "),
@@ -767,7 +773,7 @@ function init(){
 					DG.save();
 				})
 				
-				dAmnX.before('send', function(body, done){
+				dAmnX.preprocess('send', function(body, done){
 					if(DG.goodies.spleak.enabled){
 						if(body.cmd == 'msg' || body.cmd == 'action' && typeof body.str == "string" && body.str.length){
 							var str = body.str.split(" "),
@@ -787,6 +793,87 @@ function init(){
 				
 			});
 			
+			// Auto-Join
+
+			this.goodie('autojoin', {enabled: true, channels: []}, function(data){ 
+				dAmnX.command.bind('autojoin', 0, function(args){
+					if(!args || !args.length){
+						dAmnX.notice("O_o");
+					}else{
+						var a = args.split(" "),
+							cmd = a.shift(),
+							param = a[0],
+							channels = DG.goodies.autojoin.channels;
+						switch(cmd){
+						case "on":
+						case "enable":
+							dAmnX.notice('Automatic Joining is enabled. Currently joining: '+channels.join(" "));
+							DG.goodies.autojoin.enabled = true;
+							DG.save();
+						break;
+						case "off":
+						case "disable":
+							dAmnX.notice('Automatic Joining is disabled.');
+							DG.goodies.autojoin.enabled = false;
+							DG.save();
+						break;
+						case "add":
+						case "set":
+							if(!param || !param.length) dAmnX.notice("Pleave provide atleast one channel to add");
+							else {
+								var added = [],chan;
+								for(var i=0;i<a.length;i++){
+									chan = a[i].toLowerCase().replace("#","").replace("chat:","");
+									if(chan.length && channels.indexOf(chan)<0){
+										DG.goodies.autojoin.channels.push(chan);
+										added.push(chan);
+									}
+								}
+								dAmnX.notice(added.length?"Added: "+added.join(" "):"Added none.");
+								DG.save();
+							}
+						break;
+						case "del":
+						case "delete":
+						case "unset":
+							if(!param || !param.length) dAmnX.notice("Pleave provide atleast one channel to remove");
+							else {
+								var removed = [],chan,index;
+								for(var i=0;i<a.length;i++){
+									chan = a[i].toLowerCase().replace("#","").replace("chat:","");
+									index = channels.indexOf(chan);
+									if(chan.length && index>-1){
+										DG.goodies.autojoin.channels = channels = channels.slice(0,index).concat(channels.slice(index+1));
+										removed.push(chan);
+									}
+								}
+								dAmnX.notice(removed.length?"Removed: "+removed.join(" "):"Removed none.");
+								DG.save();
+							}
+						break;
+						case "list":
+							if(!channels.length) dAmnX.notice("Not automatically joining any channels");
+							else{
+								dAmnX.notice("Automatically joining: "+channels.join(" "));
+							}
+						break;
+						}
+					}
+				});
+				DG.autojoined = false;
+				dAmnX.preprocess('selfJoin', function(o,d){
+					if(DG.goodies.autojoin.enabled && DG.goodies.autojoin.channels.length > 0 && !DG.autojoined){
+						DG.autojoined = true;
+						console.log('Autojoin time :-D ')
+						for(var i=0;i<DG.goodies.autojoin.channels.length;i++){
+							if(!dAmnChatTab_active || dAmnChatTab_active.toLowerCase() != "chat:"+DG.goodies.autojoin.channels[i]) 
+								dAmnX.send.join(DG.goodies.autojoin.channels[i]);
+						}
+					}
+					d(o);
+				});
+			})
+			
 			// Anti-kick
 			this.goodie('antikick', {enabled: true}, function(){
 								
@@ -801,7 +888,7 @@ function init(){
 					DG.save();
 				});
 				
-				dAmnX.before('selfKicked', function(body, done){
+				dAmnX.preprocess('selfKicked', function(body, done){
 					if(DG.goodies.antikick.on){
 						dAmnX.send.join(body.self.ns);
 					}
@@ -818,7 +905,7 @@ function init(){
 				return str.replace(/colors:[a-zA-Z0-9]+:([a-zA-Z0-9])+/gi, "")
 			}
 			
-			this.goodie('shun', {enabled: true, taunts: ["Shun!","Shuuuuunnnnnnn!!!!", "SHUN!!!", "S H U N !", "SSHHUUNN!!", "shun? :o", "SSHHHUUUUNNNNN!!!!!!", "SHUN", "SHUNSHUNSHUNSHUNSHUNSHUN", "shun :|", "SHHHHUUUUUUUNNNN","I SHUN YOU", "SHUN THE NON-BELIEVER!", "Shunday? :o"]}, function(){
+			this.goodie('shun', {enabled: true, taunts: ["Shun!","Shuuuuunnnnnnn!!!!", "SHUN!!!", "S H U N !", "SSHHUUNN!!", "shun? :o", "SSHHHUUUUNNNNN!!!!!!", "SHUN", "SHUNSHUNSHUNSHUNSHUNSHUN", "shun :|", "SHHHHUUUUUUUNNNN","I SHUN YOU", "SHUN THE NON-BELIEVER!", "Shunday? :o", "Isn't this shuntastic? :excited:", ":iconshunuplz:", "You are now Shunned :salute:"]}, function(){
 				
 				dAmnX.command.bind('shun', 0, function(args){
 					if(!args || args == ''){
@@ -834,7 +921,7 @@ function init(){
 					}
 				})
 				
-				dAmnX.before('action', function(body, done){
+				dAmnX.preprocess('action', function(body, done){
 					var msg = DG.stripColorsTags(DG.stripAbbrTags(dAmnX.parseMsg(body.pkt.body.split("\n")[3])));
 					if(DG.goodies.shun.enabled && msg.slice(0,6)=="shuns "){
 						var shunned = msg.slice(6).split(" ")[0];
@@ -858,7 +945,7 @@ function init(){
 					dAmnX.notice(args==1?'The next message is safe':'The next '+args+' messages are safe')
 				});
 				
-				dAmnX.before('send', function(body, done){
+				dAmnX.preprocess('send', function(body, done){
 					if(DG.goodies.safe.keepSafe){
 						body.str = body.str2;
 						DG.goodies.safe.keepSafe--;
@@ -873,22 +960,22 @@ function init(){
 			
 		}
 		
-		var now = Date.now();
+		var start_time = Date.now();
 		(function waitForDamnX(){
 			if(typeof dAmnX != 'undefined' && dAmnX.isReady) DG.init();
-			else if(now + 15000 <= Date.now()){
-				var install = confirm("dAmnGoodies requires the dAmnX userscript to operate. Click OK to install. ")
-				if(install){
+			else if(Date.now() - start_time >= 15000){
+				if(confirm("dAmnGoodies requires the dAmnX userscript to operate. Click OK to install. ")){
 					var url = window.location.href;
 					window.location = "http://github.com/SamM/dAmn/raw/master/dAmnX.user.js";
 					window.setTimeout(function(){ window.location = url; }, 12000)
 				}
 			}
-			else window.setTimeout(waitForDamnX, 50);
+			else window.setTimeout(waitForDamnX, 200);
 		})();
-	};
+		
+	})();
 	
-	return new dAmnGoodies();
+	return dAmnGoodies;
 }
 
 function execute_script(script, id){
