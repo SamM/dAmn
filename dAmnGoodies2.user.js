@@ -10,14 +10,12 @@
 
 function init(){
 
-	if(typeof Array.prototype.each != "function"){
-		Array.prototype.each = function(fn, thisv){
-			if(this.length){
-				for(var i=0; i<this.length; i++)
-					fn.call(thisv||this, this[i], i);
-			}
+	Array.prototype.each = function(fn, thisv){
+		if(this.length){
+			for(var i=0; i<this.length; i++)
+				fn.call(thisv||this, this[i], i);
 		}
-	}
+	};
 	if(dAmnGoodies){
 		alert("You have multiple versions of dAmnGoodies installed.");
 		throw "Aw hell no";
