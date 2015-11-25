@@ -1,0 +1,157 @@
+<b>:new: Version 2.1</b>
+
+Hello dAmnGoodies users! Sorry for being afk for so long. I am back and will be maintaining dAmnGoodies once again. I have updated dAmnGoodies to work with SuperdAmn without any hitches (finally!) and have changed it so that you no longer need to have dAmnX installed (it now imports it automatically). In fact, if you have a dAmnX userscript installed please uninstall it before installing the dAmnGoodies update.
+
+I have a question: Are there any of the features that you would like to be removed? Do you have any ideas for new features that you would like to be added? I have noticed that some people don't approve of the /shun command, should I remove it? (When I added it I did not intend it to be offensive, it was just a reference to Charlie the Unicorn. However I can see how it might be misused or annoying.)
+
+I will start thinking about new ideas for features for dAmnGoodies and would love your input also. Until then enjoy the latest version:
+
+:new: <b>Version 2.2.2</b>
+
+Youtube videos directly in your chat! Read below for more details!
+
+<blockquote>
+<b>Install:</b> <a href="http://github.com/SamM/dAmn/raw/master/dAmnGoodies2.user.js">dAmn Goodies</a>
+
+<b>Version:</b> 2.2.2
+
+Requires: Mozilla Firefox and the <a href="http://greasemonkey.mozdev.org/">Greasemonkey Extension</a> or Google Chrome)
+
+<b>Note:</b> Please uninstall any previous versions of dAmnGoodies or dAmnX before installing this new version. The new version of dAmnGoodies imports dAmnX automatically, so you do not need to have dAmnX installed as a userscript any more.
+
+<b>SuperdAmn users:</b>
+I have updated dAmnGoodies to work alongside SuperdAmn without any errors. Sorry for the long wait, I have been inactive for a looong time.
+</blockquote>
+
+Alright, here's a basic explanation of the features of <b>dAmn Goodies 2</b>:
+
+<blockquote>
+:new: <b>Youtube Videos: /youtube</b>
+
+When this goodie is enabled: All youtube links will spawn a little mini youtube player below the message, so you can watch the video directly in chat. You can even go full screen!
+
+<b>Commands:</b>
+<code>/youtube on</code> -- Enables youtube players being spawned
+<code>/youtube off</code> -- Disables youtube players from being spawned
+
+:D <b>Nicknames : /nick</b>
+
+When you give someone a nickname their username will be replaced when you tab them in chat and their is also changed.
+:new:Now only usernames that are followed by a : will be replaced.
+Hint: End a username with two colons ( :: ) to replace with the nickname but without the end colon.
+
+username: => nickname:
+username:: => nickname
+
+<b>Commands:</b>
+/nick on -- Turns nicknames on (default)
+/nick off -- Turns nicknames off
+/nick list -- Shows list of the nicknames you have set
+
+/nick set Username Nickname -- Set a user's nickname
+/nick unset Username -- Unsets a user's nickname
+/nick clear -- Unsets all nicknames
+
+:D <b>Swap words : /swap</b>
+
+With this command you can set words to be swapped in your messages with snippets of text.
+
+<b>Commands:</b>
+/swap on -- Turns swapping on
+/swap off -- Turns swapping off
+/swap list -- Shows list of the words that will be swapped /swap set word text... -- Sets a word swap
+/swap unset word -- Unsets a word swap
+/swap clear -- Unsets all words
+
+:D <b>Backtalk : /klat</b>
+
+This goodie simply takes whatever you say and reverses it. So "How are you today?" would come out as "?yadot uoy era woH" and so on.
+
+<b>Commands:</b>
+/klat -- Toggles backtalking on/off
+
+<b>:D Antikick : /antikick</b>
+
+With this goodie you will automatically join again when you are kicked.
+
+<b>Commands:</b>
+/antikick -- Toggles antikick on/off
+
+<b>:D Bob : /bob</b>
+
+When Bob is enabled everyone becomes Bob :D
+
+<b>Commands:</b>
+/bob -- Toggles bob on/off
+
+<b><strike>Shun : /shun</strike></b>
+
+Removed...
+
+<b>Mimic : /mimic</b>
+
+Automatically copy everything someone says with this goodie.
+
+<b>Commands:</b>
+/mimic [on|off] -- Turns mimicry on/off
+/mimic start Username -- Start mimicking a user
+/mimic stop Username -- Stop mimicking someone
+/mimic clear -- Stop all mimicry
+/mimic list -- Lists who you mimic
+/mimic announce -- Toggles the announcement you make when you start/stop mimicking
+:new: /mimic to ChatroomName -- Toggles all mimicry to be directed to a particular chatroom. (Leave ChatroomName blank to turn this off)
+
+<b>:D Multi : /multi</b>
+
+<b>Note: With power comes responsibility </b>
+
+This goodie lets you do default dAmn commands like /kick and /ban multiple times.
+You can either define the users manually like so:
+
+/multi kick (userOne User2 USER-3) Reason for kicking goes here
+
+Or you can choose a whole privclass to do the command to, for example if there is a privclass named Members, then you'd use this:
+
+/multi kick *Members Reason goes here
+
+Or you can choose multiple privclasses, eg:
+
+/multi kick (*Members *Guests) Reason goes here
+
+Or /multi kick {} Reason goes here to kick everyone, including yourself.
+
+You can use the following commands with /multi:
+
+msg - Will say a msg in each channel in the list
+action - Does the same as msg, but as an action (/me action)
+ban - Bans each user.
+clear - Clears each channel
+demote - Demotes each user (type the privclass that you want to demote to in place of the "Reason goes here" in above examples)
+display - Displays the list of usernames
+join - Joins each channel in the list
+kick - Kicks each user.
+part - Parts each channel.
+promote - See demote.
+title - Sets the title in each channel in the list
+topic - Sets the topic ...
+unban - Unbans each user.
+whois - Does a whois for each user.
+
+<b>:D Safe : /safe</b>
+
+If you need to say something and don't want goodies to change it use /safe
+
+<b>Commands:</b>
+/safe -- Makes it safe for 1 message
+/safe 5 -- Makes it safe for 5 messages
+
+<b>:D Misc : /global /js /boot</b>
+
+/boot username reason -- This command will kick a user, ban them, wait 2 seconds then unban and promote them back to the right privlevel.
+
+/js return prompt('O_o', 123) -- You can execute javascript and return values with this command
+
+/global
+</blockquote>
+Enjoy!
+If you have any suggestions or bugs feel free to leave a comment on this deviation.

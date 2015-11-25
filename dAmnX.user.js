@@ -5,15 +5,15 @@
 // @name           dAmnX
 // @description    A tool for dAmn that makes writing plugins simple
 // @author         Sam Mulqueen <sammulqueen.nz@gmail.com>
-// @version        1.1.3
+// @version        1.1.4
 // @include        http://chat.deviantart.com/chat/*
 // ==/UserScript==
 
-// dAmnX v1.1.3
+// dAmnX v1.1.4
 
 function dAmnX(){
 	var dAmnX = DX = this;
-	this.version = "1.1.2";
+	this.version = "1.1.4";
 	this.isReady = true;
 
 	this.reinstall = function(){
@@ -239,6 +239,18 @@ function dAmnX(){
 			};
 			dAmnChat.prototype.onData = dAmnChat_onData;
 			dAmnChat.prototype.onData_DX = dAmnChat_onData_DX;
+
+			var dAmnChanChat_makeText_DX = dAmnChanChat.prototype.makeText;
+			dAmnChanChat.prototype.makeText
+			dAmnChanChat.prototype.makeText=function( style, from, input_text, hilite ){
+				var self = this;
+				DX.process('makeText', {'style': style, 'stop':false, 'from': from, 'text': input_text, 'hilite': hilite, 'self': this},
+					function(body, done){
+						if(!body.stop) self.makeText_DX(body.style, body.from, body.text, body.hilite);
+						done(body);
+					});
+			};
+			dAmnChanChat.prototype.makeText_DX = dAmnChanChat_makeText_DX;
 
 			var dAmnChat_onClose_DX = dAmnChat_onClose;
 			dAmnChat_onClose = function(){

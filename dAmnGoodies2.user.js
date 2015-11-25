@@ -75,6 +75,38 @@ function init(){
 
 			// Beta features
 
+			// Target user
+
+			this.goodie('target', {enabled: true}, function(){
+
+				DG.target = {};
+				DG.target.username = null;
+
+				try{
+
+					dAmnX.preprocess('makeText', function(body, done){
+						var time_class = "time__"+(new Date()).getTime();
+						body.style += " user__"+body.from+" "+time_class;
+						body.time_class = time_class;
+						done(body);
+					});
+
+					dAmnX.postprocess('makeText', function(body, done){
+						var div = document.getElementsByTagName(body.time_class);
+						console.log(div);
+						done(body);
+					});
+
+					dAmnX.preprocess('send', function(body, done){
+						done(body);
+					});
+
+				}catch(ex){
+					console.log("dAmnGoodies Error (youtube_processing) : "+ex.message);
+				}
+
+			});
+
 			// Youtube Player
 			this.goodie('youtube', {enabled: true}, function(){
 
@@ -1203,7 +1235,7 @@ function init(){
 
 		if(typeof dAmnX != "object"){
 			// Import dAmnX automatically and run dAmnGoodies.init when loaded (=P)
-			var dxurl = "https://cdn.rawgit.com/SamM/dAmn/damnx1.1.3/dAmnX.user.js?" + (new Date()).getDate();
+			var dxurl = "https://cdn.rawgit.com/SamM/dAmn/damnx1.1.4/dAmnX.user.js?" + (new Date()).getDate();
 			DWait.ready(['jms/pages/chat07/chatpage.js', 'jms/pages/chat07/dAmn.js', 'jms/pages/chat07/dAmnChat.js'], function() {
 				var dximport = importScript(dxurl, function(){
 					dAmnGoodies.init(dAmnX);
