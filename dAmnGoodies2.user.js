@@ -1,7 +1,7 @@
 
 
 // ==UserScript==
-// @name           dAmnGoodies Beta
+// @name           dAmnGoodies
 // @description    Novelty features for dAmn chat.
 // @author         Sam Mulqueen <sammulqueen.nz@gmail.com>
 // @version        2.2.1
