@@ -10,12 +10,6 @@
 
 function init(){
 
-	Array.prototype.each = function(fn, thisv){
-		if(this.length){
-			for(var i=0; i<this.length; i++)
-				fn.call(thisv||this, this[i], i);
-		}
-	};
 	if(dAmnGoodies){
 		alert("You have multiple versions of dAmnGoodies installed.");
 		throw "Aw hell no";
@@ -196,7 +190,7 @@ function init(){
 						function listOfUsernames(){
 							var l = [];
 							var mems = dAmnX.getChannel().members.members;
-							list.each(function(user){
+							list.forEach(function(user){
 								if(user[0]=="*"){
 									var privlev = user.slice(user[1]=="*"?2:1);
 									for(var member in mems){
@@ -214,7 +208,7 @@ function init(){
 
 						function listOfChannels(){
 							var l = [];
-							list.each(function(chan){
+							list.forEach(function(chan){
 								if(chan == "{}"){
 									for(var ns in dAmnChatTabs)
 										l.push(ns);
@@ -229,27 +223,27 @@ function init(){
 
 						switch(a[0]){
 							case 'msg':
-								listOfChannels().each(function(chan){
+								listOfChannels().forEach(function(chan){
 									dAmnX.send.msg(chan, text)
 								});
 							break;
 							case 'action':
-								listOfChannels().each(function(chan){
+								listOfChannels().forEach(function(chan){
 									dAmnX.send.action(chan, text)
 								});
 							break;
 							case 'ban':
 							if(users.length)
-								users.each(function(user){ dAmnX.send.ban(ns, user); });
+								users.forEach(function(user){ dAmnX.send.ban(ns, user); });
 							break;
 							case 'clear':
-							list.each(function(chan){
+							list.forEach(function(chan){
 								chan = dAmnX.channelNs(chan);
 								dAmnX.send.clear(chan);
 							});
 							break;
 							case 'demote':
-							if(users.length) users.each(function(user){
+							if(users.length) users.forEach(function(user){
 								dAmnX.send.demote(ns, user, text);
 							});
 							break;
@@ -257,46 +251,46 @@ function init(){
 							if(users.length) dAmnX.notice(users.join(" "));
 							break;
 							case 'join':
-							list.each(function(chan){
+							list.forEach(function(chan){
 								chan = dAmnX.channelNs(chan);
 								dAmnX.send.join(chan);
 							});
 							break;
 							case 'kick':
-							if(users.length) users.each(function(user){
+							if(users.length) users.forEach(function(user){
 								dAmnX.send.kick(ns, user, text);
 							});
 							break;
 							case 'part':
-							list.each(function(chan){
+							list.forEach(function(chan){
 								chan = dAmnX.channelNs(chan);
 								dAmnX.send.part(chan);
 							});
 							break;
 							case 'promote':
-							if(users.length) users.each(function(user){
+							if(users.length) users.forEach(function(user){
 								dAmnX.send.promote(ns, user, text);
 							});
 							break;
 							case 'title':
-							list.each(function(chan){
+							list.forEach(function(chan){
 								chan = dAmnX.channelNs(chan);
 								dAmnX.send.title(chan, text);
 							});
 							break;
 							case 'topic':
-							list.each(function(chan){
+							list.forEach(function(chan){
 								chan = dAmnX.channelNs(chan);
 								dAmnX.send.topic(chan, text);
 							});
 							break;
 							case 'unban':
-							if(users.length) users.each(function(user){
+							if(users.length) users.forEach(function(user){
 								dAmnX.send.unban(ns, user);
 							});
 							break;
 							case 'whois':
-							if(users.length) users.each(function(user){
+							if(users.length) users.forEach(function(user){
 								dAmnX.send.whois(user);
 							});
 							break;
@@ -669,7 +663,7 @@ function init(){
 									dAmnX.error('mimic', 'You are not mimicking '+a[1]);
 								else {
 									var l = [];
-									DG.goodies.mimic.mimicking.each(function(u){ if(u != a[1].toLowerCase()) l.push(u); })
+									DG.goodies.mimic.mimicking.forEach(function(u){ if(u != a[1].toLowerCase()) l.push(u); })
 									DG.goodies.mimic.mimicking = l;
 									DG.save();
 									dAmnX.notice('Stopped mimicking '+a[1])
