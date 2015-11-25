@@ -85,8 +85,8 @@ function init(){
 				DG.youtube.loadVideo = function(elId){
 					if(YT && YT.Player){
 						var player = new YT.Player(elId, {
-		          height: '390',
-		          width: '640',
+		          height: '195',
+		          width: '320',
 		          videoId: elId.split(".")[1],
 		          events: {
 		            'onReady': DG.youtube.onPlayerReady,
@@ -177,12 +177,12 @@ function init(){
 
 				try{
 
-					dAmnX.preprocess('msg', function(body, done){
+					dAmnX.postprocess('msg', function(body, done){
 						doYouTube(body);
 						done(body);
 					});
 
-					dAmnX.preprocess('action', function(body, done){
+					dAmnX.postprocess('action', function(body, done){
 						doYouTube(body);
 						done(body);
 					});
