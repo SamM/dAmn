@@ -10,6 +10,7 @@
 // ==/UserScript==
 
 // dAmnX v1.0.2
+
 function dAmnX(){
 	var dAmnX = DX = this;
 	this.version = "1.0.2";

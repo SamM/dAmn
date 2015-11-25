@@ -89,22 +89,15 @@ function init(){
 							dAmnX.notice('dAmnGoodies preferences were loaded');
 						break;
 						case 'reinstall':
-							if(a[1].toLowerCase() == "damnx")
-							window.setTimeout(function(){
-							if(confirm('Would you like to install the newest version of dAmnX?')){
-								dAmnX.notice('Page will refresh automatically in 3 seconds');
-								dAmnX.reinstall();
-							}
-							}, 50);
-							else
 							window.setTimeout(function(){
 							if(confirm('Would you like to install the newest version of dAmnGoodies?')){
 								dAmnX.notice('Page will refresh automatically in 3 seconds');
 								DG.reinstall();
 							}
 							}, 50);
+							break;
 						default:
-							dAmnX.error('goodies', 'Unknown command. Try: load, save');
+							dAmnX.error('goodies', 'Unknown command. Try: load, save, reinstall');
 						break;
 						}
 					});
@@ -1132,10 +1125,12 @@ function init(){
 		if(typeof dAmnX != "object"){
 			// Import dAmnX automatically and run dAmnGoodies.init when loaded (=P)
 			var dxurl = "https://cdn.rawgit.com/SamM/dAmn/master/dAmnX.user.js?" + (new Date()).getDate();
-			var dximport = importScript(dxurl, function(){
-				dAmnGoodies.init(dAmnX);
+			DWait.ready(['jms/pages/chat07/chatpage.js', 'jms/pages/chat07/dAmn.js', 'jms/pages/chat07/dAmnChat.js'], function() {
+				var dximport = importScript(dxurl, function(){
+					dAmnGoodies.init(dAmnX);
+				});
+				dximport.id = "dAmnXImport";
 			});
-			dximport.id = "dAmnXImport";
 		}
 
 	})();
