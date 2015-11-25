@@ -84,7 +84,7 @@ function init(){
 			// Goodies
 			this.goodie('goodies', {enabled: true}, function(){
 				try{
-					
+
 					dAmnX.command.bind('goodies', 1, function(args){
 						var a = args.split(' ');
 						switch(a[0]){
@@ -306,7 +306,7 @@ function init(){
 					});
 
 				}catch(ex){
-					console.log("dAmnGoodies Error (goodies_bind_commands) : "+ex.message);
+					console.log("dAmnGoodies Error (goodies_commands) : "+ex.message);
 				}
 
 			});
@@ -372,7 +372,7 @@ function init(){
 					});
 
 				}catch(ex){
-					console.log("dAmnGoodies Error (swap_bind_command) : "+ex.message);
+					console.log("dAmnGoodies Error (swap_commands) : "+ex.message);
 				}
 
 				function escapeRegExp(str) {
@@ -393,7 +393,7 @@ function init(){
 					});
 
 				}catch(ex){
-					console.log("dAmnGoodies Error (swap_preprocess) : "+ex.message);
+					console.log("dAmnGoodies Error (swap_processing) : "+ex.message);
 				}
 
 			});
@@ -468,7 +468,7 @@ function init(){
 					});
 
 				}catch(ex){
-					console.log("dAmnGoodies Error (nick_bind_command) : "+ex.message);
+					console.log("dAmnGoodies Error (nick_commands) : "+ex.message);
 				}
 
 				try{
@@ -535,7 +535,7 @@ function init(){
 					});
 
 				}catch(ex){
-					console.log("dAmnGoodies Error (nick_preprocesses) : "+ex.message);
+					console.log("dAmnGoodies Error (nick_processing) : "+ex.message);
 				}
 
 			});
@@ -562,7 +562,7 @@ function init(){
 					});
 
 				}catch(ex){
-					console.log("dAmnGoodies Error (bob_bind_command) : "+ex.message);
+					console.log("dAmnGoodies Error (bob_commands) : "+ex.message);
 				}
 
 				try{
@@ -602,7 +602,7 @@ function init(){
 					});
 
 				}catch(ex){
-					console.log("dAmnGoodies Error (bob_preprocesses) : "+ex.message);
+					console.log("dAmnGoodies Error (bob_processing) : "+ex.message);
 				}
 
 			});
@@ -610,183 +610,221 @@ function init(){
 			// Mimic
 			this.goodie('mimic', {mimicking: [], enabled: true, to: false, announce: true}, function(data){
 
-				dAmnX.command.bind('mimic', 1, function(args){
-					var a = args.split(" ");
-					var g = DG.goodies.mimic,
-						list = g.mimicking;
+				try{
 
-					switch(a[0]){
-						case "status":
-							dAmnX.notice('Mimicking is '+(g.enabled?"enabled":"disabled"));
-							break;
-						case "announce":
-							if(g.announce){
-								dAmnX.notice('Announcements are turned OFF');
-								g.announce = false;
-							}else{
-								dAmnX.notice('Announcements are turned ON. YEAH BABY!');
-								g.announce = true;
-							}
-							DG.save();
-							break;
-						case "off":
-							g.enabled = false;
-							DG.save();
-							dAmnX.notice('Mimic is disabled')
-							break;
-						case "on":
-							g.enabled = true;
-							DG.save();
-							dAmnX.notice('Mimic is enabled')
-							break;
-						case "to":
-							if(!a[1] || !a[1].length)
-								g.to = false;
-							else
-								g.to = dAmnX.channelNs(a[1]);
-							dAmnX.notice(g.to?'Mimicking to '+g.to:'Mimicking to same channel')
-							DG.save();
-							break;
-						case "start":
-							if(dAmn_Client_Username.toLowerCase() == a[1].toLowerCase()){
-								dAmnX.error('mimic', 'You cannot mimic yourself');
-							}
-							else if(a[1].toLowerCase() == 'bob'){
-								dAmnX.error('mimic', 'You cannot mimic Bob :-|');
-							}
-							else if(list.indexOf(a[1].toLowerCase())>-1)
-								dAmnX.error('mimic', 'You are already mimicking '+a[1]);
-							else {
-								DG.goodies.mimic.mimicking.push(a[1].toLowerCase());
+					dAmnX.command.bind('mimic', 1, function(args){
+						var a = args.split(" ");
+						var g = DG.goodies.mimic,
+							list = g.mimicking;
+
+						switch(a[0]){
+							case "status":
+								dAmnX.notice('Mimicking is '+(g.enabled?"enabled":"disabled"));
+								break;
+							case "announce":
+								if(g.announce){
+									dAmnX.notice('Announcements are turned OFF');
+									g.announce = false;
+								}else{
+									dAmnX.notice('Announcements are turned ON. YEAH BABY!');
+									g.announce = true;
+								}
 								DG.save();
-								dAmnX.notice('Started to mimic '+a[1])
-								if(g.announce)
-									dAmnX.send.action(false, 'started to mimic '+a[1]);
-							}
-							break;
-						case "stop":
-							if(list.indexOf(a[1].toLowerCase())==-1)
-								dAmnX.error('mimic', 'You are not mimicking '+a[1]);
-							else {
-								var l = [];
-								DG.goodies.mimic.mimicking.each(function(u){ if(u != a[1].toLowerCase()) l.push(u); })
-								DG.goodies.mimic.mimicking = l;
+								break;
+							case "off":
+								g.enabled = false;
 								DG.save();
-								dAmnX.notice('Stopped mimicking '+a[1])
+								dAmnX.notice('Mimic is disabled')
+								break;
+							case "on":
+								g.enabled = true;
+								DG.save();
+								dAmnX.notice('Mimic is enabled')
+								break;
+							case "to":
+								if(!a[1] || !a[1].length)
+									g.to = false;
+								else
+									g.to = dAmnX.channelNs(a[1]);
+								dAmnX.notice(g.to?'Mimicking to '+g.to:'Mimicking to same channel')
+								DG.save();
+								break;
+							case "start":
+								if(dAmn_Client_Username.toLowerCase() == a[1].toLowerCase()){
+									dAmnX.error('mimic', 'You cannot mimic yourself');
+								}
+								else if(a[1].toLowerCase() == 'bob'){
+									dAmnX.error('mimic', 'You cannot mimic Bob :-|');
+								}
+								else if(list.indexOf(a[1].toLowerCase())>-1)
+									dAmnX.error('mimic', 'You are already mimicking '+a[1]);
+								else {
+									DG.goodies.mimic.mimicking.push(a[1].toLowerCase());
+									DG.save();
+									dAmnX.notice('Started to mimic '+a[1])
+									if(g.announce)
+										dAmnX.send.action(false, 'started to mimic '+a[1]);
+								}
+								break;
+							case "stop":
+								if(list.indexOf(a[1].toLowerCase())==-1)
+									dAmnX.error('mimic', 'You are not mimicking '+a[1]);
+								else {
+									var l = [];
+									DG.goodies.mimic.mimicking.each(function(u){ if(u != a[1].toLowerCase()) l.push(u); })
+									DG.goodies.mimic.mimicking = l;
+									DG.save();
+									dAmnX.notice('Stopped mimicking '+a[1])
+									if(g.announce)
+										dAmnX.send.action(false, 'stopped mimicking '+a[1]);
+								}
+								break;
+							case "list":
+								dAmnX.notice('You mimic'+(list.length?": "+list.join(", "):' none'))
+								break;
+							case "clear":
+								DG.goodies.mimic.mimicking = [];
+								DG.goodies.mimic.to = false;
+								DG.save();
 								if(g.announce)
-									dAmnX.send.action(false, 'stopped mimicking '+a[1]);
-							}
-							break;
-						case "list":
-							dAmnX.notice('You mimic'+(list.length?": "+list.join(", "):' none'))
-							break;
-						case "clear":
-							DG.goodies.mimic.mimicking = [];
-							DG.goodies.mimic.to = false;
-							DG.save();
-							if(g.announce)
-								dAmnX.send.action(false, 'stopped mimicking everyone');
-							dAmnX.notice('Not mimicking anyone')
-							break;
-						default:
-							dAmnX.error('mimic', 'unknown command '+a[0]);
-							break;
-					}
+									dAmnX.send.action(false, 'stopped mimicking everyone');
+								dAmnX.notice('Not mimicking anyone')
+								break;
+							default:
+								dAmnX.error('mimic', 'unknown command '+a[0]);
+								break;
+						}
 
-				});
+					});
 
-				dAmnX.postprocess('msg', function(body, done){
-					if(DG.goodies.mimic.enabled){
-						var b = body.pkt.body.split("\n"),
-							from = b[1].split("=")[1],
-							msg = b[3];
-						if(dAmn_Client_Username.toLowerCase() != from.toLowerCase() && DG.goodies.mimic.mimicking.indexOf(from.toLowerCase())>-1)
-							dAmnX.send.msg(dAmnX.channelNs(DG.goodies.mimic.to), dAmnX.parseMsg(DG.goodies.mimic.to?"<"+from+"> "+msg:msg))
-					}
-					done(body);
-				});
+				}catch(ex){
+					console.log("dAmnGoodies Error (mimic_commands) : "+ex.message);
+				}
 
-				dAmnX.postprocess('action', function(body, done){
-					if(DG.goodies.mimic.enabled){
-						var b = body.pkt.body.split("\n"),
-							from = b[1].split("=")[1],
-							msg = b[3];
-						if(dAmn_Client_Username != from && DG.goodies.mimic.mimicking.indexOf(from.toLowerCase())>-1)
-							dAmnX.send.action(dAmnX.channelNs(DG.goodies.mimic.to), msg)
-					}
+				try{
 
-					done(body);
-				});
+					dAmnX.postprocess('msg', function(body, done){
+						if(DG.goodies.mimic.enabled){
+							var b = body.pkt.body.split("\n"),
+								from = b[1].split("=")[1],
+								msg = b[3];
+							if(dAmn_Client_Username.toLowerCase() != from.toLowerCase() && DG.goodies.mimic.mimicking.indexOf(from.toLowerCase())>-1)
+								dAmnX.send.msg(dAmnX.channelNs(DG.goodies.mimic.to), dAmnX.parseMsg(DG.goodies.mimic.to?"<"+from+"> "+msg:msg))
+						}
+						done(body);
+					});
+
+					dAmnX.postprocess('action', function(body, done){
+						if(DG.goodies.mimic.enabled){
+							var b = body.pkt.body.split("\n"),
+								from = b[1].split("=")[1],
+								msg = b[3];
+							if(dAmn_Client_Username != from && DG.goodies.mimic.mimicking.indexOf(from.toLowerCase())>-1)
+								dAmnX.send.action(dAmnX.channelNs(DG.goodies.mimic.to), msg)
+						}
+
+						done(body);
+					});
+
+				}catch(ex){
+					console.log("dAmnGoodies Error (mimic_processing) : "+ex.message);
+				}
 
 			});
 
 			// klaT
 			this.goodie('klat', {on: false}, function(){
 
-				dAmnX.command.bind('klat', 0, function(){
-					if(DG.goodies.klat.on){
-						DG.goodies.klat.on = false;
-						dAmnX.notice('Backward talking off');
-					}else{
-						DG.goodies.klat.on = true;
-						dAmnX.notice('sdrawkcab klat ot emit stI');
-					}
-					DG.save();
-				});
+				try{
 
-				dAmnX.preprocess('send', function(body, done){
-					if(DG.goodies.klat.on){
-						if(body.cmd == 'msg' || body.cmd == 'action'){
-							body.str = DG.stripAbbrTags(body.str).split("").reverse().join("");
+					dAmnX.command.bind('klat', 0, function(){
+						if(DG.goodies.klat.on){
+							DG.goodies.klat.on = false;
+							dAmnX.notice('Backward talking off');
+						}else{
+							DG.goodies.klat.on = true;
+							dAmnX.notice('sdrawkcab klat ot emit stI');
 						}
-					}
-					done(body);
-				});
+						DG.save();
+					});
+
+				}catch(ex){
+					console.log("dAmnGoodies Error (klat_commands) : "+ex.message);
+				}
+
+				try{
+
+					dAmnX.preprocess('send', function(body, done){
+						if(DG.goodies.klat.on){
+							if(body.cmd == 'msg' || body.cmd == 'action'){
+								body.str = DG.stripAbbrTags(body.str).split("").reverse().join("");
+							}
+						}
+						done(body);
+					});
+
+				}catch(ex){
+					console.log("dAmnGoodies Error (klat_processing) : "+ex.message);
+				}
 
 			});
 
 
 			// Jumble
 			this.goodie('jumble', {enabled: false}, function(){
-				dAmnX.command.bind('jumble', 0, function(a, done){
-					if(DG.goodies.jumble.enabled){
-						DG.goodies.jumble.enabled = false;
-						dAmnX.notice('Jumbling disabled');
-					}else{
-						DG.goodies.jumble.enabled = true;
-						dAmnX.notice('Jumbling enabled');
-					}
-					DG.save();
-				})
 
-				dAmnX.preprocess('send', function(body, done){
-					if(DG.goodies.jumble.enabled){
-						if(body.cmd == 'msg' || body.cmd == 'action' && body.str.length){
-							var words = DG.stripAbbrTags(body.str).split(" "),
-								punc = ".,;:'\"/\\[](){}=+?!~`#<>",
-								sentence = [];
+				try{
 
-							for(var i=0,w,s,m,e;i<words.length;i++){
-								w=words[i];
-								s=w[0];
-								if(punc.indexOf(s)>-1) s=w.slice(0,2);
-								e=w.slice(-1);
-								if(punc.indexOf(e)>-1) e=w.slice(-2);
-								m = w.slice(s.length,-e.length);
-								if(m.length > 2){
-									m = m.split('');
-									m.sort(function() {return 0.5 - Math.random()});
-									m = m.join('');
-									w = s+m+e;
-								}
-								sentence.push(w);
-							}
-
-							body.str = sentence.join(' ');
+					dAmnX.command.bind('jumble', 0, function(a, done){
+						if(DG.goodies.jumble.enabled){
+							DG.goodies.jumble.enabled = false;
+							dAmnX.notice('Jumbling disabled');
+						}else{
+							DG.goodies.jumble.enabled = true;
+							dAmnX.notice('Jumbling enabled');
 						}
-					}
-					done(body);
-				});
+						DG.save();
+					});
+
+				}catch(ex){
+					console.log("dAmnGoodies Error (jumble_commands) : "+ex.message);
+				}
+
+				try{
+
+					dAmnX.preprocess('send', function(body, done){
+						if(DG.goodies.jumble.enabled){
+							if(body.cmd == 'msg' || body.cmd == 'action' && body.str.length){
+								var words = DG.stripAbbrTags(body.str).split(" "),
+									punc = ".,;:'\"/\\[](){}=+?!~`#<>",
+									sentence = [];
+
+								for(var i=0,w,s,m,e;i<words.length;i++){
+									w=words[i];
+									s=w[0];
+									if(punc.indexOf(s)>-1) s=w.slice(0,2);
+									e=w.slice(-1);
+									if(punc.indexOf(e)>-1) e=w.slice(-2);
+									m = w.slice(s.length,-e.length);
+									if(m.length > 2){
+										m = m.split('');
+										m.sort(function() {return 0.5 - Math.random()});
+										m = m.join('');
+										w = s+m+e;
+									}
+									sentence.push(w);
+								}
+
+								body.str = sentence.join(' ');
+							}
+						}
+						done(body);
+					});
+
+				}catch(ex){
+					console.log("dAmnGoodies Error (jumble_processing) : "+ex.message);
+				}
+
 			});
 
 			// Spleak
@@ -818,140 +856,178 @@ function init(){
 				}
 				this.W = W;
 
-				dAmnX.command.bind('spleak', 0, function(a, done){
-					if(DG.goodies.spleak.enabled){
-						DG.goodies.spleak.enabled = false;
-						dAmnX.notice('Spleaking now off');
-					}else{
-						DG.goodies.spleak.enabled = true;
-						dAmnX.notice('Spleaking now on');
-					}
-					DG.save();
-				})
+				try{
 
-				dAmnX.preprocess('send', function(body, done){
-					if(DG.goodies.spleak.enabled){
-						if(body.cmd == 'msg' || body.cmd == 'action' && typeof body.str == "string" && body.str.length){
-							var str = body.str.split(" "),
-								new_str = [];
-							for(var i=0,w,l;i<str.length;i++){
-								w = W();
-								l = str[i].slice(-1);
-								if(":,.;'\"][{}()=+`~!?@#$&*".indexOf(l)>-1) w+=l;
-								if(str[i].isCapitalized()) w = w.capitalize();
-								new_str.push(w);
-							}
-							body.str = new_str.join(" ");
+					dAmnX.command.bind('spleak', 0, function(a, done){
+						if(DG.goodies.spleak.enabled){
+							DG.goodies.spleak.enabled = false;
+							dAmnX.notice('Spleaking now off');
+						}else{
+							DG.goodies.spleak.enabled = true;
+							dAmnX.notice('Spleaking now on');
 						}
-					}
-					done(body);
-				});
+						DG.save();
+					});
+
+				}catch(ex){
+					console.log("dAmnGoodies Error (spleak_commands) : "+ex.message);
+				}
+
+				try{
+
+					dAmnX.preprocess('send', function(body, done){
+						if(DG.goodies.spleak.enabled){
+							if(body.cmd == 'msg' || body.cmd == 'action' && typeof body.str == "string" && body.str.length){
+								var str = body.str.split(" "),
+									new_str = [];
+								for(var i=0,w,l;i<str.length;i++){
+									w = W();
+									l = str[i].slice(-1);
+									if(":,.;'\"][{}()=+`~!?@#$&*".indexOf(l)>-1) w+=l;
+									if(str[i].isCapitalized()) w = w.capitalize();
+									new_str.push(w);
+								}
+								body.str = new_str.join(" ");
+							}
+						}
+						done(body);
+					});
+
+				}catch(ex){
+					console.log("dAmnGoodies Error (spleak_processing) : "+ex.message);
+				}
 
 			});
 
 			// Auto-Join
 
 			this.goodie('autojoin', {enabled: true, channels: []}, function(data){
-				dAmnX.command.bind('autojoin', 0, function(args){
-					if(!args || !args.length){
-						dAmnX.notice("O_o");
-					}else{
-						var a = args.split(" "),
-							cmd = a.shift(),
-							param = a[0],
-							channels = DG.goodies.autojoin.channels;
-						switch(cmd){
-						case "on":
-						case "enable":
-							dAmnX.notice('Automatic Joining is enabled. Currently joining: '+channels.join(" "));
-							DG.goodies.autojoin.enabled = true;
-							DG.save();
-						break;
-						case "off":
-						case "disable":
-							dAmnX.notice('Automatic Joining is disabled.');
-							DG.goodies.autojoin.enabled = false;
-							DG.save();
-						break;
-						case "add":
-						case "set":
-							if(!param || !param.length) dAmnX.notice("Pleave provide atleast one channel to add");
-							else {
-								var added = [],chan;
-								for(var i=0;i<a.length;i++){
-									chan = a[i].toLowerCase().replace("#","").replace("chat:","");
-									if(chan.length && channels.indexOf(chan)<0){
-										DG.goodies.autojoin.channels.push(chan);
-										added.push(chan);
-									}
-								}
-								dAmnX.notice(added.length?"Added: "+added.join(" "):"Added none.");
+
+				try{
+
+					dAmnX.command.bind('autojoin', 0, function(args){
+						if(!args || !args.length){
+							dAmnX.notice("O_o");
+						}else{
+							var a = args.split(" "),
+								cmd = a.shift(),
+								param = a[0],
+								channels = DG.goodies.autojoin.channels;
+							switch(cmd){
+							case "on":
+							case "enable":
+								dAmnX.notice('Automatic Joining is enabled. Currently joining: '+channels.join(" "));
+								DG.goodies.autojoin.enabled = true;
 								DG.save();
-							}
-						break;
-						case "del":
-						case "delete":
-						case "unset":
-							if(!param || !param.length) dAmnX.notice("Pleave provide atleast one channel to remove");
-							else {
-								var removed = [],chan,index;
-								for(var i=0;i<a.length;i++){
-									chan = a[i].toLowerCase().replace("#","").replace("chat:","");
-									index = channels.indexOf(chan);
-									if(chan.length && index>-1){
-										DG.goodies.autojoin.channels = channels = channels.slice(0,index).concat(channels.slice(index+1));
-										removed.push(chan);
-									}
-								}
-								dAmnX.notice(removed.length?"Removed: "+removed.join(" "):"Removed none.");
+							break;
+							case "off":
+							case "disable":
+								dAmnX.notice('Automatic Joining is disabled.');
+								DG.goodies.autojoin.enabled = false;
 								DG.save();
+							break;
+							case "add":
+							case "set":
+								if(!param || !param.length) dAmnX.notice("Pleave provide atleast one channel to add");
+								else {
+									var added = [],chan;
+									for(var i=0;i<a.length;i++){
+										chan = a[i].toLowerCase().replace("#","").replace("chat:","");
+										if(chan.length && channels.indexOf(chan)<0){
+											DG.goodies.autojoin.channels.push(chan);
+											added.push(chan);
+										}
+									}
+									dAmnX.notice(added.length?"Added: "+added.join(" "):"Added none.");
+									DG.save();
+								}
+							break;
+							case "del":
+							case "delete":
+							case "unset":
+								if(!param || !param.length) dAmnX.notice("Pleave provide atleast one channel to remove");
+								else {
+									var removed = [],chan,index;
+									for(var i=0;i<a.length;i++){
+										chan = a[i].toLowerCase().replace("#","").replace("chat:","");
+										index = channels.indexOf(chan);
+										if(chan.length && index>-1){
+											DG.goodies.autojoin.channels = channels = channels.slice(0,index).concat(channels.slice(index+1));
+											removed.push(chan);
+										}
+									}
+									dAmnX.notice(removed.length?"Removed: "+removed.join(" "):"Removed none.");
+									DG.save();
+								}
+							break;
+							case "list":
+								if(!channels.length) dAmnX.notice("Not automatically joining any channels");
+								else{
+									dAmnX.notice("Automatically joining: "+channels.join(" "));
+								}
+							break;
 							}
-						break;
-						case "list":
-							if(!channels.length) dAmnX.notice("Not automatically joining any channels");
-							else{
-								dAmnX.notice("Automatically joining: "+channels.join(" "));
-							}
-						break;
 						}
-					}
-				});
+					});
+
+				}catch(ex){
+					console.log("dAmnGoodies Error (autojoin_commands) : "+ex.message);
+				}
 
 				DG.autojoined = false;
-				dAmnX.preprocess('selfJoin', function(o,d){
-					if(!DG.autojoined & DG.goodies.autojoin.enabled && DG.goodies.autojoin.channels.length > 0){
-						DG.autojoined = true;
-						console.log('Autojoin time :-D ')
-						for(var i=0;i<DG.goodies.autojoin.channels.length;i++){
-							if(!dAmnChatTab_active || dAmnChatTab_active.toLowerCase() != "chat:"+DG.goodies.autojoin.channels[i])
-								dAmnX.send.join(DG.goodies.autojoin.channels[i]);
+
+				try{
+
+					dAmnX.preprocess('selfJoin', function(o,d){
+						if(!DG.autojoined & DG.goodies.autojoin.enabled && DG.goodies.autojoin.channels.length > 0){
+							DG.autojoined = true;
+							console.log('Autojoin time :-D ')
+							for(var i=0;i<DG.goodies.autojoin.channels.length;i++){
+								if(!dAmnChatTab_active || dAmnChatTab_active.toLowerCase() != "chat:"+DG.goodies.autojoin.channels[i])
+									dAmnX.send.join(DG.goodies.autojoin.channels[i]);
+							}
 						}
-					}
-					d(o);
-				});
+						d(o);
+					});
+
+				}catch(ex){
+					console.log("dAmnGoodies Error (auto_join_processing) : "+ex.message);
+				}
 
 			})
 
 			// Anti-kick
 			this.goodie('antikick', {enabled: true}, function(){
 
-				dAmnX.command.bind('antikick', 0, function(){
-					if(DG.goodies.antikick.on){
-						DG.goodies.antikick.on = false;
-						dAmnX.notice('You can be kicked');
-					}else{
-						DG.goodies.antikick.on = true;
-						dAmnX.notice('You will automatically return after you are kicked');
-					}
-					DG.save();
-				});
+				try{
 
-				dAmnX.preprocess('selfKicked', function(body, done){
-					if(DG.goodies.antikick.on){
-						dAmnX.send.join(body.self.ns);
-					}
-					done(body);
-				});
+					dAmnX.command.bind('antikick', 0, function(){
+						if(DG.goodies.antikick.on){
+							DG.goodies.antikick.on = false;
+							dAmnX.notice('You can be kicked');
+						}else{
+							DG.goodies.antikick.on = true;
+							dAmnX.notice('You will automatically return after you are kicked');
+						}
+						DG.save();
+					});
+
+				}catch(ex){
+					console.log("dAmnGoodies Error (antikick_commands) : "+ex.message);
+				}
+
+				try{
+
+					dAmnX.preprocess('selfKicked', function(body, done){
+						if(DG.goodies.antikick.on){
+							dAmnX.send.join(body.self.ns);
+						}
+						done(body);
+					});
+
+				}catch(ex){
+					console.log("dAmnGoodies Error (antikick_processing) : "+ex.message);
+				}
 
 			});
 
@@ -965,51 +1041,79 @@ function init(){
 
 			this.goodie('shun', {enabled: true, taunts: ["Shun!","Shuuuuunnnnnnn!!!!", "SHUN!!!", "S H U N !", "SSHHUUNN!!", "shun? :o", "SSHHHUUUUNNNNN!!!!!!", "SHUN", "SHUNSHUNSHUNSHUNSHUNSHUN", "shun :|", "SHHHHUUUUUUUNNNN","I SHUN YOU", "SHUN THE NON-BELIEVER!", "Shunday? :o", "Isn't this shuntastic? :excited:", ":iconshunuplz:", "You are now Shunned :salute:"]}, function(){
 
-				dAmnX.command.bind('shun', 0, function(args){
-					if(!args || args == ''){
-						DG.goodies.shun.enabled = DG.goodies.shun.enabled?false:true;
-						dAmnX.notice('Shun is now '+(DG.goodies.shun.enabled?"ON":"OFF"))
-						DG.save();
-					}else{
-						var shunned= args.split(" ")[0];
-						if(shunned == "") dAmnX.error('shun', 'Noone to shun');
-						else{
-							dAmnX.send.action(false, 'shuns '+shunned);
-						}
-					}
-				})
+				try{
 
-				dAmnX.preprocess('action', function(body, done){
-					var msg = DG.stripColorsTags(DG.stripAbbrTags(dAmnX.parseMsg(body.pkt.body.split("\n")[3])));
-					if(DG.goodies.shun.enabled && msg.slice(0,6)=="shuns "){
-						var shunned = msg.slice(6).split(" ")[0];
-						if(shunned.length){
-							var taunts = DG.goodies.shun.taunts;
-							dAmnX.send.msg(body.self.ns, shunned+": "+(taunts[Math.floor(Math.random()*taunts.length)]||"SHUN"))
+					dAmnX.command.bind('shun', 0, function(args){
+						if(!args || args == ''){
+							DG.goodies.shun.enabled = DG.goodies.shun.enabled?false:true;
+							dAmnX.notice('Shun is now '+(DG.goodies.shun.enabled?"ON":"OFF"))
+							DG.save();
+						}else{
+							var shunned= args.split(" ")[0];
+							if(shunned == "") dAmnX.error('shun', 'Noone to shun');
+							else{
+								dAmnX.send.action(false, 'shuns '+shunned);
+							}
 						}
-					}
-					done(body)
-				});
+					});
+
+				}catch(ex){
+					console.log("dAmnGoodies Error (shun_commands) : "+ex.message);
+				}
+
+				try{
+
+					dAmnX.preprocess('action', function(body, done){
+						var msg = DG.stripColorsTags(DG.stripAbbrTags(dAmnX.parseMsg(body.pkt.body.split("\n")[3])));
+						if(DG.goodies.shun.enabled && msg.slice(0,6)=="shuns "){
+							var shunned = msg.slice(6).split(" ")[0];
+							if(shunned.length){
+								var taunts = DG.goodies.shun.taunts;
+								dAmnX.send.msg(body.self.ns, shunned+": "+(taunts[Math.floor(Math.random()*taunts.length)]||"SHUN"))
+							}
+						}
+						done(body)
+					});
+
+				}catch(ex){
+					console.log("dAmnGoodies Error (shun_processing) : "+ex.message);
+				}
+
+
 			})
 
 			// Safe message. Send a message that won't be altered
 
 			this.goodie('safe', {'keepSafe':0}, function(){
-				dAmnX.command.bind('safe', 0, function(args){
-					if(!args || args=='') args = 1
-					else if(!isNaN(Number(args))) args = Math.abs(Number(args));
-					else args = 1;
-					DG.goodies.safe.keepSafe = args;
-					dAmnX.notice(args==1?'The next message is safe':'The next '+args+' messages are safe')
-				});
 
-				dAmnX.preprocess('send', function(body, done){
-					if(DG.goodies.safe.keepSafe){
-						body.str = body.str2;
-						DG.goodies.safe.keepSafe--;
-					}
-					done(body);
-				})
+				try{
+
+					dAmnX.command.bind('safe', 0, function(args){
+						if(!args || args=='') args = 1
+						else if(!isNaN(Number(args))) args = Math.abs(Number(args));
+						else args = 1;
+						DG.goodies.safe.keepSafe = args;
+						dAmnX.notice(args==1?'The next message is safe':'The next '+args+' messages are safe')
+					});
+
+				}catch(ex){
+					console.log("dAmnGoodies Error (safe_commands) : "+ex.message);
+				}
+
+				try{
+
+					dAmnX.preprocess('send', function(body, done){
+						if(DG.goodies.safe.keepSafe){
+							body.str = body.str2;
+							DG.goodies.safe.keepSafe--;
+						}
+						done(body);
+					});
+
+				}catch(ex){
+					console.log("dAmnGoodies Error (safe_processing) : "+ex.message);
+				}
+
 			})
 
 
