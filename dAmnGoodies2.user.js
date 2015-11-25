@@ -82,6 +82,22 @@ function init(){
 				DG.target = {};
 				DG.target.username = null;
 
+				var styles = document.createElement("style");
+				styles.id = "DG_target_styles";
+				document.getElementsByTagName("head")[0].appendChild(styles);
+				DG.target.styles = styles;
+
+				DG.target.toggle = function(username){
+					if(username == dAmn_Client_Username || username == DG.target.username){
+						// Toggle off
+						DG.target.styles.innerHTML = "";
+						DG.target.username = null;
+					}else{
+						DG.target.styles.innerHTML = ".msg { opacity: 0.5; } .u-"+username+", .u-"+dAmn_Client_Username+" { opacity: 1!important; }";
+						DG.target.username = username;
+					}
+				}
+
 				try{
 
 					dAmnX.preprocess('makeText', function(body, done){
@@ -92,9 +108,13 @@ function init(){
 					});
 
 					dAmnX.postprocess('makeText', function(body, done){
-						var div = document.getElementsByTagName(body.time_class);
-						console.log(body.time_class);
-						console.log(div);
+						var div = document.getElementsByClassName(body.time_class)[0];
+						var from = div.getElementsByClassName("from")[0];
+						var username = from.innerText;
+						username = username.substr(1,username.length-2);
+						from.addEventListener("click", function(e){
+							DG.target.toggle(username);
+						});
 						done(body);
 					});
 
