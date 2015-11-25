@@ -5,15 +5,15 @@
 // @name           dAmnX
 // @description    A tool for dAmn that makes writing plugins simple
 // @author         Sam Mulqueen <sammulqueen.nz@gmail.com>
-// @version        1.0.2
+// @version        1.1.0
 // @include        http://chat.deviantart.com/chat/*
 // ==/UserScript==
 
-// dAmnX v1.0.2
+// dAmnX v1.1.0
 
 function dAmnX(){
 	var dAmnX = DX = this;
-	this.version = "1.0.2";
+	this.version = "1.1.0";
 	this.isReady = true;
 
 	this.reinstall = function(){
@@ -230,230 +230,232 @@ function dAmnX(){
 	// Update Existing dAmn Methods
 	//
 
-	(function updateDamn(){
-		var dAmnChat_onData_DX = dAmnChat_onData;
-		dAmnChat_onData = function (pkt) {
-			var self = this;
-			DX.process('onData', {'pkt': pkt, 'stop':false, 'self': this}, function(body, done){ if(!body.stop) self.onData_DX(body.pkt); done(body); });
-		};
-		dAmnChat.prototype.onData = dAmnChat_onData;
-		dAmnChat.prototype.onData_DX = dAmnChat_onData_DX;
+	this.init = function(){
+		(function updateDamn(){
+			var dAmnChat_onData_DX = dAmnChat_onData;
+			dAmnChat_onData = function (pkt) {
+				var self = this;
+				DX.process('onData', {'pkt': pkt, 'stop':false, 'self': this}, function(body, done){ if(!body.stop) self.onData_DX(body.pkt); done(body); });
+			};
+			dAmnChat.prototype.onData = dAmnChat_onData;
+			dAmnChat.prototype.onData_DX = dAmnChat_onData_DX;
 
-		var dAmnChat_onClose_DX = dAmnChat_onClose;
-		dAmnChat_onClose = function(){
-			var self = this;
-			DX.process('onClose', {'self': this}, function(body, done){ self.onClose_DX(); done(body); });
-		};
-		dAmnChat.prototype.onClose = dAmnChat_onClose;
-		dAmnChat.prototype.onClose_DX = dAmnChat_onClose_DX;
+			var dAmnChat_onClose_DX = dAmnChat_onClose;
+			dAmnChat_onClose = function(){
+				var self = this;
+				DX.process('onClose', {'self': this}, function(body, done){ self.onClose_DX(); done(body); });
+			};
+			dAmnChat.prototype.onClose = dAmnChat_onClose;
+			dAmnChat.prototype.onClose_DX = dAmnChat_onClose_DX;
 
-		var dAmnChat_onResize_DX = dAmnChat_onResize;
-		dAmnChat_onResize = function(real) {
-			var self = this;
-			DX.process('onResize', {'real': real, 'stop': false, 'self': this}, function(body, done){ if(!body.stop) self.onResize_DX(body.real); done(body); });
-		};
-		dAmnChat.prototype.onResize = dAmnChat_onResize;
-		dAmnChat.prototype.onResize_DX = dAmnChat_onResize_DX;
+			var dAmnChat_onResize_DX = dAmnChat_onResize;
+			dAmnChat_onResize = function(real) {
+				var self = this;
+				DX.process('onResize', {'real': real, 'stop': false, 'self': this}, function(body, done){ if(!body.stop) self.onResize_DX(body.real); done(body); });
+			};
+			dAmnChat.prototype.onResize = dAmnChat_onResize;
+			dAmnChat.prototype.onResize_DX = dAmnChat_onResize_DX;
 
-		var dAmnChat_onDisconnect_DX = dAmnChat_onDisconnect;
-		dAmnChat_onDisconnect = function(reason) {
-			var self = this;
-			DX.process('onDisconnect', {'reason': reason, 'self': this}, function(body, done){ self.onDisconnect_DX(body.reason); done(body); });
-		};
-		dAmnChat.prototype.onDisconnect = dAmnChat_onDisconnect;
-		dAmnChat.prototype.onDisconnect_DX = dAmnChat_onDisconnect_DX;
+			var dAmnChat_onDisconnect_DX = dAmnChat_onDisconnect;
+			dAmnChat_onDisconnect = function(reason) {
+				var self = this;
+				DX.process('onDisconnect', {'reason': reason, 'self': this}, function(body, done){ self.onDisconnect_DX(body.reason); done(body); });
+			};
+			dAmnChat.prototype.onDisconnect = dAmnChat_onDisconnect;
+			dAmnChat.prototype.onDisconnect_DX = dAmnChat_onDisconnect_DX;
 
-		var dAmnChat_onShutdown_DX = dAmnChat_onShutdown;
-		dAmnChat_onShutdown = function() {
-			var self = this;
-			DX.process('onShutdown', {'self': this}, function(body, done){ self.onShutdown_DX(); done(body); });
-		};
-		dAmnChat.prototype.onShutdown = dAmnChat_onShutdown;
-		dAmnChat.prototype.onShutdown_DX = dAmnChat_onShutdown_DX;
+			var dAmnChat_onShutdown_DX = dAmnChat_onShutdown;
+			dAmnChat_onShutdown = function() {
+				var self = this;
+				DX.process('onShutdown', {'self': this}, function(body, done){ self.onShutdown_DX(); done(body); });
+			};
+			dAmnChat.prototype.onShutdown = dAmnChat_onShutdown;
+			dAmnChat.prototype.onShutdown_DX = dAmnChat_onShutdown_DX;
 
-		var dAmnChat_Send_DX = dAmnChat_Send;
-		dAmnChat_Send = function(cmd, channel, str) {
-			var self = this;
-			DX.process('send', {'cmd': cmd, 'channel': channel, 'str': str, 'str2': str, 'stop': false, 'self': this}, function(body, done){ if(!body.stop) self.Send_DX(body.cmd, body.channel, body.str); done(body); });
-		};
-		dAmnChat.prototype.Send = dAmnChat_Send;
-		dAmnChat.prototype.Send_DX = dAmnChat_Send_DX;
+			var dAmnChat_Send_DX = dAmnChat_Send;
+			dAmnChat_Send = function(cmd, channel, str) {
+				var self = this;
+				DX.process('send', {'cmd': cmd, 'channel': channel, 'str': str, 'str2': str, 'stop': false, 'self': this}, function(body, done){ if(!body.stop) self.Send_DX(body.cmd, body.channel, body.str); done(body); });
+			};
+			dAmnChat.prototype.Send = dAmnChat_Send;
+			dAmnChat.prototype.Send_DX = dAmnChat_Send_DX;
 
-		dAmnChanChat.prototype.Clear_DX = dAmnChanChat.prototype.Clear;
-		dAmnChanChat.prototype.Clear = function() {
-			var self = this;
-			DX.process('clear', {'self': this}, function(body, done){ self.Clear_DX(); done(body); });
-		};
+			dAmnChanChat.prototype.Clear_DX = dAmnChanChat.prototype.Clear;
+			dAmnChanChat.prototype.Clear = function() {
+				var self = this;
+				DX.process('clear', {'self': this}, function(body, done){ self.Clear_DX(); done(body); });
+			};
 
-		var dAmnChatTabs_activate_DX = dAmnChatTabs_activate;
-		dAmnChatTabs_activate = function( id , real ) {
-			var self = this;
-			DX.process('onTabActivate', {'id': id, 'real': real, 'self': this}, function(body, done){ dAmnChatTabs_activate_DX(body.id, body.real); done(body); });
-		};
+			var dAmnChatTabs_activate_DX = dAmnChatTabs_activate;
+			dAmnChatTabs_activate = function( id , real ) {
+				var self = this;
+				DX.process('onTabActivate', {'id': id, 'real': real, 'self': this}, function(body, done){ dAmnChatTabs_activate_DX(body.id, body.real); done(body); });
+			};
 
-		var dAmnChatInput_onKey_DX 	= dAmnChatInput_onKey;
-		dAmnChatInput_onKey = function(e,kc,force)
-		{
-			try{
-			var self = this,
-				el = this.chatinput_el;
+			var dAmnChatInput_onKey_DX 	= dAmnChatInput_onKey;
+			dAmnChatInput_onKey = function(e,kc,force)
+			{
+				try{
+				var self = this,
+					el = this.chatinput_el;
 
-			DX.process('onKey', {'e': e, 'keyCode': kc, 'force': force, 'self': this});
+				DX.process('onKey', {'e': e, 'keyCode': kc, 'force': force, 'self': this});
 
-			if(kc != 9){
-				if (!self.multiline) {
-					self.prev_multiline_str = null
-		        }
-				if (kc == 13 && ( force || !self.multiline || e.shiftKey || e.ctrlKey ) && el.value && !(e.shiftKey || (!self.multiline && e.ctrlKey))){
-					var cmdre = el.value.match( /^\/([a-z]+)([\s\S]*)/m );
-					if (cmdre){
-						var cmd  = cmdre[1].toLowerCase();
-						var args = null;
-						if (cmdre[2]) {
-							var tmp = cmdre[2].match(/^\s([\s\S]*)/);
-							if( tmp && tmp.length )
-								args = tmp[1];
-						}
-
-						if(self.cmds[cmd] && self.cmds[cmd][1] == "dAmnX") {
-							dAmnChatTabs_activate( self.cr.ns, true );
-							delete self.tablist;
-							if (self.history_pos != -1  && self.history[self.history_pos] == el.value) {
-								var before = self.history.slice(0,self.history_pos);
-								var after  = self.history.slice(self.history_pos+1);
-								self.history = before.concat(after).concat( self.history[self.history_pos] );
-							} else {
-								self.history = self.history.concat( el.value );
-								if( self.history.length > 300 )
-									self.history = self.history.slice(1);
-							}
-							self.history_pos = -1;
-
-							if(self.cmds[cmd][0] && !args){
-								DX.error(cmd, "insufficient parameters");
-							}else{
-								DX.process('command', {'command': cmd, 'args': args||'', 'self': self}, function(b,c){ el.value = DX.command.trigger(b.command, b.args) || ''; c(b) });
+				if(kc != 9){
+					if (!self.multiline) {
+						self.prev_multiline_str = null
+			        }
+					if (kc == 13 && ( force || !self.multiline || e.shiftKey || e.ctrlKey ) && el.value && !(e.shiftKey || (!self.multiline && e.ctrlKey))){
+						var cmdre = el.value.match( /^\/([a-z]+)([\s\S]*)/m );
+						if (cmdre){
+							var cmd  = cmdre[1].toLowerCase();
+							var args = null;
+							if (cmdre[2]) {
+								var tmp = cmdre[2].match(/^\s([\s\S]*)/);
+								if( tmp && tmp.length )
+									args = tmp[1];
 							}
 
-							el.focus();
-							el.value = '';
+							if(self.cmds[cmd] && self.cmds[cmd][1] == "dAmnX") {
+								dAmnChatTabs_activate( self.cr.ns, true );
+								delete self.tablist;
+								if (self.history_pos != -1  && self.history[self.history_pos] == el.value) {
+									var before = self.history.slice(0,self.history_pos);
+									var after  = self.history.slice(self.history_pos+1);
+									self.history = before.concat(after).concat( self.history[self.history_pos] );
+								} else {
+									self.history = self.history.concat( el.value );
+									if( self.history.length > 300 )
+										self.history = self.history.slice(1);
+								}
+								self.history_pos = -1;
 
-							return false;
+								if(self.cmds[cmd][0] && !args){
+									DX.error(cmd, "insufficient parameters");
+								}else{
+									DX.process('command', {'command': cmd, 'args': args||'', 'self': self}, function(b,c){ el.value = DX.command.trigger(b.command, b.args) || ''; c(b) });
+								}
+
+								el.focus();
+								el.value = '';
+
+								return false;
+							}
 						}
 					}
-				}
 
-	        }
-			return this.onKey_DX(e,kc,force);
-		}catch(ex){
-			console.log(ex);
-			return false;
-		}
-		};
-
-		dAmnChatInput.prototype.onKey = dAmnChatInput_onKey;
-		dAmnChatInput.prototype.onKey_DX = dAmnChatInput_onKey_DX;
-
-		dAmnChanChat.prototype.Init_DX 	= dAmnChanChat.prototype.Init;
-		dAmnChanChat.prototype.Init 	= function( cr, name, parent_el ){
-			var self = this;
-			DX.process('init', {'cr': cr, 'name': name, 'parent_el': parent_el, 'self': this},  function(b,c){ self.Init_DX(b.cr, b.name, b.parent_el); c(b); })
-		};
-
-		dAmnChanMainChat.prototype.onEvent_DX = dAmnChanMainChat.prototype.onEvent;
-		dAmnChanMainChat.prototype.onEvent = function(pkt){
-			var self = this;
-			DX.process('event', {'pkt': pkt, 'self': this},
-				function(body, done){ self.onEvent_DX(body.pkt); done(body) });
-		}
-
-		dAmnChanMainChat.prototype.onSelfEvent_DX = dAmnChanMainChat.prototype.onSelfEvent;
-		dAmnChanMainChat.prototype.onSelfEvent = function( ev, arg1, arg2 ){
-			var self = this;
-			DX.process('selfEvent', {'ev': ev, 'arg1': arg1, 'arg2': arg2, 'self': this},
-				function(body, done){ self.onSelfEvent_DX(body.ev, body.arg1, body.arg2); done(body) });
-		}
-
-		var dAmnChatbase_dAmnCB_DX = dAmnChatbase_dAmnCB;
-		dAmnChatbase_dAmnCB = function(cmd,arg)
-		{
-			DX.process('dAmnChatbase', {'cmd': cmd, 'arg': arg, self: this}, function(o,d){
-				dAmnChatbase_dAmnCB_DX(o.cmd, o.arg);
-				d(o);
-			});
-		};
-
-	}).call(this);
-
-	(function initialEvents(){
-		//
-		// Events
-		//
-		this.preprocess('onTabActivate', function(body, done){
-			if(body.id != dAmnChatTab_active)
-				DX.process('onSwitchTab', {'id': body.id, 'real': body.real, 'self': body.self}, function(b,c){ c(b) });
-			done(body);
-		})
-		this.preprocess('dAmnChatbase', function(o,d){
-			if(["login", "connect", "shutdown", "disconnect"].indexOf(o.cmd)>-1)
-				DX.process(o.cmd, {'arg': o.arg, 'self': o.self}, function(body, done){o.arg = body.arg; d(o); done(body); });
-			else d(o);
-		});
-		this.postprocess("init", function(b,c){
-			for(var cmd in DX.command.commands)
-				b.self.input.cmds[cmd] = [DX.command.commands[cmd][0], 'dAmnX'];
-			c(b);
-		});
-		this.preprocess('onData', function(b,c){
-			var ev = null;
-			switch (b.pkt.cmd) {
-				case 'join': 	ev="selfJoin"; break;
-				case 'part': 	ev="selfPart"; break;
-				case 'kicked': 	ev="selfKicked"; break;
-				case 'set' :
-				case 'get' :
-				case 'send': 	ev="onError"; break;
-				case 'property': ev="property"; break;
-				case 'recv': 	ev="recv"; break;
+		        }
+				return this.onKey_DX(e,kc,force);
+			}catch(ex){
+				console.log(ex);
+				return false;
 			}
-			if(ev) this.process(ev, {'pkt': b.pkt, 'self': b.self, 'stop': false},
-				function(body, done){ if(body.stop) b.stop=true; b.pkt = body.pkt; c(b); done(body); });
-			else c(b);
-		});
-		this.preprocess('property', function(b,c){
-			var ev = b.pkt.args.p;
+			};
 
-			if(["members", "privclasses", "title", "topic"].indexOf(ev)>-1)
-				this.process(ev, {'pkt': b.pkt, 'self': b.self, 'stop': false},
+			dAmnChatInput.prototype.onKey = dAmnChatInput_onKey;
+			dAmnChatInput.prototype.onKey_DX = dAmnChatInput_onKey_DX;
+
+			dAmnChanChat.prototype.Init_DX 	= dAmnChanChat.prototype.Init;
+			dAmnChanChat.prototype.Init 	= function( cr, name, parent_el ){
+				var self = this;
+				DX.process('init', {'cr': cr, 'name': name, 'parent_el': parent_el, 'self': this},  function(b,c){ self.Init_DX(b.cr, b.name, b.parent_el); c(b); })
+			};
+
+			dAmnChanMainChat.prototype.onEvent_DX = dAmnChanMainChat.prototype.onEvent;
+			dAmnChanMainChat.prototype.onEvent = function(pkt){
+				var self = this;
+				DX.process('event', {'pkt': pkt, 'self': this},
+					function(body, done){ self.onEvent_DX(body.pkt); done(body) });
+			}
+
+			dAmnChanMainChat.prototype.onSelfEvent_DX = dAmnChanMainChat.prototype.onSelfEvent;
+			dAmnChanMainChat.prototype.onSelfEvent = function( ev, arg1, arg2 ){
+				var self = this;
+				DX.process('selfEvent', {'ev': ev, 'arg1': arg1, 'arg2': arg2, 'self': this},
+					function(body, done){ self.onSelfEvent_DX(body.ev, body.arg1, body.arg2); done(body) });
+			}
+
+			var dAmnChatbase_dAmnCB_DX = dAmnChatbase_dAmnCB;
+			dAmnChatbase_dAmnCB = function(cmd,arg)
+			{
+				DX.process('dAmnChatbase', {'cmd': cmd, 'arg': arg, self: this}, function(o,d){
+					dAmnChatbase_dAmnCB_DX(o.cmd, o.arg);
+					d(o);
+				});
+			};
+
+		}).call(this);
+
+		(function initialEvents(){
+			//
+			// Events
+			//
+			this.preprocess('onTabActivate', function(body, done){
+				if(body.id != dAmnChatTab_active)
+					DX.process('onSwitchTab', {'id': body.id, 'real': body.real, 'self': body.self}, function(b,c){ c(b) });
+				done(body);
+			})
+			this.preprocess('dAmnChatbase', function(o,d){
+				if(["login", "connect", "shutdown", "disconnect"].indexOf(o.cmd)>-1)
+					DX.process(o.cmd, {'arg': o.arg, 'self': o.self}, function(body, done){o.arg = body.arg; d(o); done(body); });
+				else d(o);
+			});
+			this.postprocess("init", function(b,c){
+				for(var cmd in DX.command.commands)
+					b.self.input.cmds[cmd] = [DX.command.commands[cmd][0], 'dAmnX'];
+				c(b);
+			});
+			this.preprocess('onData', function(b,c){
+				var ev = null;
+				switch (b.pkt.cmd) {
+					case 'join': 	ev="selfJoin"; break;
+					case 'part': 	ev="selfPart"; break;
+					case 'kicked': 	ev="selfKicked"; break;
+					case 'set' :
+					case 'get' :
+					case 'send': 	ev="onError"; break;
+					case 'property': ev="property"; break;
+					case 'recv': 	ev="recv"; break;
+				}
+				if(ev) this.process(ev, {'pkt': b.pkt, 'self': b.self, 'stop': false},
 					function(body, done){ if(body.stop) b.stop=true; b.pkt = body.pkt; c(b); done(body); });
-			else c(b);
-		})
-		this.preprocess('recv', function(b,c){
-			var rp = dAmn_ParsePacket(b.pkt.body),
-				ev = rp.cmd;
+				else c(b);
+			});
+			this.preprocess('property', function(b,c){
+				var ev = b.pkt.args.p;
 
-			if(["action", "msg", "part", "kicked", "join", "privchg"].indexOf(ev)>-1)
-				this.process(ev, {'pkt': b.pkt, 'self': b.self, 'stop': false}, function(body, done){ if(body.stop) b.stop=true; b.pkt = body.pkt; c(b); done(body); });
-			else c(b);
-		});
-		this.preprocess('send', function(b,c){
-	        var ev = b.cmd,
-				ev2 = "send"+ev[0].toUpperCase() + ev.slice(1);
+				if(["members", "privclasses", "title", "topic"].indexOf(ev)>-1)
+					this.process(ev, {'pkt': b.pkt, 'self': b.self, 'stop': false},
+						function(body, done){ if(body.stop) b.stop=true; b.pkt = body.pkt; c(b); done(body); });
+				else c(b);
+			})
+			this.preprocess('recv', function(b,c){
+				var rp = dAmn_ParsePacket(b.pkt.body),
+					ev = rp.cmd;
 
-			if(["action", "msg", "npmsg"].indexOf(ev)>-1)
-				this.process(ev2, {'channel': b.channel, 'str': b.str, 'stop': false},
-					function(body, done){ if(body.stop) b.stop=true; b.channel = body.channel; b.str = body.str; c(b); done(body); });
-			else c(b);
-	    });
-		this.preprocess('title', function(b,c){
-			this.titles[b.pkt.param] = this.parseMsg(b.pkt.body);
-			c(b);
-		});
-		this.preprocess('topic', function(b,c){
-			this.topics[b.pkt.param] = this.parseMsg(b.pkt.body);
-			c(b);
-		});
-	}).call(this);
+				if(["action", "msg", "part", "kicked", "join", "privchg"].indexOf(ev)>-1)
+					this.process(ev, {'pkt': b.pkt, 'self': b.self, 'stop': false}, function(body, done){ if(body.stop) b.stop=true; b.pkt = body.pkt; c(b); done(body); });
+				else c(b);
+			});
+			this.preprocess('send', function(b,c){
+		        var ev = b.cmd,
+					ev2 = "send"+ev[0].toUpperCase() + ev.slice(1);
+
+				if(["action", "msg", "npmsg"].indexOf(ev)>-1)
+					this.process(ev2, {'channel': b.channel, 'str': b.str, 'stop': false},
+						function(body, done){ if(body.stop) b.stop=true; b.channel = body.channel; b.str = body.str; c(b); done(body); });
+				else c(b);
+		    });
+			this.preprocess('title', function(b,c){
+				this.titles[b.pkt.param] = this.parseMsg(b.pkt.body);
+				c(b);
+			});
+			this.preprocess('topic', function(b,c){
+				this.topics[b.pkt.param] = this.parseMsg(b.pkt.body);
+				c(b);
+			});
+		}).call(this);
+	};
 
 	//
 	// Utitily Functions
@@ -583,6 +585,11 @@ function dAmnX(){
 
         return msg;
 	}
+
+	DWait.ready(['jms/pages/chat07/chatpage.js', 'jms/pages/chat07/dAmn.js', 'jms/pages/chat07/dAmnChat.js'], function() {
+		dAmnX.init();
+	});
+
 }
 //
 // Append script to document and initialize dAmnX
