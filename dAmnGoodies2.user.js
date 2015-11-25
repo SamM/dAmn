@@ -4,7 +4,7 @@
 // @name           dAmnGoodies
 // @description    Novelty features for dAmn chat.
 // @author         Sam Mulqueen <sammulqueen.nz@gmail.com>
-// @version        2.2.2
+// @version        2.2.3
 // @include        http://chat.deviantart.com/chat/*
 // ==/UserScript==
 
@@ -15,7 +15,7 @@ function init(){
 		throw "Aw hell no";
 	}
 	var dAmnGoodies = new (function(){
-		this.version = "2.2.2";
+		this.version = "2.2.3";
 
 		var DG = this;
 
