@@ -10,10 +10,12 @@
 
 function init(){
 
-	Array.prototype.each = function(fn, thisv){
-		if(this.length){
-			for(var i=0; i<this.length; i++)
-				fn.call(thisv||this, this[i], i);
+	if(typeof Array.prototype.each != "function"){
+		Array.prototype.each = function(fn, thisv){
+			if(this.length){
+				for(var i=0; i<this.length; i++)
+					fn.call(thisv||this, this[i], i);
+			}
 		}
 	}
 	if(dAmnGoodies){
@@ -31,21 +33,33 @@ function init(){
 		this.goodie = function(name, data, setUp){
 			var newData;
 			this.goodies[name] = this.goodies[name] || data || {};
-			if(typeof setUp == 'function')
-				newData = setUp.call(this, data);
+			if(typeof setUp == 'function'){
+				try{
+					newData = setUp.call(this, data);
+				}catch(ex){
+					console.log("dAmnGoodies Error (goodies_setup) : "+ex.message);
+				}
+			}
 			if(typeof newData == 'object')
 				this.goodies[name] = newData;
 			return this;
 		}
 
 		this.save = function(){
-			$.jStorage.set("dAmnGoodies", DG.goodies);
+			try{
+				$.jStorage.set("dAmnGoodies", DG.goodies);
+			}catch(ex){
+				console.log("dAmnGoodies Error (save_goodies) : "+ex.message);
+			}
 			return this;
 		}
 
 		this.load = function(){
-			var loaded = $.jStorage.get("dAmnGoodies");
-
+			try{
+				var loaded = $.jStorage.get("dAmnGoodies");
+			}catch(ex){
+				console.log("dAmnGoodies Error (load_goodies) : "+ex.message);
+			}
 			if(!loaded || typeof loaded != 'object')  loaded = {};
 
 			DG.goodies = loaded;
@@ -55,7 +69,7 @@ function init(){
 		this.reinstall = function(){
 			var url = window.location.href;
 			window.location = "http://github.com/SamM/dAmn/raw/master/dAmnGoodies2.user.js";
-			setTimeout(function(){ window.location = url }, 2000);
+			setTimeout(function(){ window.location = url }, 3000);
 		}
 
 		this.init = function(dAmnX){
@@ -69,225 +83,234 @@ function init(){
 
 			// Goodies
 			this.goodie('goodies', {enabled: true}, function(){
-				dAmnX.command.bind('goodies', 1, function(args){
-					var a = args.split(' ');
-					switch(a[0]){
-					case 'save':
-						dAmnX.notice('dAmnGoodies preferences were saved');
-						DG.save();
-					break;
-					case 'load':
-						DG.load();
-						dAmnX.notice('dAmnGoodies preferences were loaded');
-					break;
-					case 'reinstall':
-						if(a[1].toLowerCase() == "damnx")
-						window.setTimeout(function(){
-						if(confirm('Would you like to install the newest version of dAmnX?')){
-							dAmnX.notice('Page will refresh automatically in 10 seconds');
-							dAmnX.reinstall();
+				try{
+					
+					dAmnX.command.bind('goodies', 1, function(args){
+						var a = args.split(' ');
+						switch(a[0]){
+						case 'save':
+							dAmnX.notice('dAmnGoodies preferences were saved');
+							DG.save();
+						break;
+						case 'load':
+							DG.load();
+							dAmnX.notice('dAmnGoodies preferences were loaded');
+						break;
+						case 'reinstall':
+							if(a[1].toLowerCase() == "damnx")
+							window.setTimeout(function(){
+							if(confirm('Would you like to install the newest version of dAmnX?')){
+								dAmnX.notice('Page will refresh automatically in 3 seconds');
+								dAmnX.reinstall();
+							}
+							}, 50);
+							else
+							window.setTimeout(function(){
+							if(confirm('Would you like to install the newest version of dAmnGoodies?')){
+								dAmnX.notice('Page will refresh automatically in 3 seconds');
+								DG.reinstall();
+							}
+							}, 50);
+						default:
+							dAmnX.error('goodies', 'Unknown command. Try: load, save');
+						break;
 						}
-						}, 50);
-						else
-						window.setTimeout(function(){
-						if(confirm('Would you like to install the newest version of dAmnGoodies?')){
-							dAmnX.notice('Page will refresh automatically in 10 seconds');
-							DG.reinstall();
-						}
-						}, 50);
-					default:
-						dAmnX.error('goodies', 'Unknown command. Try: load, save');
-					break;
-					}
-				});
+					});
 
-				dAmnX.command.bind('js', 1, function(args){
-					var exec_js =  function(){
-						var js = new Function('DX','DG', args);
-						try{
-							var result = js.call(DG, dAmnX, DG);
-								dAmnX.notice((typeof JSON!='undefined'?JSON.stringify(result):unescape(result)));
-						}catch(ex){
-							dAmnX.error('js', ex);
+					dAmnX.command.bind('js', 1, function(args){
+						var exec_js =  function(){
+							var js = new Function('DX','DG', args);
+							try{
+								var result = js.call(DG, dAmnX, DG);
+									dAmnX.notice((typeof JSON!='undefined'?JSON.stringify(result):unescape(result)));
+							}catch(ex){
+								console.log("dAmnGoodies Error (js_cmd) : "+ex.message);
+								dAmnX.error('js_cmd', ex);
+							}
 						}
-					}
-					window.setTimeout(exec_js, 50);
-				});
+						window.setTimeout(exec_js, 50);
+					});
 
 				dAmnX.command.bind('boot', 1, function(args){
-					var chan = dAmnX.getChannel(),
-						ns = chan.ns,
-						members = chan.members.members;
-					var user = args.split(" ")[0],
-						kick_msg = args.slice(user.length + 1),
-						found = false;
+						var chan = dAmnX.getChannel(),
+							ns = chan.ns,
+							members = chan.members.members,
+							user = args.split(" ")[0],
+							kick_msg = args.slice(user.length + 1),
+							found = false;
 
-					if(!user.length){
-						dAmnX.error('boot', 'Enter a username')
-						return;
-					}
-
-					for(var m in members){
-						if(user.toLowerCase() == m.toLowerCase()){
-							found = m; break;
+						if(!user.length){
+							dAmnX.error('boot', 'Enter a username')
+							return;
 						}
-					}
 
-					if(found){
-						user = members[found];
-						var pc = user.info.pc;
+						for(var m in members){
+							if(user.toLowerCase() == m.toLowerCase()){
+								found = m; break;
+							}
+						}
 
-						dAmnX.send.kick(ns, found, kick_msg||"You have been booted");
-						dAmnX.send.ban(ns, found);
-						window.setTimeout(function restore(){
-							dAmnX.send.unban(ns, found);
-							dAmnX.send.promote(ns, found, pc);
-						}, 2000);
-					}else{
-						dAmnX.error('boot', 'Member not found');
-					}
-				})
+						if(found){
+							user = members[found];
+							var pc = user.info.pc;
 
-				dAmnX.command.bind('global', 1, function(args){
-					for(var ns in dAmnChatTabs)
-						dAmnX.send.msg(ns, args)
-				})
+							dAmnX.send.kick(ns, found, kick_msg||"You have been booted");
+							dAmnX.send.ban(ns, found);
+							window.setTimeout(function restore(){
+								dAmnX.send.unban(ns, found);
+								dAmnX.send.promote(ns, found, pc);
+							}, 2000);
+						}else{
+							dAmnX.error('boot', 'Member not found');
+						}
+					})
 
-				dAmnX.command.bind('multi', 1, function(args){
-					var a = args.split(' ');
-					if(a.length == 1){
-						dAmnX.error('multi', 'Supply more parameters')
-						return;
-					}
+					dAmnX.command.bind('global', 1, function(args){
+						for(var ns in dAmnChatTabs)
+							dAmnX.send.msg(ns, args)
+					})
 
-					var list, text, ns = dAmnX.channelNs();
-					if(a[1][0]=="("){
-						list = args.slice(args.indexOf("("));
-						var endbrac = list.indexOf(")")
-						list = list.slice(0,endbrac);
-						text = list.slice(endbrac+2);
-						list = (list == "")?[]:list.split(' ');
-					}else{
-						if(a[1] == "") list = [];
-						else list = [a[1]];
-						text = args.slice(a[0].length+1+a[1].length+1)
-					}
+					dAmnX.command.bind('multi', 1, function(args){
+						var a = args.split(' ');
+						if(a.length == 1){
+							dAmnX.error('multi', 'Supply more parameters')
+							return;
+						}
 
-					if(!list.length){
-						dAmnX.error('multi', 'List empty')
-						return;
-					}
+						var list, text, ns = dAmnX.channelNs();
+						if(a[1][0]=="("){
+							list = args.slice(args.indexOf("("));
+							var endbrac = list.indexOf(")")
+							list = list.slice(0,endbrac);
+							text = list.slice(endbrac+2);
+							list = (list == "")?[]:list.split(' ');
+						}else{
+							if(a[1] == "") list = [];
+							else list = [a[1]];
+							text = args.slice(a[0].length+1+a[1].length+1)
+						}
 
-					function listOfUsernames(){
-						var l = [];
-						var mems = dAmnX.getChannel().members.members;
-						list.each(function(user){
-							if(user[0]=="*"){
-								var privlev = user.slice(user[1]=="*"?2:1);
-								for(var member in mems){
-									if(mems[member].info.pc == privlev) l.push(member);
+						if(!list.length){
+							dAmnX.error('multi', 'List empty')
+							return;
+						}
+
+						function listOfUsernames(){
+							var l = [];
+							var mems = dAmnX.getChannel().members.members;
+							list.each(function(user){
+								if(user[0]=="*"){
+									var privlev = user.slice(user[1]=="*"?2:1);
+									for(var member in mems){
+										if(mems[member].info.pc == privlev) l.push(member);
+									}
+								}else if(user=="{}"){
+									for(var member in mems)
+										l.push(member);
+								}else{
+									l.push(user);
 								}
-							}else if(user=="{}"){
-								for(var member in mems)
-									l.push(member);
-							}else{
-								l.push(user);
-							}
-						});
-						return l;
-					}
-
-					function listOfChannels(){
-						var l = [];
-						list.each(function(chan){
-							if(chan == "{}"){
-								for(var ns in dAmnChatTabs)
-									l.push(ns);
-							}
-							else l.push(dAmnX.channelNs(chan));
-						})
-						list = l;
-						return list;
-					}
-
-					var users = listOfUsernames();
-
-					switch(a[0]){
-						case 'msg':
-							listOfChannels().each(function(chan){
-								dAmnX.send.msg(chan, text)
 							});
-						break;
-						case 'action':
-							listOfChannels().each(function(chan){
-								dAmnX.send.action(chan, text)
+							return l;
+						}
+
+						function listOfChannels(){
+							var l = [];
+							list.each(function(chan){
+								if(chan == "{}"){
+									for(var ns in dAmnChatTabs)
+										l.push(ns);
+								}
+								else l.push(dAmnX.channelNs(chan));
+							})
+							list = l;
+							return list;
+						}
+
+						var users = listOfUsernames();
+
+						switch(a[0]){
+							case 'msg':
+								listOfChannels().each(function(chan){
+									dAmnX.send.msg(chan, text)
+								});
+							break;
+							case 'action':
+								listOfChannels().each(function(chan){
+									dAmnX.send.action(chan, text)
+								});
+							break;
+							case 'ban':
+							if(users.length)
+								users.each(function(user){ dAmnX.send.ban(ns, user); });
+							break;
+							case 'clear':
+							list.each(function(chan){
+								chan = dAmnX.channelNs(chan);
+								dAmnX.send.clear(chan);
 							});
-						break;
-						case 'ban':
-						if(users.length)
-							users.each(function(user){ dAmnX.send.ban(ns, user); });
-						break;
-						case 'clear':
-						list.each(function(chan){
-							chan = dAmnX.channelNs(chan);
-							dAmnX.send.clear(chan);
-						});
-						break;
-						case 'demote':
-						if(users.length) users.each(function(user){
-							dAmnX.send.demote(ns, user, text);
-						});
-						break;
-						case 'display':
-						if(users.length) dAmnX.notice(users.join(" "));
-						break;
-						case 'join':
-						list.each(function(chan){
-							chan = dAmnX.channelNs(chan);
-							dAmnX.send.join(chan);
-						});
-						break;
-						case 'kick':
-						if(users.length) users.each(function(user){
-							dAmnX.send.kick(ns, user, text);
-						});
-						break;
-						case 'part':
-						list.each(function(chan){
-							chan = dAmnX.channelNs(chan);
-							dAmnX.send.part(chan);
-						});
-						break;
-						case 'promote':
-						if(users.length) users.each(function(user){
-							dAmnX.send.promote(ns, user, text);
-						});
-						break;
-						case 'title':
-						list.each(function(chan){
-							chan = dAmnX.channelNs(chan);
-							dAmnX.send.title(chan, text);
-						});
-						break;
-						case 'topic':
-						list.each(function(chan){
-							chan = dAmnX.channelNs(chan);
-							dAmnX.send.topic(chan, text);
-						});
-						break;
-						case 'unban':
-						if(users.length) users.each(function(user){
-							dAmnX.send.unban(ns, user);
-						});
-						break;
-						case 'whois':
-						if(users.length) users.each(function(user){
-							dAmnX.send.whois(user);
-						});
-						break;
-					}
-				});
+							break;
+							case 'demote':
+							if(users.length) users.each(function(user){
+								dAmnX.send.demote(ns, user, text);
+							});
+							break;
+							case 'display':
+							if(users.length) dAmnX.notice(users.join(" "));
+							break;
+							case 'join':
+							list.each(function(chan){
+								chan = dAmnX.channelNs(chan);
+								dAmnX.send.join(chan);
+							});
+							break;
+							case 'kick':
+							if(users.length) users.each(function(user){
+								dAmnX.send.kick(ns, user, text);
+							});
+							break;
+							case 'part':
+							list.each(function(chan){
+								chan = dAmnX.channelNs(chan);
+								dAmnX.send.part(chan);
+							});
+							break;
+							case 'promote':
+							if(users.length) users.each(function(user){
+								dAmnX.send.promote(ns, user, text);
+							});
+							break;
+							case 'title':
+							list.each(function(chan){
+								chan = dAmnX.channelNs(chan);
+								dAmnX.send.title(chan, text);
+							});
+							break;
+							case 'topic':
+							list.each(function(chan){
+								chan = dAmnX.channelNs(chan);
+								dAmnX.send.topic(chan, text);
+							});
+							break;
+							case 'unban':
+							if(users.length) users.each(function(user){
+								dAmnX.send.unban(ns, user);
+							});
+							break;
+							case 'whois':
+							if(users.length) users.each(function(user){
+								dAmnX.send.whois(user);
+							});
+							break;
+						}
+					});
+
+				}catch(ex){
+					console.log("dAmnGoodies Error (goodies_bind_commands) : "+ex.message);
+				}
+
 			});
+
 
 			this.abbr = function(title, innerText){
 				return "<abbr title=\""+title+"\">"+(innerText||'')+"</abbr>";
@@ -296,70 +319,83 @@ function init(){
 			// Swap
 
 			this.goodie('swap', {pairs: {'dAmnGoodies': ':thumb110193573:', 'https://': 'http://'}, enabled: true}, function(){
-				dAmnX.command.bind('swap', 1, function(args){
-					var a = args.split(" "),
-						pairs = DG.goodies.pairs;
-					switch(a[0]){
-						case "on":
-							DG.goodies.swap.enabled = true;
-							DG.save();
-							dAmnX.notice("Swapping enabled");
-						break;
-						case "off":
-							DG.goodies.swap.enabled = false;
-							DG.save();
-							dAmnX.notice("Swapping disabled");
-						break;
-						case "get":
-							var result = pairs[a[1]];
-							if(result) dAmnX.notice(result);
-							else dAmnX.notice(a[1]+' is not set');
-						break;
-						case "set":
-							var result = args.slice(a[0].length+a[1].length+2);
-							var str = a[1];
-							if(a[1] == "{space}") a[1] = " ";
-							DG.goodies.swap.pairs[a[1]] = result;
-							DG.save();
-							dAmnX.notice(a[1]+' => '+result);
-						break;
-						case "unset":
-							if(a[1] == "{space}") a[1] = " ";
-							delete DG.goodies.swap.pairs[a[1]];
-							dAmnX.notice(a[1]+' is unset')
-							DG.save();
-						break;
-						case "list":
-							var msg = [];
-							for(var it in DG.goodies.swap.pairs)
-								msg.push(it);
-							dAmnX.notice(msg.join(" "));
-						break;
-						case "clear":
-							DG.goodies.swap.pairs = {};
-							dAmnX.notice('Not swapping anything')
-							DG.save();
-						break;
-						default:
-							dAmnX.error('swap', 'Unknown command. Try: on, off, get, set, unset, list, clear');
-						break;
-					}
-				});
+				try{
+
+					dAmnX.command.bind('swap', 1, function(args){
+						var a = args.split(" "),
+							pairs = DG.goodies.pairs;
+						switch(a[0]){
+							case "on":
+								DG.goodies.swap.enabled = true;
+								DG.save();
+								dAmnX.notice("Swapping enabled");
+							break;
+							case "off":
+								DG.goodies.swap.enabled = false;
+								DG.save();
+								dAmnX.notice("Swapping disabled");
+							break;
+							case "get":
+								var result = pairs[a[1]];
+								if(result) dAmnX.notice(result);
+								else dAmnX.notice(a[1]+' is not set');
+							break;
+							case "set":
+								var result = args.slice(a[0].length+a[1].length+2);
+								var str = a[1];
+								if(a[1] == "{space}") a[1] = " ";
+								DG.goodies.swap.pairs[a[1]] = result;
+								DG.save();
+								dAmnX.notice(a[1]+' => '+result);
+							break;
+							case "unset":
+								if(a[1] == "{space}") a[1] = " ";
+								delete DG.goodies.swap.pairs[a[1]];
+								dAmnX.notice(a[1]+' is unset')
+								DG.save();
+							break;
+							case "list":
+								var msg = [];
+								for(var it in DG.goodies.swap.pairs)
+									msg.push(it);
+								dAmnX.notice(msg.join(" "));
+							break;
+							case "clear":
+								DG.goodies.swap.pairs = {};
+								dAmnX.notice('Not swapping anything')
+								DG.save();
+							break;
+							default:
+								dAmnX.error('swap', 'Unknown command. Try: on, off, get, set, unset, list, clear');
+							break;
+						}
+					});
+
+				}catch(ex){
+					console.log("dAmnGoodies Error (swap_bind_command) : "+ex.message);
+				}
 
 				function escapeRegExp(str) {
 				  return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
 				}
 
-				dAmnX.preprocess('send', function(body, done){
-					var msg = body.str;
-					if(DG.goodies.swap.enabled){
-						for(var i in DG.goodies.swap.pairs){
-							msg = msg.replace(new RegExp(escapeRegExp(i),'g'), DG.goodies.swap.pairs[i]);
+				try{
+
+					dAmnX.preprocess('send', function(body, done){
+						var msg = body.str;
+						if(DG.goodies.swap.enabled){
+							for(var i in DG.goodies.swap.pairs){
+								msg = msg.replace(new RegExp(escapeRegExp(i),'g'), DG.goodies.swap.pairs[i]);
+							}
+							body.str = msg;
 						}
-						body.str = msg;
-					}
-					done(body);
-				})
+						done(body);
+					});
+
+				}catch(ex){
+					console.log("dAmnGoodies Error (swap_preprocess) : "+ex.message);
+				}
+
 			});
 
 			// Nicknames
@@ -369,181 +405,205 @@ function init(){
 					DG.save();
 				}
 				// Setup /nick command
-				dAmnX.command.bind('nick', 1, function(args){
-					var a = args.split(" ");
-					switch(a[0]){
-						case 'on':
-						dAmnX.notice('Nicknames ON');
-						DG.goodies.nickname.enabled = true;
-						DG.save();
-						break;
-						case 'off':
-						dAmnX.notice('Nicknames OFF');
-						DG.goodies.nickname.enabled = false;
-						DG.save();
-						break;
-						case 'tags':
-						var to = a[1]?a[1].toLowerCase():"";
-						if(!to || !to.length)
-							to = DG.goodies.nickname.switchTags?"off":"on";
-						if(to=="on"){
-							dAmnX.notice('Switching &lt;Nametags&gt; enabled');
-							DG.goodies.nickname.switchTags = true;
+				try{
+
+					dAmnX.command.bind('nick', 1, function(args){
+						var a = args.split(" ");
+						switch(a[0]){
+							case 'on':
+							dAmnX.notice('Nicknames ON');
+							DG.goodies.nickname.enabled = true;
 							DG.save();
-						}else if(to=="off"){
-							dAmnX.notice('Switching &lt;Nametags&gt; disabled');
-							DG.goodies.nickname.switchTags = false;
+							break;
+							case 'off':
+							dAmnX.notice('Nicknames OFF');
+							DG.goodies.nickname.enabled = false;
 							DG.save();
-						}else{
-							dAmnX.error("nick", "<code>/nick tags "+to+"</code> is not a recognized command");
+							break;
+							case 'tags':
+							var to = a[1]?a[1].toLowerCase():"";
+							if(!to || !to.length)
+								to = DG.goodies.nickname.switchTags?"off":"on";
+							if(to=="on"){
+								dAmnX.notice('Switching &lt;Nametags&gt; enabled');
+								DG.goodies.nickname.switchTags = true;
+								DG.save();
+							}else if(to=="off"){
+								dAmnX.notice('Switching &lt;Nametags&gt; disabled');
+								DG.goodies.nickname.switchTags = false;
+								DG.save();
+							}else{
+								dAmnX.error("nick", "<code>/nick tags "+to+"</code> is not a recognized command");
+							}
+							break;
+							case 'get':
+							var user = DG.goodies.nickname.nicks[a[1].toLowerCase()];
+							dAmnX.notice(user?a[1]+' = '+user:"none")
+							break;
+							case 'set':
+							var nick = a.length>3?args.slice(a[0].length+1+a[1].length+1):a[2];
+							DG.goodies.nickname.nicks[a[1].toLowerCase()] = nick;
+							DG.save();
+							dAmnX.notice("Nickname for "+a[1]+" is set to "+nick);
+							break;
+							case 'unset':
+							delete DG.goodies.nickname.nicks[a[1].toLowerCase()];
+							DG.save();
+							dAmnX.notice("Nickname for "+a[1]+" is unset");
+							break;
+							case 'list':
+							var nicks = DG.goodies.nickname.nicks;
+							var notice = [];
+							for(var user in nicks) notice.push(user+"="+nicks[user]);
+							dAmnX.notice(notice.length?notice.join("; "):"No nicknames are set");
+							break;
+							case 'clear':
+							DG.goodies.nickname.nicks = {};
+							dAmnX.notice("No nicknames are set");
+							DG.save();
+							default:
+							dAmnX.error('nick', 'unknown command '+a[0]);
+							break;
 						}
-						break;
-						case 'get':
-						var user = DG.goodies.nickname.nicks[a[1].toLowerCase()];
-						dAmnX.notice(user?a[1]+' = '+user:"none")
-						break;
-						case 'set':
-						var nick = a.length>3?args.slice(a[0].length+1+a[1].length+1):a[2];
-						DG.goodies.nickname.nicks[a[1].toLowerCase()] = nick;
-						DG.save();
-						dAmnX.notice("Nickname for "+a[1]+" is set to "+nick);
-						break;
-						case 'unset':
-						delete DG.goodies.nickname.nicks[a[1].toLowerCase()];
-						DG.save();
-						dAmnX.notice("Nickname for "+a[1]+" is unset");
-						break;
-						case 'list':
-						var nicks = DG.goodies.nickname.nicks;
-						var notice = [];
-						for(var user in nicks) notice.push(user+"="+nicks[user]);
-						dAmnX.notice(notice.length?notice.join("; "):"No nicknames are set");
-						break;
-						case 'clear':
-						DG.goodies.nickname.nicks = {};
-						dAmnX.notice("No nicknames are set");
-						DG.save();
-						default:
-						dAmnX.error('nick', 'unknown command '+a[0]);
-						break;
-					}
-				});
+					});
 
-				dAmnX.preprocess('send', function(body, done){
-					var msg = " "+body.str+" ";
+				}catch(ex){
+					console.log("dAmnGoodies Error (nick_bind_command) : "+ex.message);
+				}
 
-					if(DG.goodies.nickname.enabled){
-						var nicks = DG.goodies.nickname.nicks;
-						for(var nick in nicks){
-							var reg = new RegExp('([ :,])'+nick+'([:]+)','gi'),
-								match = reg.exec(msg);
-							if(match)
-								msg = msg.replace(reg, match[1]+DG.abbr(nick, nicks[nick])+(match[2]=="::"?"":match[2]));
+				try{
+
+					dAmnX.preprocess('send', function(body, done){
+						var msg = " "+body.str+" ";
+
+						if(DG.goodies.nickname.enabled){
+							var nicks = DG.goodies.nickname.nicks;
+							for(var nick in nicks){
+								var reg = new RegExp('([ :,])'+nick+'([:]+)','gi'),
+									match = reg.exec(msg);
+								if(match)
+									msg = msg.replace(reg, match[1]+DG.abbr(nick, nicks[nick])+(match[2]=="::"?"":match[2]));
+							}
+
+							body.str = msg.slice(1,-1);
 						}
 
-						body.str = msg.slice(1,-1);
-					}
+						done(body);
+					})
 
-					done(body);
-				})
+					dAmnX.preprocess('msg', function(body, done){
+						if(DG.goodies.nickname.enabled && DG.goodies.nickname.switchTags){
+							var b = body.pkt.body.split("\n");
+							var from = b[1].split("=")[1],
+								nick = DG.goodies.nickname.nicks[from.toLowerCase()];
+							if(nick) b[1] = "from="+nick;
+							body.pkt.body = b.join("\n");
+						}
+						done(body);
+					});
 
-				dAmnX.preprocess('msg', function(body, done){
-					if(DG.goodies.nickname.enabled && DG.goodies.nickname.switchTags){
-						var b = body.pkt.body.split("\n");
-						var from = b[1].split("=")[1],
-							nick = DG.goodies.nickname.nicks[from.toLowerCase()];
-						if(nick) b[1] = "from="+nick;
-						body.pkt.body = b.join("\n");
-					}
-					done(body);
-				});
+					dAmnX.preprocess('action', function(body, done){
+						if(DG.goodies.nickname.enabled && DG.goodies.nickname.switchTags){
+							var b = body.pkt.body.split("\n");
+							var from = b[1].split("=")[1].toLowerCase(),
+								nick = DG.goodies.nickname.nicks[from];
+							if(nick) b[1] = "from="+nick;
+							body.pkt.body = b.join("\n");
+						}
+						done(body);
+					});
 
-				dAmnX.preprocess('action', function(body, done){
-					if(DG.goodies.nickname.enabled && DG.goodies.nickname.switchTags){
-						var b = body.pkt.body.split("\n");
-						var from = b[1].split("=")[1].toLowerCase(),
-							nick = DG.goodies.nickname.nicks[from];
-						if(nick) b[1] = "from="+nick;
-						body.pkt.body = b.join("\n");
-					}
-					done(body);
-				});
+					dAmnX.preprocess('event', function(body, done){
+						if(DG.goodies.nickname.enabled && DG.goodies.nickname.switchTags){
 
-				dAmnX.preprocess('event', function(body, done){
-					if(DG.goodies.nickname.enabled && DG.goodies.nickname.switchTags){
+							var nick = DG.goodies.nickname.nicks[body.pkt.param.toLowerCase()];
+							if(nick) body.pkt.param = nick;
+							nick = null;
+							if(body.pkt.args && body.pkt.args.by)
+								nick = DG.goodies.nickname.nicks[body.pkt.args.by.toLowerCase()];
+							if(nick) body.pkt.args.by = nick;
+						}
+						done(body);
+					});
 
-						var nick = DG.goodies.nickname.nicks[body.pkt.param.toLowerCase()];
-						if(nick) body.pkt.param = nick;
-						nick = null;
-						if(body.pkt.args && body.pkt.args.by)
-							nick = DG.goodies.nickname.nicks[body.pkt.args.by.toLowerCase()];
-						if(nick) body.pkt.args.by = nick;
-					}
-					done(body);
-				});
+					dAmnX.preprocess('selfEvent', function(body, done){
+						if(DG.goodies.nickname.enabled && body.ev == 'kicked' && DG.goodies.nickname.switchTags){
+							var nick = DG.goodies.nickname.nicks[body.arg1.toLowerCase()]
+							if(nick) body.arg1 = nick;
+						}
+						done(body);
+					});
 
-				dAmnX.preprocess('selfEvent', function(body, done){
-					if(DG.goodies.nickname.enabled && body.ev == 'kicked' && DG.goodies.nickname.switchTags){
-						var nick = DG.goodies.nickname.nicks[body.arg1.toLowerCase()]
-						if(nick) body.arg1 = nick;
-					}
-					done(body);
-				});
+				}catch(ex){
+					console.log("dAmnGoodies Error (nick_preprocesses) : "+ex.message);
+				}
+
 			});
 
 			// Bob
 			this.goodie('bob', {enabled: false}, function(){
+				try{
 
-				dAmnX.command.bind('bob', 0, function(args){
-					if(args.toLowerCase() == "on"){
-						DG.goodies.bob.enabled = true;
-						dAmnX.notice('BOB!');
-					}else if(args.toLowerCase() == "off"){
-						DG.goodies.bob.enabled = false;
-						dAmnX.notice('No More Bob');
-					}else if(DG.goodies.bob.enabled){
-						DG.goodies.bob.enabled = false;
-						dAmnX.notice('No More Bob');
-					}else{
-						DG.goodies.bob.enabled = true;
-						dAmnX.notice('BOB!');
-					}
-					DG.save();
-				});
+					dAmnX.command.bind('bob', 0, function(args){
+						if(args.toLowerCase() == "on"){
+							DG.goodies.bob.enabled = true;
+							dAmnX.notice('BOB!');
+						}else if(args.toLowerCase() == "off"){
+							DG.goodies.bob.enabled = false;
+							dAmnX.notice('No More Bob');
+						}else if(DG.goodies.bob.enabled){
+							DG.goodies.bob.enabled = false;
+							dAmnX.notice('No More Bob');
+						}else{
+							DG.goodies.bob.enabled = true;
+							dAmnX.notice('BOB!');
+						}
+						DG.save();
+					});
 
-				dAmnX.preprocess('msg', function(body, done){
-					if(DG.goodies.bob.enabled){
-						var b = body.pkt.body.split("\n");
-						b[1] = "from=Bob";
-						body.pkt.body = b.join("\n");
-					}
-					done(body);
-				});
+				}catch(ex){
+					console.log("dAmnGoodies Error (bob_bind_command) : "+ex.message);
+				}
 
-				dAmnX.preprocess('action', function(body, done){
-					if(DG.goodies.bob.enabled){
-						var b = body.pkt.body.split("\n");
-						b[1] = "from=Bob";
-						body.pkt.body = b.join("\n");
-					}
-					done(body);
-				});
+				try{
 
-				dAmnX.preprocess('event', function(body, done){
-					if(DG.goodies.bob.enabled){
-						body.pkt.param = 'Bob';
-						if(body.pkt.args)
-							body.pkt.args.by = 'Bob';
-					}
-					done(body);
-				});
+					dAmnX.preprocess('msg', function(body, done){
+						if(DG.goodies.bob.enabled){
+							var b = body.pkt.body.split("\n");
+							b[1] = "from=Bob";
+							body.pkt.body = b.join("\n");
+						}
+						done(body);
+					});
 
-				dAmnX.preprocess('selfEvent', function(body, done){
-					if(DG.goodies.bob.enabled && body.ev == 'kicked'){
-						body.arg1 = 'Bob';
-					}
-					done(body);
-				});
+					dAmnX.preprocess('action', function(body, done){
+						if(DG.goodies.bob.enabled){
+							var b = body.pkt.body.split("\n");
+							b[1] = "from=Bob";
+							body.pkt.body = b.join("\n");
+						}
+						done(body);
+					});
+
+					dAmnX.preprocess('event', function(body, done){
+						if(DG.goodies.bob.enabled){
+							body.pkt.param = 'Bob';
+							if(body.pkt.args)
+								body.pkt.args.by = 'Bob';
+						}
+						done(body);
+					});
+
+					dAmnX.preprocess('selfEvent', function(body, done){
+						if(DG.goodies.bob.enabled && body.ev == 'kicked'){
+							body.arg1 = 'Bob';
+						}
+						done(body);
+					});
+
+				}catch(ex){
+					console.log("dAmnGoodies Error (bob_preprocesses) : "+ex.message);
+				}
 
 			});
 
