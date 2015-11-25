@@ -160,6 +160,7 @@ function init(){
 					var player = document.createElement("div");
 					player.id = "youtube."+id+"."+(new Date()).getTime();
 					dAmnX.chat.element(channel, player);
+					console.log(DG);
 					DG.youtube.videos[player.id] = null;
 					DG.youtube.loadVideo(player.id);
 				};
