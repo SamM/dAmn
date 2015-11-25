@@ -91,8 +91,6 @@ function init(){
 					if(username == dAmn_Client_Username){
 						// Remove all users
 						DG.target.usernames = [];
-						DG.target.styles.innerHTML = "";
-						return;
 					}
 					if(DG.target.usernames.indexOf(username) > -1){
 						// Remove User
@@ -106,8 +104,12 @@ function init(){
 						DG.target.usernames.push(username);
 					}
 
-					var classes = ".u-"+DG.target.usernames.concat([dAmn_Client_Username]).join(", .u-").toLowerCase();
-					DG.target.styles.innerHTML = ".msg { opacity: 0.5; } "+classes+" { opacity: 1!important; }";
+					if(DG.target.usernames.length == 0){
+						DG.target.styles.innerHTML = "";
+					}else{
+						var classes = ".u-"+DG.target.usernames.concat([dAmn_Client_Username]).join(", .u-").toLowerCase();
+						DG.target.styles.innerHTML = ".msg { opacity: 0.5; } "+classes+" { opacity: 1!important; }";
+					}
 				}
 
 				try{
