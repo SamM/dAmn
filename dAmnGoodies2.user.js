@@ -125,7 +125,7 @@ function init(){
 						var div = document.getElementsByClassName(body.time_class)[0];
 						var from = div.getElementsByClassName("from")[0];
 						var username = from.innerText;
-						username = username.replace("&lt;","").replace("&gt;","").replace(" ", "").replace("*","");
+						username = username.replace("<","").replace(">","").replace(" ", "").replace("*","");
 						if(username != ""){
 							from.addEventListener("click", function(e){
 								DG.target.toggle(username);
