@@ -312,7 +312,7 @@ function init(){
 
 					dAmnX.command.bind('swap', 1, function(args){
 						var a = args.split(" "),
-							pairs = DG.goodies.pairs;
+							pairs = DG.goodies.swap.pairs;
 						switch(a[0]){
 							case "on":
 								DG.goodies.swap.enabled = true;
