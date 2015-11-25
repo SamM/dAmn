@@ -79,9 +79,8 @@ function init(){
 			this.goodie('youtube', {enabled: true}, function(){
 				try{
 
-					dAmnX.command.bind('youtube', 1, function(args){
-						var a = args.split(" ");
-						switch(a[0]){
+					dAmnX.command.bind('youtube', 0, function(args){
+						switch(args){
 							case "":
 								DG.goodies.youtube.enabled = !DG.goodies.youtube.enabled;
 								DG.save();
