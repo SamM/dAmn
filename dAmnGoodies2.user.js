@@ -19,8 +19,6 @@ function init(){
 
 		var DG = this;
 
-		this.username = dAmn_Client_Username;
-
 		this.goodies = {};
 		this.goodie = function(name, data, setUp){
 			var newData;
@@ -65,6 +63,8 @@ function init(){
 		}
 
 		this.init = function(dAmnX){
+
+			this.username = dAmn_Client_Username;
 
 			if(!dAmnX){
 				alert("Error: dAmnX was not loaded automatically. Tell sumopiggy =P");
