@@ -80,24 +80,28 @@ function init(){
 					dAmnX.command.bind('goodies', 1, function(args){
 						var a = args.split(' ');
 						switch(a[0]){
-						case 'save':
-							dAmnX.notice('dAmnGoodies preferences were saved');
-							DG.save();
-						break;
-						case 'load':
-							DG.load();
-							dAmnX.notice('dAmnGoodies preferences were loaded');
-						break;
-						case 'reinstall':
-							window.setTimeout(function(){
-							if(confirm('Would you like to install the newest version of dAmnGoodies?')){
-								dAmnX.notice('Page will refresh automatically in 3 seconds');
-								DG.reinstall();
-							}
-							}, 50);
+							case '':
+							case 'version':
+								dAmnX.notice('dAmnGoodies version '+DG.version);
 							break;
+							case 'save':
+								dAmnX.notice('dAmnGoodies preferences were saved');
+								DG.save();
+							break;
+							case 'load':
+								DG.load();
+								dAmnX.notice('dAmnGoodies preferences were loaded');
+							break;
+							case 'reinstall':
+								window.setTimeout(function(){
+								if(confirm('Would you like to install the newest version of dAmnGoodies?')){
+									dAmnX.notice('Page will refresh automatically in 3 seconds');
+									DG.reinstall();
+								}
+								}, 50);
+								break;
 						default:
-							dAmnX.error('goodies', 'Unknown command. Try: load, save, reinstall');
+							dAmnX.error('goodies', 'Unknown command. Try: version, load, save, reinstall');
 						break;
 						}
 					});
