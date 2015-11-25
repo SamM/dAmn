@@ -1246,7 +1246,7 @@ function init(){
 
 		if(typeof dAmnX != "object"){
 			// Import dAmnX automatically and run dAmnGoodies.init when loaded (=P)
-			var dxurl = "https://cdn.rawgit.com/SamM/dAmn/beta/dAmnX.user.js?" + (new Date()).getDate();
+			var dxurl = "https://cdn.rawgit.com/SamM/dAmn/master/dAmnX.user.js?" + (new Date()).getDate();
 			DWait.ready(['jms/pages/chat07/chatpage.js', 'jms/pages/chat07/dAmn.js', 'jms/pages/chat07/dAmnChat.js'], function() {
 				var dximport = importScript(dxurl, function(){
 					dAmnGoodies.init(dAmnX);
