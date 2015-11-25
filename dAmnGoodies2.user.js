@@ -160,7 +160,6 @@ function init(){
 					var player = document.createElement("div");
 					player.id = "youtube."+id+"."+(new Date()).getTime();
 					dAmnX.chat.element(channel, player);
-					console.log(DG);
 					DG.youtube.videos[player.id] = null;
 					DG.youtube.loadVideo(player.id);
 				};
@@ -169,7 +168,6 @@ function init(){
 					if(DG.goodies.youtube.enabled){
 						var ytid = getYoutubeId(body);
 						if(ytid){
-							console.log("Youtube Id: "+ytid);
 							embedYouTubePlayer(body.pkt.param, ytid);
 						}
 					}
