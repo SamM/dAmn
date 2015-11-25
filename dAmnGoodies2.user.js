@@ -106,7 +106,7 @@ function init(){
 						DG.target.usernames.push(username);
 					}
 
-					var classes = ".u-"+usernames.concat([dAmn_Client_Username]).join(", .u-").toLowerCase();
+					var classes = ".u-"+DG.target.usernames.concat([dAmn_Client_Username]).join(", .u-").toLowerCase();
 					DG.target.styles.innerHTML = ".msg { opacity: 0.5; } "+classes+" { opacity: 1!important; }";
 				}
 
