@@ -106,25 +106,34 @@ function init(){
 					console.log("dAmnGoodies Error (youtube_commands) : "+ex.message);
 				}
 
-				function checkMsg(body){
-					var msg = body.pkt.body;
-					console.log(msg.split("\n"));
-					console.log(msg.split("\r"));
-					//console.log(dAmnX.parseMsg(msg));
+				var doParse = function(body){
+					var msg = dAmnX.parseMsg(body.pkt.body.split("\n")[3]);
+					var result = /(http(s)?\:\/\/)?(((www\.)?youtube\.com|youtu\.?be)\/(watch\?v=)?)(\w+)/gi.exec(msg);
+					if(result){
+						return result[7];
+					}else{
+						return null;
+					}
 				}
 
 				try{
 
 					dAmnX.preprocess('msg', function(body, done){
 						if(DG.goodies.youtube.enabled){
-							checkMsg(body);
+							var ytid = doParse(body);
+							if(ytid){
+								console.log("Youtube Id: "+ytid);
+							}
 						}
 						done(body);
 					});
 
 					dAmnX.preprocess('action', function(body, done){
 						if(DG.goodies.youtube.enabled){
-							checkMsg(body);
+							var ytid = doParse(body);
+							if(ytid){
+								console.log("Youtube Id: "+ytid);
+							}
 						}
 						done(body);
 					});
