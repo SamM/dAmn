@@ -1,28 +1,29 @@
 
 
+
 // ==UserScript==
 // @name           dAmnX
 // @description    A tool for dAmn that makes writing plugins simple
 // @author         Sam Mulqueen <sammulqueen.nz@gmail.com>
-// @version        1.0.1
+// @version        1.0.2
 // @include        http://chat.deviantart.com/chat/*
 // ==/UserScript==
 
-// dAmnX v1.0.1
+// dAmnX v1.0.2
 function dAmnX(){
-	var DX = this;
-	this.version = "1.0.1";
+	var dAmnX = DX = this;
+	this.version = "1.0.2";
 	this.isReady = true;
-	
+
 	this.reinstall = function(){
 		var url = window.location.href;
-		window.location = "http://github.com/SamM/dAmn/raw/master/dAmnX.user.js";
-		setTimeout(function(){ window.location = url }, 12000);
+		window.location = "https://cdn.rawgit.com/SamM/dAmn/master/dAmnX.user.js";
+		setTimeout(function(){ window.location = url }, 2000);
 	}
 	// NEW: Processes (to replace Actions);
 	this.preprocessors = {};
 	this.postprocessors = {};
-	this.process = function(id, object, process, endProcessing){ 
+	this.process = function(id, object, process, endProcessing){
 		if(typeof object == "function"){
 			endProcessing = process;
 			process = object;
@@ -60,30 +61,24 @@ function dAmnX(){
 
 	};
 	this.preprocess = function(id, processor){
-		if(!Array.isArray(this.preprocessors[id])) 
+		if(!Array.isArray(this.preprocessors[id]))
 			this.preprocessors[id] = [];
 		var prep=this.preprocessors[id];
-		if(typeof processor != "function") return prep;
-		else prep.push(processor);
+		if(typeof processor == "function") prep.push(processor);
 		return this;
 	}
-	this.postprocess = function(id, processor){ 
-		if(!Array.isArray(this.postprocessors[id])) 
+	this.postprocess = function(id, processor){
+		if(!Array.isArray(this.postprocessors[id]))
 			this.postprocessors[id] = [];
 		var post=this.postprocessors[id]
-		if(typeof processor != "function"){
-			return post;
-		}else{
-			if(!Array.isArray(post)) post=[];
-			post.push(processor);
-		}
+		if(typeof processor == "function") post.push(processor);
 		return this;
 	}
-	
+
 	//
 	// command
 	//
-	
+
 	this.command = {
    		commands: {},
    		bind: function(cmd, params, fn){
@@ -120,9 +115,9 @@ function dAmnX(){
             }
         }
    	}
-	
+
 	// Cookie Functions
-	
+
 	this.cookie = {
 		set: function(name, value, days) {
 			var expires;
@@ -132,14 +127,14 @@ function dAmnX(){
 				expires = date.toGMTString();
 			}
 			else expires = "";
-			
+
 			if(!value) value = "";
 			if(typeof value == number) value += "";
 			if(typeof value != 'string')
 				throw new Error("Second argument `value` must be a string");
 			if(value.indexOf(";")>-1)
 				throw new Error("Second argument `value` cannot contain any semi-colons; ");
-			
+
 			document.cookie = [name+"="+value, "expires="+expires, "path=/", "domain=chat.deviantart.com"].join("; ");
 		},
 		get: function(name) {
@@ -155,9 +150,9 @@ function dAmnX(){
 			DX.cookie.set(name,"",-1);
 		}
 	}
-	
+
 	// dAmn Send Methods
-	
+
 	this.send = {
     	action: function(channel, msg){
     		channel = DX.channelNs(channel);
@@ -233,7 +228,7 @@ function dAmnX(){
 	//
 	// Update Existing dAmn Methods
 	//
-	
+
 	(function updateDamn(){
 		var dAmnChat_onData_DX = dAmnChat_onData;
 		dAmnChat_onData = function (pkt) {
@@ -242,7 +237,7 @@ function dAmnX(){
 		};
 		dAmnChat.prototype.onData = dAmnChat_onData;
 		dAmnChat.prototype.onData_DX = dAmnChat_onData_DX;
-		
+
 		var dAmnChat_onClose_DX = dAmnChat_onClose;
 		dAmnChat_onClose = function(){
 			var self = this;
@@ -250,7 +245,7 @@ function dAmnX(){
 		};
 		dAmnChat.prototype.onClose = dAmnChat_onClose;
 		dAmnChat.prototype.onClose_DX = dAmnChat_onClose_DX;
-		
+
 		var dAmnChat_onResize_DX = dAmnChat_onResize;
 		dAmnChat_onResize = function(real) {
 			var self = this;
@@ -258,7 +253,7 @@ function dAmnX(){
 		};
 		dAmnChat.prototype.onResize = dAmnChat_onResize;
 		dAmnChat.prototype.onResize_DX = dAmnChat_onResize_DX;
-		
+
 		var dAmnChat_onDisconnect_DX = dAmnChat_onDisconnect;
 		dAmnChat_onDisconnect = function(reason) {
 			var self = this;
@@ -266,7 +261,7 @@ function dAmnX(){
 		};
 		dAmnChat.prototype.onDisconnect = dAmnChat_onDisconnect;
 		dAmnChat.prototype.onDisconnect_DX = dAmnChat_onDisconnect_DX;
-		
+
 		var dAmnChat_onShutdown_DX = dAmnChat_onShutdown;
 		dAmnChat_onShutdown = function() {
 			var self = this;
@@ -274,7 +269,7 @@ function dAmnX(){
 		};
 		dAmnChat.prototype.onShutdown = dAmnChat_onShutdown;
 		dAmnChat.prototype.onShutdown_DX = dAmnChat_onShutdown_DX;
-		
+
 		var dAmnChat_Send_DX = dAmnChat_Send;
 		dAmnChat_Send = function(cmd, channel, str) {
 			var self = this;
@@ -294,16 +289,16 @@ function dAmnX(){
 			var self = this;
 			DX.process('onTabActivate', {'id': id, 'real': real, 'self': this}, function(body, done){ dAmnChatTabs_activate_DX(body.id, body.real); done(body); });
 		};
-		
+
 		var dAmnChatInput_onKey_DX 	= dAmnChatInput_onKey;
 		dAmnChatInput_onKey = function(e,kc,force)
 		{
 			try{
 			var self = this,
 				el = this.chatinput_el;
-				
+
 			DX.process('onKey', {'e': e, 'keyCode': kc, 'force': force, 'self': this});
-			
+
 			if(kc != 9){
 				if (!self.multiline) {
 					self.prev_multiline_str = null
@@ -332,16 +327,16 @@ function dAmnX(){
 									self.history = self.history.slice(1);
 							}
 							self.history_pos = -1;
-							
+
 							if(self.cmds[cmd][0] && !args){
 								DX.error(cmd, "insufficient parameters");
 							}else{
 								DX.process('command', {'command': cmd, 'args': args||'', 'self': self}, function(b,c){ el.value = DX.command.trigger(b.command, b.args) || ''; c(b) });
 							}
-							
+
 							el.focus();
 							el.value = '';
-							
+
 							return false;
 						}
 					}
@@ -354,30 +349,30 @@ function dAmnX(){
 			return false;
 		}
 		};
-		
+
 		dAmnChatInput.prototype.onKey = dAmnChatInput_onKey;
 		dAmnChatInput.prototype.onKey_DX = dAmnChatInput_onKey_DX;
-		
+
 		dAmnChanChat.prototype.Init_DX 	= dAmnChanChat.prototype.Init;
 		dAmnChanChat.prototype.Init 	= function( cr, name, parent_el ){
 			var self = this;
 			DX.process('init', {'cr': cr, 'name': name, 'parent_el': parent_el, 'self': this},  function(b,c){ self.Init_DX(b.cr, b.name, b.parent_el); c(b); })
 		};
-		
+
 		dAmnChanMainChat.prototype.onEvent_DX = dAmnChanMainChat.prototype.onEvent;
 		dAmnChanMainChat.prototype.onEvent = function(pkt){
 			var self = this;
-			DX.process('event', {'pkt': pkt, 'self': this}, 
+			DX.process('event', {'pkt': pkt, 'self': this},
 				function(body, done){ self.onEvent_DX(body.pkt); done(body) });
 		}
-		
+
 		dAmnChanMainChat.prototype.onSelfEvent_DX = dAmnChanMainChat.prototype.onSelfEvent;
 		dAmnChanMainChat.prototype.onSelfEvent = function( ev, arg1, arg2 ){
 			var self = this;
-			DX.process('selfEvent', {'ev': ev, 'arg1': arg1, 'arg2': arg2, 'self': this}, 
+			DX.process('selfEvent', {'ev': ev, 'arg1': arg1, 'arg2': arg2, 'self': this},
 				function(body, done){ self.onSelfEvent_DX(body.ev, body.arg1, body.arg2); done(body) });
 		}
-		
+
 		var dAmnChatbase_dAmnCB_DX = dAmnChatbase_dAmnCB;
 		dAmnChatbase_dAmnCB = function(cmd,arg)
 		{
@@ -386,16 +381,16 @@ function dAmnX(){
 				d(o);
 			});
 		};
-		
+
 	}).call(this);
-	
+
 	(function initialEvents(){
 		//
 		// Events
 		//
-		this.preprocess('onTabActivate', function(body, done){ 
-			if(body.id != dAmnChatTab_active) 
-				DX.process('onSwitchTab', {'id': body.id, 'real': body.real, 'self': body.self}, function(b,c){ c(b) }); 
+		this.preprocess('onTabActivate', function(body, done){
+			if(body.id != dAmnChatTab_active)
+				DX.process('onSwitchTab', {'id': body.id, 'real': body.real, 'self': body.self}, function(b,c){ c(b) });
 			done(body);
 		})
 		this.preprocess('dAmnChatbase', function(o,d){
@@ -420,15 +415,15 @@ function dAmnX(){
 				case 'property': ev="property"; break;
 				case 'recv': 	ev="recv"; break;
 			}
-			if(ev) this.process(ev, {'pkt': b.pkt, 'self': b.self, 'stop': false}, 
+			if(ev) this.process(ev, {'pkt': b.pkt, 'self': b.self, 'stop': false},
 				function(body, done){ if(body.stop) b.stop=true; b.pkt = body.pkt; c(b); done(body); });
 			else c(b);
 		});
 		this.preprocess('property', function(b,c){
 			var ev = b.pkt.args.p;
 
-			if(["members", "privclasses", "title", "topic"].indexOf(ev)>-1) 
-				this.process(ev, {'pkt': b.pkt, 'self': b.self, 'stop': false}, 
+			if(["members", "privclasses", "title", "topic"].indexOf(ev)>-1)
+				this.process(ev, {'pkt': b.pkt, 'self': b.self, 'stop': false},
 					function(body, done){ if(body.stop) b.stop=true; b.pkt = body.pkt; c(b); done(body); });
 			else c(b);
 		})
@@ -445,7 +440,7 @@ function dAmnX(){
 				ev2 = "send"+ev[0].toUpperCase() + ev.slice(1);
 
 			if(["action", "msg", "npmsg"].indexOf(ev)>-1)
-				this.process(ev2, {'channel': b.channel, 'str': b.str, 'stop': false}, 
+				this.process(ev2, {'channel': b.channel, 'str': b.str, 'stop': false},
 					function(body, done){ if(body.stop) b.stop=true; b.channel = body.channel; b.str = body.str; c(b); done(body); });
 			else c(b);
 	    });
@@ -462,12 +457,12 @@ function dAmnX(){
 	//
 	// Utitily Functions
 	//
-	
+
 	Object.each = function(obj, func, thisv){
 		for(var k in obj)
 			func.call(thisv||this, obj[k], k);
 	}
-	
+
 	this.serialize = function(a){
         var s = [];
         if(a.constructor != Array)
@@ -491,7 +486,7 @@ function dAmnX(){
 
 	this.titles = {};
 	this.topics = {};
-	
+
     this.getChannelTitle = function(channel){
     	channel = this.channelNs(channel);
     	if(channel in this.titles)
@@ -508,7 +503,7 @@ function dAmnX(){
 	this.error = function(evt, err){
 		this.getChannel().channels.main.cr.channels.main.onErrorEvent(evt, err);
 	}
-	
+
 	this.notice = function(str, spanClass, timeout){
    		var chan = this.channelNs();
    		spanClass = spanClass?spanClass:"";
@@ -602,4 +597,3 @@ function execute_script(script, id){
 var jStorage_script=execute_script("("+function(){(function(a){function k(){var a=false;if("localStorage"in window){try{window.localStorage.setItem("_tmptest","tmpval");a=true;window.localStorage.removeItem("_tmptest")}catch(b){}}if(a){try{if(window.localStorage){c=window.localStorage;h="localStorage"}}catch(e){}}else if("globalStorage"in window){try{if(window.globalStorage){c=window.globalStorage[window.location.hostname];h="globalStorage"}}catch(f){}}else{d=document.createElement("link");if(d.addBehavior){d.style.behavior="url(#default#userData)";document.getElementsByTagName("head")[0].appendChild(d);d.load("jStorage");var g="{}";try{g=d.getAttribute("jStorage")}catch(i){}c.jStorage=g;h="userDataBehavior"}else{d=null;return}}l();o()}function l(){if(c.jStorage){try{b=g(String(c.jStorage))}catch(a){c.jStorage="{}"}}else{c.jStorage="{}"}e=c.jStorage?String(c.jStorage).length:0}function m(){try{c.jStorage=f(b);if(d){d.setAttribute("jStorage",c.jStorage);d.save("jStorage")}e=c.jStorage?String(c.jStorage).length:0}catch(a){}}function n(a){if(!a||typeof a!="string"&&typeof a!="number"){throw new TypeError("Key name must be string or numeric")}if(a=="__jstorage_meta"){throw new TypeError("Reserved key name")}return true}function o(){var a,c,d,e=Infinity,f=false;clearTimeout(i);if(!b.__jstorage_meta||typeof b.__jstorage_meta.TTL!="object"){return}a=+(new Date);d=b.__jstorage_meta.TTL;for(c in d){if(d.hasOwnProperty(c)){if(d[c]<=a){delete d[c];delete b[c];f=true}else if(d[c]<e){e=d[c]}}}if(e!=Infinity){i=setTimeout(o,e-a)}if(f){m()}}if(!a||!(a.toJSON||Object.toJSON||window.JSON)){throw new Error("jQuery, MooTools or Prototype needs to be loaded before jStorage!")}var b={},c={jStorage:"{}"},d=null,e=0,f=a.toJSON||Object.toJSON||window.JSON&&(JSON.encode||JSON.stringify),g=a.evalJSON||window.JSON&&(JSON.decode||JSON.parse)||function(a){return String(a).evalJSON()},h=false,i,j={isXML:function(a){var b=(a?a.ownerDocument||a:0).documentElement;return b?b.nodeName!=="HTML":false},encode:function(a){if(!this.isXML(a)){return false}try{return(new XMLSerializer).serializeToString(a)}catch(b){try{return a.xml}catch(c){}}return false},decode:function(a){var b="DOMParser"in window&&(new DOMParser).parseFromString||window.ActiveXObject&&function(a){var b=new ActiveXObject("Microsoft.XMLDOM");b.async="false";b.loadXML(a);return b},c;if(!b){return false}c=b.call("DOMParser"in window&&new DOMParser||window,a,"text/xml");return this.isXML(c)?c:false}};a.jStorage={version:"0.1.7.0",set:function(a,c,d){n(a);d=d||{};if(j.isXML(c)){c={_is_xml:true,xml:j.encode(c)}}else if(typeof c=="function"){c=null}else if(c&&typeof c=="object"){c=g(f(c))}b[a]=c;if(!isNaN(d.TTL)){this.setTTL(a,d.TTL)}else{m()}return c},get:function(a,c){n(a);if(a in b){if(b[a]&&typeof b[a]=="object"&&b[a]._is_xml&&b[a]._is_xml){return j.decode(b[a].xml)}else{return b[a]}}return typeof c=="undefined"?null:c},deleteKey:function(a){n(a);if(a in b){delete b[a];if(b.__jstorage_meta&&typeof b.__jstorage_meta.TTL=="object"&&a in b.__jstorage_meta.TTL){delete b.__jstorage_meta.TTL[a]}m();return true}return false},setTTL:function(a,c){var d=+(new Date);n(a);c=Number(c)||0;if(a in b){if(!b.__jstorage_meta){b.__jstorage_meta={}}if(!b.__jstorage_meta.TTL){b.__jstorage_meta.TTL={}}if(c>0){b.__jstorage_meta.TTL[a]=d+c}else{delete b.__jstorage_meta.TTL[a]}m();o();return true}return false},flush:function(){b={};m();return true},storageObj:function(){function a(){}a.prototype=b;return new a},index:function(){var a=[],c;for(c in b){if(b.hasOwnProperty(c)&&c!="__jstorage_meta"){a.push(c)}}return a},storageSize:function(){return e},currentBackend:function(){return h},storageAvailable:function(){return!!h},reInit:function(){var a,b;if(d&&d.addBehavior){a=document.createElement("link");d.parentNode.replaceChild(a,d);d=a;d.style.behavior="url(#default#userData)";document.getElementsByTagName("head")[0].appendChild(d);d.load("jStorage");b="{}";try{b=d.getAttribute("jStorage")}catch(e){}c.jStorage=b;h="userDataBehavior"}l()}};k()})(window.$||window.jQuery)}.toString()+")()")
 
 var DX_script = execute_script("var dAmnX = window.dAmnX = new (" + dAmnX.toString() + ")();", "dAmnX_Script");
-

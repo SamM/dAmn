@@ -9,7 +9,7 @@
 // ==/UserScript==
 
 function init(){
-	
+
 	Array.prototype.each = function(fn, thisv){
 		if(this.length){
 			for(var i=0; i<this.length; i++)
@@ -22,11 +22,11 @@ function init(){
 	}
 	var dAmnGoodies = new (function(){
 		this.version = "2.0.2";
-		
+
 		var DG = this;
-		
+
 		this.username = dAmn_Client_Username;
-		
+
 		this.goodies = {};
 		this.goodie = function(name, data, setUp){
 			var newData;
@@ -37,40 +37,36 @@ function init(){
 				this.goodies[name] = newData;
 			return this;
 		}
-		
+
 		this.save = function(){
 			$.jStorage.set("dAmnGoodies", DG.goodies);
 			return this;
 		}
-		
+
 		this.load = function(){
 			var loaded = $.jStorage.get("dAmnGoodies");
-			
+
 			if(!loaded || typeof loaded != 'object')  loaded = {};
-			
+
 			DG.goodies = loaded;
 			return this;
 		}
-		
+
 		this.reinstall = function(){
 			var url = window.location.href;
 			window.location = "http://github.com/SamM/dAmn/raw/master/dAmnGoodies2.user.js";
-			setTimeout(function(){ window.location = url }, 10000);
+			setTimeout(function(){ window.location = url }, 2000);
 		}
-		
-		this.init = function(){
-			//function VersionNumber(str){ var arr = str.split(".");for(var i=0;i<arr.length;i++)arr[i]=isNaN(Number(arr[i]))?arr[i]:Number(arr[i]); return arr; }
-			var required_version = "1.0.1";
-			if(typeof dAmnX == 'undefined'){
-				alert("dAmnX is not found.");
+
+		this.init = function(dAmnX){
+
+			if(!dAmnX){
+				alert("Error: dAmnX was not loaded automatically. Tell sumopiggy =P");
+				throw "a tantrum!";
 			}
-			else if(dAmnX.version != required_version && [required_version,dAmnX.version].sort().indexOf(dAmnX.version)==0){
-				if(confirm("This version of dAmnGoodies needs a newer version of dAmnX."))
-					dAmnX.reinstall();
-			}
-			
+
 			this.load();
-			
+
 			// Goodies
 			this.goodie('goodies', {enabled: true}, function(){
 				dAmnX.command.bind('goodies', 1, function(args){
@@ -104,7 +100,7 @@ function init(){
 					break;
 					}
 				});
-				
+
 				dAmnX.command.bind('js', 1, function(args){
 					var exec_js =  function(){
 						var js = new Function('DX','DG', args);
@@ -117,7 +113,7 @@ function init(){
 					}
 					window.setTimeout(exec_js, 50);
 				});
-				
+
 				dAmnX.command.bind('boot', 1, function(args){
 					var chan = dAmnX.getChannel(),
 						ns = chan.ns,
@@ -125,22 +121,22 @@ function init(){
 					var user = args.split(" ")[0],
 						kick_msg = args.slice(user.length + 1),
 						found = false;
-					
+
 					if(!user.length){
 						dAmnX.error('boot', 'Enter a username')
 						return;
 					}
-					
+
 					for(var m in members){
 						if(user.toLowerCase() == m.toLowerCase()){
 							found = m; break;
 						}
 					}
-					
+
 					if(found){
 						user = members[found];
 						var pc = user.info.pc;
-						
+
 						dAmnX.send.kick(ns, found, kick_msg||"You have been booted");
 						dAmnX.send.ban(ns, found);
 						window.setTimeout(function restore(){
@@ -151,19 +147,19 @@ function init(){
 						dAmnX.error('boot', 'Member not found');
 					}
 				})
-				
+
 				dAmnX.command.bind('global', 1, function(args){
 					for(var ns in dAmnChatTabs)
 						dAmnX.send.msg(ns, args)
 				})
-				
+
 				dAmnX.command.bind('multi', 1, function(args){
 					var a = args.split(' ');
 					if(a.length == 1){
 						dAmnX.error('multi', 'Supply more parameters')
 						return;
 					}
-					
+
 					var list, text, ns = dAmnX.channelNs();
 					if(a[1][0]=="("){
 						list = args.slice(args.indexOf("("));
@@ -176,12 +172,12 @@ function init(){
 						else list = [a[1]];
 						text = args.slice(a[0].length+1+a[1].length+1)
 					}
-					
+
 					if(!list.length){
 						dAmnX.error('multi', 'List empty')
 						return;
 					}
-					
+
 					function listOfUsernames(){
 						var l = [];
 						var mems = dAmnX.getChannel().members.members;
@@ -200,7 +196,7 @@ function init(){
 						});
 						return l;
 					}
-					
+
 					function listOfChannels(){
 						var l = [];
 						list.each(function(chan){
@@ -213,9 +209,9 @@ function init(){
 						list = l;
 						return list;
 					}
-					
+
 					var users = listOfUsernames();
-					
+
 					switch(a[0]){
 						case 'msg':
 							listOfChannels().each(function(chan){
@@ -284,7 +280,7 @@ function init(){
 							dAmnX.send.unban(ns, user);
 						});
 						break;
-						case 'whois': 
+						case 'whois':
 						if(users.length) users.each(function(user){
 							dAmnX.send.whois(user);
 						});
@@ -292,13 +288,13 @@ function init(){
 					}
 				});
 			});
-			
+
 			this.abbr = function(title, innerText){
 				return "<abbr title=\""+title+"\">"+(innerText||'')+"</abbr>";
 			}
-			
+
 			// Swap
-			
+
 			this.goodie('swap', {pairs: {'dAmnGoodies': ':thumb110193573:', 'https://': 'http://'}, enabled: true}, function(){
 				dAmnX.command.bind('swap', 1, function(args){
 					var a = args.split(" "),
@@ -349,11 +345,11 @@ function init(){
 						break;
 					}
 				});
-				
+
 				function escapeRegExp(str) {
 				  return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
 				}
-				
+
 				dAmnX.preprocess('send', function(body, done){
 					var msg = body.str;
 					if(DG.goodies.swap.enabled){
@@ -365,7 +361,7 @@ function init(){
 					done(body);
 				})
 			});
-			
+
 			// Nicknames
 			this.goodie('nickname', {nicks: {}, enabled: true, switchTags: true }, function(data){
 				if(typeof DG.goodies.nickname.switchTags == 'undefined'){
@@ -432,10 +428,10 @@ function init(){
 						break;
 					}
 				});
-				
+
 				dAmnX.preprocess('send', function(body, done){
 					var msg = " "+body.str+" ";
-					
+
 					if(DG.goodies.nickname.enabled){
 						var nicks = DG.goodies.nickname.nicks;
 						for(var nick in nicks){
@@ -444,13 +440,13 @@ function init(){
 							if(match)
 								msg = msg.replace(reg, match[1]+DG.abbr(nick, nicks[nick])+(match[2]=="::"?"":match[2]));
 						}
-						
+
 						body.str = msg.slice(1,-1);
 					}
-					
+
 					done(body);
 				})
-				
+
 				dAmnX.preprocess('msg', function(body, done){
 					if(DG.goodies.nickname.enabled && DG.goodies.nickname.switchTags){
 						var b = body.pkt.body.split("\n");
@@ -461,7 +457,7 @@ function init(){
 					}
 					done(body);
 				});
-				
+
 				dAmnX.preprocess('action', function(body, done){
 					if(DG.goodies.nickname.enabled && DG.goodies.nickname.switchTags){
 						var b = body.pkt.body.split("\n");
@@ -472,10 +468,10 @@ function init(){
 					}
 					done(body);
 				});
-				
+
 				dAmnX.preprocess('event', function(body, done){
 					if(DG.goodies.nickname.enabled && DG.goodies.nickname.switchTags){
-						
+
 						var nick = DG.goodies.nickname.nicks[body.pkt.param.toLowerCase()];
 						if(nick) body.pkt.param = nick;
 						nick = null;
@@ -485,7 +481,7 @@ function init(){
 					}
 					done(body);
 				});
-				
+
 				dAmnX.preprocess('selfEvent', function(body, done){
 					if(DG.goodies.nickname.enabled && body.ev == 'kicked' && DG.goodies.nickname.switchTags){
 						var nick = DG.goodies.nickname.nicks[body.arg1.toLowerCase()]
@@ -494,10 +490,10 @@ function init(){
 					done(body);
 				});
 			});
-			
+
 			// Bob
 			this.goodie('bob', {enabled: false}, function(){
-								
+
 				dAmnX.command.bind('bob', 0, function(args){
 					if(args.toLowerCase() == "on"){
 						DG.goodies.bob.enabled = true;
@@ -514,7 +510,7 @@ function init(){
 					}
 					DG.save();
 				});
-				
+
 				dAmnX.preprocess('msg', function(body, done){
 					if(DG.goodies.bob.enabled){
 						var b = body.pkt.body.split("\n");
@@ -523,7 +519,7 @@ function init(){
 					}
 					done(body);
 				});
-				
+
 				dAmnX.preprocess('action', function(body, done){
 					if(DG.goodies.bob.enabled){
 						var b = body.pkt.body.split("\n");
@@ -532,7 +528,7 @@ function init(){
 					}
 					done(body);
 				});
-				
+
 				dAmnX.preprocess('event', function(body, done){
 					if(DG.goodies.bob.enabled){
 						body.pkt.param = 'Bob';
@@ -541,16 +537,16 @@ function init(){
 					}
 					done(body);
 				});
-				
+
 				dAmnX.preprocess('selfEvent', function(body, done){
 					if(DG.goodies.bob.enabled && body.ev == 'kicked'){
 						body.arg1 = 'Bob';
 					}
 					done(body);
 				});
-				
+
 			});
-			
+
 			// Mimic
 			this.goodie('mimic', {mimicking: [], enabled: true, to: false, announce: true}, function(data){
 
@@ -558,7 +554,7 @@ function init(){
 					var a = args.split(" ");
 					var g = DG.goodies.mimic,
 						list = g.mimicking;
-						
+
 					switch(a[0]){
 						case "status":
 							dAmnX.notice('Mimicking is '+(g.enabled?"enabled":"disabled"));
@@ -586,7 +582,7 @@ function init(){
 						case "to":
 							if(!a[1] || !a[1].length)
 								g.to = false;
-							else 
+							else
 								g.to = dAmnX.channelNs(a[1]);
 							dAmnX.notice(g.to?'Mimicking to '+g.to:'Mimicking to same channel')
 							DG.save();
@@ -598,7 +594,7 @@ function init(){
 							else if(a[1].toLowerCase() == 'bob'){
 								dAmnX.error('mimic', 'You cannot mimic Bob :-|');
 							}
-							else if(list.indexOf(a[1].toLowerCase())>-1) 
+							else if(list.indexOf(a[1].toLowerCase())>-1)
 								dAmnX.error('mimic', 'You are already mimicking '+a[1]);
 							else {
 								DG.goodies.mimic.mimicking.push(a[1].toLowerCase());
@@ -609,7 +605,7 @@ function init(){
 							}
 							break;
 						case "stop":
-							if(list.indexOf(a[1].toLowerCase())==-1) 
+							if(list.indexOf(a[1].toLowerCase())==-1)
 								dAmnX.error('mimic', 'You are not mimicking '+a[1]);
 							else {
 								var l = [];
@@ -636,9 +632,9 @@ function init(){
 							dAmnX.error('mimic', 'unknown command '+a[0]);
 							break;
 					}
-					
+
 				});
-				
+
 				dAmnX.postprocess('msg', function(body, done){
 					if(DG.goodies.mimic.enabled){
 						var b = body.pkt.body.split("\n"),
@@ -649,7 +645,7 @@ function init(){
 					}
 					done(body);
 				});
-				
+
 				dAmnX.postprocess('action', function(body, done){
 					if(DG.goodies.mimic.enabled){
 						var b = body.pkt.body.split("\n"),
@@ -658,15 +654,15 @@ function init(){
 						if(dAmn_Client_Username != from && DG.goodies.mimic.mimicking.indexOf(from.toLowerCase())>-1)
 							dAmnX.send.action(dAmnX.channelNs(DG.goodies.mimic.to), msg)
 					}
-					
+
 					done(body);
 				});
-				
+
 			});
-			
+
 			// klaT
 			this.goodie('klat', {on: false}, function(){
-								
+
 				dAmnX.command.bind('klat', 0, function(){
 					if(DG.goodies.klat.on){
 						DG.goodies.klat.on = false;
@@ -677,7 +673,7 @@ function init(){
 					}
 					DG.save();
 				});
-				
+
 				dAmnX.preprocess('send', function(body, done){
 					if(DG.goodies.klat.on){
 						if(body.cmd == 'msg' || body.cmd == 'action'){
@@ -686,10 +682,10 @@ function init(){
 					}
 					done(body);
 				});
-				
+
 			});
-			
-			
+
+
 			// Jumble
 			this.goodie('jumble', {enabled: false}, function(){
 				dAmnX.command.bind('jumble', 0, function(a, done){
@@ -702,14 +698,14 @@ function init(){
 					}
 					DG.save();
 				})
-				
+
 				dAmnX.preprocess('send', function(body, done){
 					if(DG.goodies.jumble.enabled){
 						if(body.cmd == 'msg' || body.cmd == 'action' && body.str.length){
 							var words = DG.stripAbbrTags(body.str).split(" "),
 								punc = ".,;:'\"/\\[](){}=+?!~`#<>",
 								sentence = [];
-							
+
 							for(var i=0,w,s,m,e;i<words.length;i++){
 								w=words[i];
 								s=w[0];
@@ -725,18 +721,18 @@ function init(){
 								}
 								sentence.push(w);
 							}
-							
+
 							body.str = sentence.join(' ');
 						}
 					}
 					done(body);
 				});
 			});
-			
+
 			// Spleak
-			
+
 			this.goodie('spleak', {enabled: false}, function(){
-				
+
 				var A = "a e i o u ae ee oo ou ie ea ei eo ui ia ay ey oy oi ai au".split(" "),
 				    B = "b c d f g h j k l m n p qu r s t v w x y z br bl ch cr cl dr fr fl gr gl kl kr ph pr pl st sl spl sp str sc scr tr wr wh".split(" "),
 				    Z = " b c d f g h j k l m n p r s t w y z bs cs ds fs gs ks ls ms ns ps ph phs rs ts ws nt ck cks nts ".split(" ");
@@ -761,7 +757,7 @@ function init(){
 				    return w.join(c||'');
 				}
 				this.W = W;
-				
+
 				dAmnX.command.bind('spleak', 0, function(a, done){
 					if(DG.goodies.spleak.enabled){
 						DG.goodies.spleak.enabled = false;
@@ -772,7 +768,7 @@ function init(){
 					}
 					DG.save();
 				})
-				
+
 				dAmnX.preprocess('send', function(body, done){
 					if(DG.goodies.spleak.enabled){
 						if(body.cmd == 'msg' || body.cmd == 'action' && typeof body.str == "string" && body.str.length){
@@ -790,12 +786,12 @@ function init(){
 					}
 					done(body);
 				});
-				
+
 			});
-			
+
 			// Auto-Join
 
-			this.goodie('autojoin', {enabled: true, channels: []}, function(data){ 
+			this.goodie('autojoin', {enabled: true, channels: []}, function(data){
 				dAmnX.command.bind('autojoin', 0, function(args){
 					if(!args || !args.length){
 						dAmnX.notice("O_o");
@@ -860,23 +856,25 @@ function init(){
 						}
 					}
 				});
+
 				DG.autojoined = false;
 				dAmnX.preprocess('selfJoin', function(o,d){
-					if(DG.goodies.autojoin.enabled && DG.goodies.autojoin.channels.length > 0 && !DG.autojoined){
+					if(!DG.autojoined & DG.goodies.autojoin.enabled && DG.goodies.autojoin.channels.length > 0){
 						DG.autojoined = true;
 						console.log('Autojoin time :-D ')
 						for(var i=0;i<DG.goodies.autojoin.channels.length;i++){
-							if(!dAmnChatTab_active || dAmnChatTab_active.toLowerCase() != "chat:"+DG.goodies.autojoin.channels[i]) 
+							if(!dAmnChatTab_active || dAmnChatTab_active.toLowerCase() != "chat:"+DG.goodies.autojoin.channels[i])
 								dAmnX.send.join(DG.goodies.autojoin.channels[i]);
 						}
 					}
 					d(o);
 				});
+
 			})
-			
+
 			// Anti-kick
 			this.goodie('antikick', {enabled: true}, function(){
-								
+
 				dAmnX.command.bind('antikick', 0, function(){
 					if(DG.goodies.antikick.on){
 						DG.goodies.antikick.on = false;
@@ -887,16 +885,16 @@ function init(){
 					}
 					DG.save();
 				});
-				
+
 				dAmnX.preprocess('selfKicked', function(body, done){
 					if(DG.goodies.antikick.on){
 						dAmnX.send.join(body.self.ns);
 					}
 					done(body);
 				});
-				
+
 			});
-			
+
 			this.stripAbbrTags = function(str){
 				str = str.replace( /<abbr title="(.*)">.*<\/abbr>/gi, '$1' );
 				return str;
@@ -904,9 +902,9 @@ function init(){
 			this.stripColorsTags = function(str){
 				return str.replace(/colors:[a-zA-Z0-9]+:([a-zA-Z0-9])+/gi, "")
 			}
-			
+
 			this.goodie('shun', {enabled: true, taunts: ["Shun!","Shuuuuunnnnnnn!!!!", "SHUN!!!", "S H U N !", "SSHHUUNN!!", "shun? :o", "SSHHHUUUUNNNNN!!!!!!", "SHUN", "SHUNSHUNSHUNSHUNSHUNSHUN", "shun :|", "SHHHHUUUUUUUNNNN","I SHUN YOU", "SHUN THE NON-BELIEVER!", "Shunday? :o", "Isn't this shuntastic? :excited:", ":iconshunuplz:", "You are now Shunned :salute:"]}, function(){
-				
+
 				dAmnX.command.bind('shun', 0, function(args){
 					if(!args || args == ''){
 						DG.goodies.shun.enabled = DG.goodies.shun.enabled?false:true;
@@ -920,7 +918,7 @@ function init(){
 						}
 					}
 				})
-				
+
 				dAmnX.preprocess('action', function(body, done){
 					var msg = DG.stripColorsTags(DG.stripAbbrTags(dAmnX.parseMsg(body.pkt.body.split("\n")[3])));
 					if(DG.goodies.shun.enabled && msg.slice(0,6)=="shuns "){
@@ -933,9 +931,9 @@ function init(){
 					done(body)
 				});
 			})
-			
+
 			// Safe message. Send a message that won't be altered
-			
+
 			this.goodie('safe', {'keepSafe':0}, function(){
 				dAmnX.command.bind('safe', 0, function(args){
 					if(!args || args=='') args = 1
@@ -944,7 +942,7 @@ function init(){
 					DG.goodies.safe.keepSafe = args;
 					dAmnX.notice(args==1?'The next message is safe':'The next '+args+' messages are safe')
 				});
-				
+
 				dAmnX.preprocess('send', function(body, done){
 					if(DG.goodies.safe.keepSafe){
 						body.str = body.str2;
@@ -953,28 +951,39 @@ function init(){
 					done(body);
 				})
 			})
-			
-			
+
+
 			if(!$.jStorage) alert('No jStorage!');
 			else this.save();
-			
+
 		}
-		
-		var start_time = Date.now();
-		(function waitForDamnX(){
-			if(typeof dAmnX != 'undefined' && dAmnX.isReady) DG.init();
-			else if(Date.now() - start_time >= 15000){
-				if(confirm("dAmnGoodies requires the dAmnX userscript to operate. Click OK to install. ")){
-					var url = window.location.href;
-					window.location = "http://github.com/SamM/dAmn/raw/master/dAmnX.user.js";
-					window.setTimeout(function(){ window.location = url; }, 12000)
-				}
-			}
-			else window.setTimeout(waitForDamnX, 200);
-		})();
-		
+
+		function loadError (oError) {
+			alert("There was an error loading the dAmnX script, which is essential for dAmnGoodies to run. Tell sumopiggy =P");
+			throw new URIError("The script " + oError.target.src + " is not accessible.");
+		}
+
+		function importScript (sSrc, fOnload) {
+		  var oScript = document.createElement("script");
+		  oScript.type = "text\/javascript";
+		  oScript.onerror = loadError;
+		  if (fOnload) { oScript.onload = fOnload; }
+		  document.getElementsByTagName("head")[0].appendChild(oScript);
+		  oScript.src = sSrc;
+			return oScript;
+		}
+
+		if(typeof dAmnX != "object"){
+			// Import dAmnX automatically and run dAmnGoodies.init when loaded (=P)
+			var dxurl = "https://cdn.rawgit.com/SamM/dAmn/master/dAmnX.user.js?" + (new Date()).getDate();
+			var dximport = importScript(dxurl, function(){
+				dAmnGoodies.init(dAmnX);
+			});
+			dximport.id = "dAmnXImport";
+		}
+
 	})();
-	
+
 	return dAmnGoodies;
 }
 
