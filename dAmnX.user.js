@@ -18,7 +18,7 @@ function dAmnX(){
 
 	this.reinstall = function(){
 		var url = window.location.href;
-		window.location = "https://cdn.rawgit.com/SamM/dAmn/master/dAmnX.user.js";
+		window.location = "https://github.com/SamM/dAmn/master/dAmnX.user.js";
 		setTimeout(function(){ window.location = url }, 3000);
 	}
 	// NEW: Processes (to replace Actions);
