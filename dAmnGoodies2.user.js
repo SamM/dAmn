@@ -1146,49 +1146,6 @@ function init(){
 				return str.replace(/colors:[a-zA-Z0-9]+:([a-zA-Z0-9])+/gi, "")
 			}
 
-			this.goodie('shun', {enabled: true, taunts: ["Shun!","Shuuuuunnnnnnn!!!!", "SHUN!!!", "S H U N !", "SSHHUUNN!!", "shun? :o", "SSHHHUUUUNNNNN!!!!!!", "SHUN", "SHUNSHUNSHUNSHUNSHUNSHUN", "shun :|", "SHHHHUUUUUUUNNNN","I SHUN YOU", "SHUN THE NON-BELIEVER!", "Shunday? :o", "Isn't this shuntastic? :excited:", ":iconshunuplz:", "You are now Shunned :salute:"]}, function(){
-
-				try{
-
-					dAmnX.command.bind('shun', 0, function(args){
-						if(!args || args == ''){
-							DG.goodies.shun.enabled = DG.goodies.shun.enabled?false:true;
-							dAmnX.notice('Shun is now '+(DG.goodies.shun.enabled?"ON":"OFF"))
-							DG.save();
-						}else{
-							var shunned= args.split(" ")[0];
-							if(shunned == "") dAmnX.error('shun', 'Noone to shun');
-							else{
-								dAmnX.send.action(false, 'shuns '+shunned);
-							}
-						}
-					});
-
-				}catch(ex){
-					console.log("dAmnGoodies Error (shun_commands) : "+ex.message);
-				}
-
-				try{
-
-					dAmnX.preprocess('action', function(body, done){
-						var msg = DG.stripColorsTags(DG.stripAbbrTags(dAmnX.parseMsg(body.pkt.body.split("\n")[3])));
-						if(DG.goodies.shun.enabled && msg.slice(0,6)=="shuns "){
-							var shunned = msg.slice(6).split(" ")[0];
-							if(shunned.length){
-								var taunts = DG.goodies.shun.taunts;
-								dAmnX.send.msg(body.self.ns, shunned+": "+(taunts[Math.floor(Math.random()*taunts.length)]||"SHUN"))
-							}
-						}
-						done(body)
-					});
-
-				}catch(ex){
-					console.log("dAmnGoodies Error (shun_processing) : "+ex.message);
-				}
-
-
-			})
-
 			// Safe message. Send a message that won't be altered
 
 			this.goodie('safe', {'keepSafe':0}, function(){
