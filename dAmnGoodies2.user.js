@@ -123,13 +123,17 @@ function init(){
 
 					dAmnX.postprocess('makeText', function(body, done){
 						var div = document.getElementsByClassName(body.time_class)[0];
-						var from = div.getElementsByClassName("from")[0];
-						var username = from.innerText;
-						username = username.replace("<","").replace(">","").replace(" ", "").replace("*","");
-						if(username != ""){
-							from.addEventListener("click", function(e){
-								DG.target.toggle(username);
-							});
+						if(div){
+							var from = div.getElementsByClassName("from")[0];
+							if(from){
+								var username = from.innerText;
+								username = username.replace("<","").replace(">","").replace(" ", "").replace("*","");
+								if(username != ""){
+									from.addEventListener("click", function(e){
+										DG.target.toggle(username);
+									});
+								}
+							}
 						}
 						done(body);
 					});
