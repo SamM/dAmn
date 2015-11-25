@@ -85,7 +85,7 @@ function init(){
 				DG.youtube.loadVideo = function(elId){
 					if(YT && YT.Player){
 						var player = new YT.Player(elId, {
-		          height: '195',
+		          height: '240',
 		          width: '320',
 		          videoId: elId.split(".")[1],
 		          events: {
