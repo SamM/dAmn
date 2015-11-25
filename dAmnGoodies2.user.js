@@ -77,6 +77,35 @@ function init(){
 
 			// Youtube Player
 			this.goodie('youtube', {enabled: true}, function(){
+
+				DG.youtube = {};
+				DG.youtube.videos = {};
+				DG.youtube.onPlayerReady = function(event){};
+				DG.youtube.onPlayerStateChange = function(event){};
+				DG.youtube.loadVideo = function(elId){
+					if(YT && YT.Player){
+						var player = new YT.Player(elId, {
+		          height: '390',
+		          width: '640',
+		          videoId: elId.split(".")[1],
+		          events: {
+		            'onReady': DG.youtube.onPlayerReady,
+		            'onStateChange': DG.youtube.onPlayerStateChange
+		          }
+		        });
+						DG.youtube.videos[elId] = player;
+						return player;
+					}
+				}
+
+				window.onYouTubeIframeAPIReady = function(){
+					for(var elId in DG.youtube.videos){
+						if(!DG.youtube.videos[elId]){
+							DG.youtube.loadVideo(elId);
+						}
+					}
+				}
+
 				try{
 
 					dAmnX.command.bind('youtube', 0, function(args){
@@ -106,7 +135,18 @@ function init(){
 					console.log("dAmnGoodies Error (youtube_commands) : "+ex.message);
 				}
 
-				var doParse = function(body){
+				try{
+
+					var tag = document.createElement('script');
+					tag.src = "https://www.youtube.com/iframe_api";
+      		var firstScriptTag = document.getElementsByTagName('script')[0];
+      		firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+				}catch(ex){
+					console.log("dAmnGoodies Error (youtube_iframe_api) : "+ex.message);
+				}
+
+				var getYoutubeId = function(body){
 					var msg = dAmnX.parseMsg(body.pkt.body.split("\n")[3]);
 					var result = /(http(s)?\:\/\/)?(((www\.)?youtube\.com|youtu\.?be)\/(watch\?v=)?)(\w+)/gi.exec(msg);
 					if(result){
@@ -116,25 +156,33 @@ function init(){
 					}
 				}
 
+				var embedYouTubePlayer = function(channel, id){
+					var player = document.createElement("div");
+					player.id = "youtube."+id+"."+(new Date()).getTime();
+					dAmnX.chat.element(channel, player);
+					DG.videos[player.id] = null;
+					DG.loadVideo(player.id);
+				};
+
+				function doYouTube(body){
+					if(DG.goodies.youtube.enabled){
+						var ytid = getYoutubeId(body);
+						if(ytid){
+							console.log("Youtube Id: "+ytid);
+							embedYouTubePlayer(body.pkt.param, ytid);
+						}
+					}
+				}
+
 				try{
 
 					dAmnX.preprocess('msg', function(body, done){
-						if(DG.goodies.youtube.enabled){
-							var ytid = doParse(body);
-							if(ytid){
-								console.log("Youtube Id: "+ytid);
-							}
-						}
+						doYouTube(body);
 						done(body);
 					});
 
 					dAmnX.preprocess('action', function(body, done){
-						if(DG.goodies.youtube.enabled){
-							var ytid = doParse(body);
-							if(ytid){
-								console.log("Youtube Id: "+ytid);
-							}
-						}
+						doYouTube(body);
 						done(body);
 					});
 
@@ -1199,7 +1247,7 @@ function init(){
 
 		if(typeof dAmnX != "object"){
 			// Import dAmnX automatically and run dAmnGoodies.init when loaded (=P)
-			var dxurl = "https://cdn.rawgit.com/SamM/dAmn/master/dAmnX.user.js?" + (new Date()).getDate();
+			var dxurl = "https://cdn.rawgit.com/SamM/dAmn/beta/dAmnX.user.js?" + (new Date()).getDate();
 			DWait.ready(['jms/pages/chat07/chatpage.js', 'jms/pages/chat07/dAmn.js', 'jms/pages/chat07/dAmnChat.js'], function() {
 				var dximport = importScript(dxurl, function(){
 					dAmnGoodies.init(dAmnX);
