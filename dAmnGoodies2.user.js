@@ -80,7 +80,7 @@ function init(){
 			this.goodie('target', {enabled: true}, function(){
 
 				DG.target = {};
-				DG.target.username = null;
+				DG.target.usernames = [];
 
 				var styles = document.createElement("style");
 				styles.id = "DG_target_styles";
@@ -88,14 +88,26 @@ function init(){
 				DG.target.styles = styles;
 
 				DG.target.toggle = function(username){
-					if(username == dAmn_Client_Username || username == DG.target.username){
-						// Toggle off
+					if(username == dAmn_Client_Username){
+						// Remove all users
+						DG.target.usernames = [];
 						DG.target.styles.innerHTML = "";
-						DG.target.username = null;
-					}else{
-						DG.target.styles.innerHTML = ".msg { opacity: 0.5; } .u-"+username+", .u-"+dAmn_Client_Username+" { opacity: 1!important; }";
-						DG.target.username = username;
+						return;
 					}
+					if(DG.target.usernames.indexOf(username) > -1){
+						// Remove User
+						var usernames = [];
+						DG.target.usernames.forEach(function(name){
+							if(name != username) usernames.push(name);
+						});
+						DG.target.usernames = usernames;
+					}else{
+						// Add User
+						DG.target.usernames.push(username);
+					}
+
+					var classes = ".u-"+usernames.concat([dAmn_Client_Username]).join(", .u-").toLowerCase();
+					DG.target.styles.innerHTML = ".msg { opacity: 0.5; } "+classes+" { opacity: 1!important; }";
 				}
 
 				try{
