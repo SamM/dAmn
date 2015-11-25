@@ -106,18 +106,23 @@ function init(){
 					console.log("dAmnGoodies Error (youtube_commands) : "+ex.message);
 				}
 
+				function checkMsg(body){
+					var msg = body.pkt.body.split("\n")[2];
+					console.log(dAmnX.parseMsg(msg));
+				}
+
 				try{
 
 					dAmnX.preprocess('msg', function(body, done){
 						if(DG.goodies.youtube.enabled){
-							console.log(body);
+							checkMsg(body);
 						}
 						done(body);
 					});
 
 					dAmnX.preprocess('action', function(body, done){
 						if(DG.goodies.youtube.enabled){
-							console.log(body);
+							checkMsg(body);
 						}
 						done(body);
 					});
