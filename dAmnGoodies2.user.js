@@ -1,10 +1,10 @@
 
 
 // ==UserScript==
-// @name           dAmnGoodies
+// @name           dAmnGoodies Beta
 // @description    Novelty features for dAmn chat.
 // @author         Sam Mulqueen <sammulqueen.nz@gmail.com>
-// @version        2.1.0
+// @version        2.2.0
 // @include        http://chat.deviantart.com/chat/*
 // ==/UserScript==
 
@@ -15,7 +15,7 @@ function init(){
 		throw "Aw hell no";
 	}
 	var dAmnGoodies = new (function(){
-		this.version = "2.1.0";
+		this.version = "2.2.0";
 
 		var DG = this;
 
@@ -72,6 +72,62 @@ function init(){
 			}
 
 			this.load();
+
+			// Beta features
+
+			// Youtube Player
+			this.goodie('youtube', {enabled: true}, function(){
+				try{
+
+					dAmnX.command.bind('youtube', 1, function(args){
+						var a = args.split(" ");
+						switch(a[0]){
+							case "":
+								DG.goodies.youtube.enabled = !DG.goodies.youtube.enabled;
+								DG.save();
+								dAmnX.notice("YouTube "+(DG.goodies.youtube.enabled?"enabled":"disabled"));
+								break;
+							case "on":
+								DG.goodies.youtube.enabled = true;
+								DG.save();
+								dAmnX.notice("YouTube enabled");
+							break;
+							case "off":
+								DG.goodies.youtube.enabled = false;
+								DG.save();
+								dAmnX.notice("YouTube disabled");
+							break;
+							default:
+								dAmnX.error('swap', 'Unknown command. Try: on, off');
+							break;
+						}
+					});
+
+				}catch(ex){
+					console.log("dAmnGoodies Error (youtube_commands) : "+ex.message);
+				}
+
+				try{
+
+					dAmnX.preprocess('msg', function(body, done){
+						if(DG.goodies.youtube.enabled){
+							console.log(body);
+						}
+						done(body);
+					});
+
+					dAmnX.preprocess('action', function(body, done){
+						if(DG.goodies.youtube.enabled){
+							console.log(body);
+						}
+						done(body);
+					});
+
+				}catch(ex){
+					console.log("dAmnGoodies Error (youtube_processing) : "+ex.message);
+				}
+
+			});
 
 			// Goodies
 			this.goodie('goodies', {enabled: true}, function(){
