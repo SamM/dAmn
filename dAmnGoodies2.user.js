@@ -125,10 +125,12 @@ function init(){
 						var div = document.getElementsByClassName(body.time_class)[0];
 						var from = div.getElementsByClassName("from")[0];
 						var username = from.innerText;
-						username = username.substr(1,username.length-2);
-						from.addEventListener("click", function(e){
-							DG.target.toggle(username);
-						});
+						username = username.replace("&lt;","").replace("&gt;","").replace(" ", "").replace("*","");
+						if(username != ""){
+							from.addEventListener("click", function(e){
+								DG.target.toggle(username);
+							});
+						}
 						done(body);
 					});
 
