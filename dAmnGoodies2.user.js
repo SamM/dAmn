@@ -88,11 +88,11 @@ function init(){
 				DG.target.styles = styles;
 
 				DG.target.toggle = function(username){
+					console.log(username);
 					if(username == dAmn_Client_Username){
 						// Remove all users
 						DG.target.usernames = [];
-					}
-					if(DG.target.usernames.indexOf(username) > -1){
+					}else if(DG.target.usernames.indexOf(username) > -1){
 						// Remove User
 						var usernames = [];
 						DG.target.usernames.forEach(function(name){
