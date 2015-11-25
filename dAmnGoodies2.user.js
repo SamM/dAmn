@@ -86,13 +86,14 @@ function init(){
 
 					dAmnX.preprocess('makeText', function(body, done){
 						var time_class = "time__"+(new Date()).getTime();
-						body.style += " user__"+body.from+" "+time_class;
+						body.style += " "+time_class;
 						body.time_class = time_class;
 						done(body);
 					});
 
 					dAmnX.postprocess('makeText', function(body, done){
 						var div = document.getElementsByTagName(body.time_class);
+						console.log(body.time_class);
 						console.log(div);
 						done(body);
 					});
