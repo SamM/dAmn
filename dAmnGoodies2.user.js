@@ -107,8 +107,10 @@ function init(){
 				}
 
 				function checkMsg(body){
-					var msg = body.pkt.body.split("\n")[2];
-					console.log(dAmnX.parseMsg(msg));
+					var msg = body.pkt.body;
+					console.log(msg.split("\n"));
+					console.log(msg.split("\r"));
+					//console.log(dAmnX.parseMsg(msg));
 				}
 
 				try{
