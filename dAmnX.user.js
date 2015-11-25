@@ -5,7 +5,7 @@
 // @name           dAmnX
 // @description    A tool for dAmn that makes writing plugins simple
 // @author         Sam Mulqueen <sammulqueen.nz@gmail.com>
-// @version        1.1.0
+// @version        1.1.1
 // @include        http://chat.deviantart.com/chat/*
 // ==/UserScript==
 
@@ -13,7 +13,7 @@
 
 function dAmnX(){
 	var dAmnX = DX = this;
-	this.version = "1.1.0";
+	this.version = "1.1.1";
 	this.isReady = true;
 
 	this.reinstall = function(){
@@ -501,6 +501,44 @@ function dAmnX(){
     	if(channel in this.topics)
     		 return this.parseMsg(this.topics[channel]);
     	else return null;
+    }
+		this.chat = {};
+		this.chat.element = function(channel, el){
+			var chan = dAmnX.getChannel(channel);
+			if(chan){
+				var main = chan.channels.main;
+				var o = dAmn_MakeSpan( "msg " );
+        o.style.display='none';
+
+        var br = document.createElement('br');
+        main.chat_el.appendChild(br);
+
+        main.chat_el.appendChild(o);
+
+        var i = dAmn_AddSpan( o , "inner" );
+
+				i.appendChild(el);
+
+        main.addDiv( o, true, 0 );
+			}
+		};
+		this.chat.text = function(channel, style, from, msg, hilite){
+    	var chan = dAmnX.getChannel(channel);
+			if(chan){
+				chan.channels.main.makeText(style, from, msg, hilite);
+			}
+    }
+		this.chat.message = function(channel, from, msg){
+    	var chan = dAmnX.getChannel(channel);
+			if(chan){
+				chan.channels.main.onMsg(from, msg);
+			}
+    }
+		this.chat.action = function(channel, from, msg){
+			var chan = dAmnX.getChannel(channel);
+			if(chan){
+				chan.channels.main.onAction(from, msg);
+			}
     }
 
 	this.error = function(evt, err){

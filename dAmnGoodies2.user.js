@@ -1,10 +1,10 @@
 
 
 // ==UserScript==
-// @name           dAmnGoodies
+// @name           dAmnGoodies Beta
 // @description    Novelty features for dAmn chat.
 // @author         Sam Mulqueen <sammulqueen.nz@gmail.com>
-// @version        2.1.0
+// @version        2.2.1
 // @include        http://chat.deviantart.com/chat/*
 // ==/UserScript==
 
@@ -15,7 +15,7 @@ function init(){
 		throw "Aw hell no";
 	}
 	var dAmnGoodies = new (function(){
-		this.version = "2.1.0";
+		this.version = "2.2.1";
 
 		var DG = this;
 
@@ -72,6 +72,124 @@ function init(){
 			}
 
 			this.load();
+
+			// Beta features
+
+			// Youtube Player
+			this.goodie('youtube', {enabled: true}, function(){
+
+				DG.youtube = {};
+				DG.youtube.videos = {};
+				DG.youtube.onPlayerReady = function(event){};
+				DG.youtube.onPlayerStateChange = function(event){};
+				DG.youtube.loadVideo = function(elId){
+					if(YT && YT.Player){
+						var player = new YT.Player(elId, {
+		          height: '240',
+		          width: '320',
+		          videoId: elId.split(".")[1],
+		          events: {
+		            'onReady': DG.youtube.onPlayerReady,
+		            'onStateChange': DG.youtube.onPlayerStateChange
+		          }
+		        });
+						DG.youtube.videos[elId] = player;
+						return player;
+					}
+				}
+
+				window.onYouTubeIframeAPIReady = function(){
+					for(var elId in DG.youtube.videos){
+						if(!DG.youtube.videos[elId]){
+							DG.youtube.loadVideo(elId);
+						}
+					}
+				}
+
+				try{
+
+					dAmnX.command.bind('youtube', 0, function(args){
+						switch(args){
+							case "":
+								DG.goodies.youtube.enabled = !DG.goodies.youtube.enabled;
+								DG.save();
+								dAmnX.notice("YouTube "+(DG.goodies.youtube.enabled?"enabled":"disabled"));
+								break;
+							case "on":
+								DG.goodies.youtube.enabled = true;
+								DG.save();
+								dAmnX.notice("YouTube enabled");
+							break;
+							case "off":
+								DG.goodies.youtube.enabled = false;
+								DG.save();
+								dAmnX.notice("YouTube disabled");
+							break;
+							default:
+								dAmnX.error('swap', 'Unknown command. Try: on, off');
+							break;
+						}
+					});
+
+				}catch(ex){
+					console.log("dAmnGoodies Error (youtube_commands) : "+ex.message);
+				}
+
+				try{
+
+					var tag = document.createElement('script');
+					tag.src = "https://www.youtube.com/iframe_api";
+      		var firstScriptTag = document.getElementsByTagName('script')[0];
+      		firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+				}catch(ex){
+					console.log("dAmnGoodies Error (youtube_iframe_api) : "+ex.message);
+				}
+
+				var getYoutubeId = function(body){
+					var msg = dAmnX.parseMsg(body.pkt.body.split("\n")[3]);
+					var result = /(http(s)?\:\/\/)?(((www\.)?youtube\.com|youtu\.?be)\/(watch\?v=)?)(\w+)/gi.exec(msg);
+					if(result){
+						return result[7];
+					}else{
+						return null;
+					}
+				}
+
+				var embedYouTubePlayer = function(channel, id){
+					var player = document.createElement("div");
+					player.id = "youtube."+id+"."+(new Date()).getTime();
+					dAmnX.chat.element(channel, player);
+					DG.youtube.videos[player.id] = null;
+					DG.youtube.loadVideo(player.id);
+				};
+
+				function doYouTube(body){
+					if(DG.goodies.youtube.enabled){
+						var ytid = getYoutubeId(body);
+						if(ytid){
+							embedYouTubePlayer(body.pkt.param, ytid);
+						}
+					}
+				}
+
+				try{
+
+					dAmnX.postprocess('msg', function(body, done){
+						doYouTube(body);
+						done(body);
+					});
+
+					dAmnX.postprocess('action', function(body, done){
+						doYouTube(body);
+						done(body);
+					});
+
+				}catch(ex){
+					console.log("dAmnGoodies Error (youtube_processing) : "+ex.message);
+				}
+
+			});
 
 			// Goodies
 			this.goodie('goodies', {enabled: true}, function(){
@@ -1128,7 +1246,7 @@ function init(){
 
 		if(typeof dAmnX != "object"){
 			// Import dAmnX automatically and run dAmnGoodies.init when loaded (=P)
-			var dxurl = "https://cdn.rawgit.com/SamM/dAmn/master/dAmnX.user.js?" + (new Date()).getDate();
+			var dxurl = "https://cdn.rawgit.com/SamM/dAmn/beta/dAmnX.user.js?" + (new Date()).getDate();
 			DWait.ready(['jms/pages/chat07/chatpage.js', 'jms/pages/chat07/dAmn.js', 'jms/pages/chat07/dAmnChat.js'], function() {
 				var dximport = importScript(dxurl, function(){
 					dAmnGoodies.init(dAmnX);
