@@ -18,8 +18,8 @@ function DLH(){
       this.DLHmakeText( style, from, input_text, hilite );
     }
     dAmnChanChat.prototype.DLHmakeText = old_fn;
+  }
 
-  
   DWait.ready(['jms/pages/chat07/chatpage.js', 'jms/pages/chat07/dAmn.js', 'jms/pages/chat07/dAmnChat.js'], function() {
 		makeChanges();
 	});
