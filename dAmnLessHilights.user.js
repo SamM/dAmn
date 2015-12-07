@@ -4,7 +4,7 @@
 // @name           dAmn Less Hilights
 // @description    Cancels hilighting for part, disconnect & shutdown
 // @author         Sam Mulqueen <sammulqueen.nz@gmail.com>
-// @version        1.0.0
+// @version        1.0.1
 // @include        http://chat.deviantart.com/chat/*
 // ==/UserScript==
 
