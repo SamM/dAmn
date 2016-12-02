@@ -90,7 +90,7 @@ function DCDScript(){
     path.forEach(function(step){
       original = original[step];
     });
-    if(typeof original == "function" && typeof dAmn.replace[method] == "undefined"){
+    if(typeof original == "function" && typeof dAmn.replaced[method] == "undefined"){
       dAmn.original[method] = original;
       dAmn.replaced[method] = function(){
         var args = Array.prototype.slice.call(arguments);
