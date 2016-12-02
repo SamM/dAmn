@@ -15,7 +15,7 @@ function DCDScript(){
   dAmn.overide = {};
 
   var dAmn_methods = [
-    "dAmn_ChatPage_init", "dAmn_Client_Agent", "dAmn_Init",
+    "dAmn_superdAmn_detect", "dAmn_ChatPage_init", "dAmn_Init",
     "dAmn_AddLogCB", "dAmn_RemLogCB", "dAmn_Connect",
     "dAmn_Login", "dAmn_Logoff", "dAmn_Rem_dAmnCB",
     "dAmn_Add_dAmnCB", "dAmn_Join", "dAmn_Part", "dAmn_Send",
@@ -26,27 +26,22 @@ function DCDScript(){
     "dAmn_arrayAddUnique", "dAmn_arrayRemValue",
     "dAmn_arrayForEach", "dAmn_objForEach",
     "dAmn_objForEachString", "dAmn_objCount",
-    "dAmn_stringIEqual", "dAmn_print2Digits", "dAmn_printDate",
-    "dAmn_printElapsedTime", "dAmn_printElement",
-    "dAmn_doInsertAdjacentHTML", "dAmn_StringizePacket",
-    "dAmn_DeleteChildren", "dAmn_DeleteSelf",
-    "dAmn_classMatch", "dAmn_findParentWClass", "dAmn_MakeEl",
-    "dAmn_MakeDiv", "dAmn_MakeSpan", "dAmn_MakeTextInput",
-    "dAmn_MakeButton", "dAmn_AddEl", "dAmn_InsertEl",
-    "dAmn_AddDiv", "dAmn_AddSpan", "dAmn_AddNewEl",
-    "dAmn_getOverflow", "dAmn_getDisplay", "dAmn_getPosition",
+    "dAmn_stringIEqual", "dAmn_print2Digits",
+    "dAmn_printDate", "dAmn_printElapsedTime",
+    "dAmn_printElement", "dAmn_doInsertAdjacentHTML",
+    "dAmn_StringizePacket", "dAmn_DeleteChildren",
+    "dAmn_DeleteSelf", "dAmn_classMatch",
+    "dAmn_findParentWClass", "dAmn_MakeEl", "dAmn_MakeDiv",
+    "dAmn_MakeSpan", "dAmn_MakeTextInput", "dAmn_MakeButton",
+    "dAmn_AddEl", "dAmn_InsertEl", "dAmn_AddDiv",
+    "dAmn_AddSpan", "dAmn_AddNewEl", "dAmn_getOverflow",
+    "dAmn_getDisplay", "dAmn_getPosition",
     "dAmn_getBorderBottomWidth", "dAmn_cursorToEnd",
     "dAmn_resizeFlexyRow", "dAmn_resizeFlexyCol",
     "dAmn_resizeInverted", "dAmn_noHTML", "dAmn_Plugin_Java",
     "dAmn_Plugin_XPCOM", "dAmn_Plugin_Flash",
     "dAmn_PluginObj", "dAmn_Plugin_jsPing_timeout",
-    "dAmn_Plugin_jsWait_timeout", "dAmn_Client_RE",
-    "dAmn_Client_Server", "dAmn_Client_Username",
-    "dAmn_Client_Userinfo", "dAmn_Client_AuthToken",
-    "dAmn_Client_State", "dAmn_Client_Queues",
-    "dAmn_Client_LogCallback", "dAmn_LogCallbacks",
-    "dAmn_Callbacks", "dAmn_AutoPosObj",
-    "dAmn_Client_retry_connect", "dAmn_GetElement",
+    "dAmn_Plugin_jsWait_timeout", "dAmn_GetElement",
     "dAmn_AutoPos_ResizeEvent", "dAmn_Log", "dAmn_PopQueue",
     "dAmn_ProcessQueues", "dAmn_Command", "dAmn_Cmd",
     "dAmn_Command_TrySend", "dAmn_GenerateParsedPacket",
@@ -57,11 +52,10 @@ function DCDScript(){
     "dAmnChat_Remove", "dAmnChatTabs_rem",
     "dAmnChatTabs_activate_active", "dAmnChatTabs_activate",
     "dAmnChatTabs_activateNext", "dAmnChatTabs_flashTab",
-    "dAmnChatTabs_newData", "dAmnChatTabs",
-    "dAmnChatTabStack", "dAmnChatTab_active", "dAmnChats",
-    "dAmn_InvalidateLayout", "dAmn_CalculateLayout",
-    "dAmnChatbase_onResize", "dAmnChatbase_onResize_cb",
-    "dAmnChatbase_onLog", "dAmnChatbase_imgbox_onclick",
+    "dAmnChatTabs_newData", "dAmn_InvalidateLayout",
+    "dAmn_CalculateLayout", "dAmnChatbase_onResize",
+    "dAmnChatbase_onResize_cb", "dAmnChatbase_onLog",
+    "dAmnChatbase_imgbox_onclick",
     "dAmnChat_ImgBoxHover_enter", "dAmnChat_ImgBoxHover_exit",
     "dAmnChat_AddImgBox_Images", "dAmnChat_AddImgBox",
     "dAmnChatbase_onObjClose", "dAmnEscape", "dAmnChat",
@@ -86,37 +80,45 @@ function DCDScript(){
     "dAmnChatbase_updateAlerts", "dAmnChatbase_removeAlert",
     "dAmnChatbase_onHide", "dAmn_addTimedDiv",
     "dAmnChanMainChat", "dAmn_newRoomClick",
-    "dAmn_Client_PluginArea", "dAmn_Plugins",
-    "dAmn_Plugin_timeout", "dAmn_Plugin", "dAmnChat_header",
-    "dAmnChat_tabbar", "dAmnChat_serverlog_outer",
-    "dAmnChat_serverlog"
+    "dAmn_Plugin_timeout"
   ];
 
   dAmn.event = {};
   dAmn.event.hook = function(method){
-    if(typeof window[method] == "function" && typeof dAmn.replace[method] == "undefined"){
-      dAmn.original[method] = window[method];
+    var original = window;
+    var path = method.split(".");
+    path.forEach(function(step){
+      original = original[step];
+    });
+    if(typeof original == "function" && typeof dAmn.replace[method] == "undefined"){
+      dAmn.original[method] = original;
       dAmn.replaced[method] = function(){
         var args = Array.prototype.slice.call(arguments);
         var prevent = false;
-        var returnValue;
         var event = {
           args: args,
           preventDefault: function(){
             prevent = true;
           },
-          return: function(value){
-            returnValue = value;
-          }
+          returnValue: undefined,
+          after: function(returnValue){ return returnValue; }
         };
         dAmn.event.emit.apply(this, [method, event]);
         var methodReturn;
         if(!prevent){
           methodReturn = dAmn.original[method].apply(this, args);
+          if(typeof event.after == "function"){
+            event.after.call(this, methodReturn);
+          }
         }
-        return (typeof returnValue == "undefined")?methodReturn:returnValue;
+        return (typeof event.returnValue == "undefined")?methodReturn:event.returnValue;
       };
-      window[method] = dAmn.replaced[method]
+      var original = window;
+      path.forEach(function(step, i){
+        if(i == path.length-1){
+          original[step] = dAmn.replaced[method];
+        }
+      });
     }
   }
   dAmn.event.listeners = {};
@@ -143,7 +145,7 @@ function DCDScript(){
   dAmn.chat.stack = dAmnChatTabStack;
   dAmn.chat.getActive = function(returnObject){
     if(returnObject){
-      return dAmnChats[dAmnChatTab_active];
+      return dAmn.chat.chatrooms[dAmnChatTab_active];
     }
     return dAmnChatTab_active;
   }
