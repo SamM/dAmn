@@ -10,6 +10,7 @@ function DCDScript(){
   console.log(window);
 
   var dAmn = {};
+  window.dAmn = dAmn;
 
   dAmn.original = {};
   dAmn.overide = {};
@@ -153,7 +154,7 @@ function DCDScript(){
     }
     return dAmn.chat.tabs[dAmn.chat.getActive()];
   }
-  
+
 }
 
 function execute_script(script, id){
