@@ -7,7 +7,6 @@
 // ==/UserScript==
 
 function DCDScript(){
-  console.log(window);
 
   var dAmn = {};
   window.dAmn = dAmn;
