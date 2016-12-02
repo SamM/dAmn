@@ -2,7 +2,7 @@
 // @name           dAmn Collective Drawing
 // @description    Draw alongside other Deviants right from within dAmn
 // @author         Sam Mulqueen <sammulqueen.nz@gmail.com>
-// @version        0.0.1
+// @version        0.0.2
 // @include        http://chat.deviantart.com/chat/*
 // ==/UserScript==
 
@@ -12,7 +12,7 @@ function DCDScript(){
   window.dAmn = dAmn;
 
   dAmn.original = {};
-  dAmn.overide = {};
+  dAmn.replaced = {};
 
   var dAmn_methods = [
     "dAmn_superdAmn_detect", "dAmn_ChatPage_init", "dAmn_Init",
