@@ -319,13 +319,13 @@ function DCDScript(){
     var room = this.room_el;
     var parent = room.parentNode;
     this.drawToggle = typeof toggle == "boolean"?toggle:!this.drawToggle;
-    room.style.width = this.drawToggle?(parent.offsetWidth - room.offsetHeight)+"px":"100%";
     if(this.drawToggle){
       this.canvas.style.display = "block";
       Redraw.call(this);
       DCD.gui.update(true);
     }else{
       this.canvas.style.display = "none";
+      room.style.width = "100%";
       DCD.gui.update(false);
     }
     this.onResize();
@@ -390,16 +390,20 @@ function DCDScript(){
         break;
     }
   }
+  function ResetSize(){
+    var width = this.room_el.offsetHeight;
+    var height = this.room_el.offsetHeight;
+    this.canvas.width = width;
+    this.canvas.height = height;
+    this.room_el.style.width = (this.room_el.parentNode.offsetWidth - this.room_el.offsetHeight)+"px";
+  }
 
   function Redraw(){
     var steps = this.drawingSteps;
     var canvas = this.canvas;
     if(!canvas) return;
     var context = canvas.getContext("2d");
-    var width = this.room_el.offsetHeight;
-    var height = this.room_el.offsetHeight;
-    canvas.width = width;
-    canvas.height = height;
+    ResetSize.call(this);
     context.clearRect(0,0,canvas.width, canvas.height);
     context.save();
     context.translate(canvas.width/2, canvas.height/2);
