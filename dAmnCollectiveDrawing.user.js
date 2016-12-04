@@ -2,7 +2,7 @@
 // @name           dAmn Collective Drawing
 // @description    Draw alongside other Deviants right from within dAmn
 // @author         Sam Mulqueen <sammulqueen.nz@gmail.com>
-// @version        1.0.2
+// @version        1.0.5
 // @include        http://chat.deviantart.com/chat/*
 // ==/UserScript==
 
@@ -57,6 +57,9 @@ function dAmnHelperScript(){
             return (typeof event.returnValue == "undefined") ? methodReturn : event.returnValue;
           }
         };
+        if(["dAmnChat", "dAmnChanChat", "dAmnChanMainChat"].indexOf(method)>-1){
+          dAmn.replaced[method].prototype = dAmn.original[method].prototype;
+        }
         original = window;
         path.forEach(function(step, i){
           if(i == path.length-1){
@@ -68,6 +71,13 @@ function dAmnHelperScript(){
           var channels = dAmn.chat.chatrooms;
           for(var c in channels){
             channels[c].channels.main[path[path.length-1]] = dAmn.replaced[method];
+          }
+        }
+        if(method.indexOf("dAmnChat.prototype.") === 0){
+          dAmnChat.prototype[path[path.length-1]] = dAmn.replaced[method];
+          var channels = dAmn.chat.chatrooms;
+          for(var c in channels){
+            channels[c][path[path.length-1]] = dAmn.replaced[method];
           }
         }
       }
@@ -530,6 +540,19 @@ function DCDScript(){
       }
     });
 
+    dAmn.event.listen("dAmnChat.prototype.onData", function(event){
+      var pkt = event.args[0];
+      var ns = this.ns;
+      if(pkt.cmd=="property" && pkt.args.p == "title"){
+        event.after = function(){
+          if(!DCD.isSetup) return;
+          var chatroom = dAmn.chat.get(ns);
+          var found = dAmn.chat.getTitle(ns).toLowerCase().indexOf("(draw!)")>-1;
+          ToggleChatroom.call(chatroom, found);
+        };
+      }
+    });
+
     dAmn.chat.events.onAction(function(event){
       var user = event.args[0];
       var msg = event.args[1];
@@ -598,6 +621,7 @@ function DCDScript(){
         el.style.display = "block";
         el.innerHTML = "";
         var chatroom = dAmn.chat.get();
+        if(!chatroom) return;
         var settings = chatroom.drawSettings;
         if(chatroom.drawToggle){
           var color_el = DCD.gui.makeElement("color", settings.color, function(){
