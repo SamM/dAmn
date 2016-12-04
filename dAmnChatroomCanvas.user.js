@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name           dAmn Collective Drawing
+// @name           dAmn Chatroom Canvas
 // @description    Draw alongside other Deviants right from within dAmn
 // @author         Sam Mulqueen <sammulqueen.nz@gmail.com>
-// @version        1.0.5
+// @version        1.1.0
 // @include        http://chat.deviantart.com/chat/*
 // ==/UserScript==
 
@@ -174,15 +174,15 @@ function dAmnHelperScript(){
   return dAmn;
 }
 
-function DCDScript(){
-  var DCD = {};
+function DCCScript(){
+  var DCC = {};
 
-  DCD.toggle = function(){
+  DCC.toggle = function(){
     var chatroom = dAmn.chat.get();
     ToggleChatroom.call(chatroom);
   };
 
-  DCD.fade = function(alpha){
+  DCC.fade = function(alpha){
     var chatroom = dAmn.chat.get();
     FadeChatroom.call(chatroom,alpha);
   };
@@ -196,14 +196,14 @@ function DCDScript(){
 
   function SetupCanvas(){
     var parent = this.room_el.parentNode;
-    DCD.canvas = MakeCanvas(parent, 0);
-    DCD.canvas.style.backgroundColor = "white";
-    DCD.canvas.style.display = "none";
+    DCC.canvas = MakeCanvas(parent, 0);
+    DCC.canvas.style.backgroundColor = "white";
+    DCC.canvas.style.display = "none";
   }
 
   function SetupChatroom(){
     this.drawToggle = false;
-    this.canvas = DCD.canvas;
+    this.canvas = DCC.canvas;
     this.drawingSteps = [];
     this.drawSettings = {
       color: "#7F7F7F",
@@ -218,34 +218,34 @@ function DCDScript(){
     }, 1000);
 
   }
-  DCD.isDrawing = false;
-  DCD.click = {x:0,y:0};
-  DCD.move = {x:0, y:0};
-  DCD.linePath = [];
-  DCD.lineLimit = 100;
-  DCD.isSetup = false;
+  DCC.isDrawing = false;
+  DCC.click = {x:0,y:0};
+  DCC.move = {x:0, y:0};
+  DCC.linePath = [];
+  DCC.lineLimit = 100;
+  DCC.isSetup = false;
 
   function HandleMouseDown(e){
     var chatroom = dAmn.chat.get();
-    DCD.isDrawing = true;
-    DCD.move.x = DCD.click.x = e.offsetX-Math.round(chatroom.canvas.width/2);
-    DCD.move.y = DCD.click.y = e.offsetY-Math.round(chatroom.canvas.height/2);
-    DCD.linePath = [];
-    DCD.linePath.push([
-      DCD.click.x,
-      DCD.click.y
+    DCC.isDrawing = true;
+    DCC.move.x = DCC.click.x = e.offsetX-Math.round(chatroom.canvas.width/2);
+    DCC.move.y = DCC.click.y = e.offsetY-Math.round(chatroom.canvas.height/2);
+    DCC.linePath = [];
+    DCC.linePath.push([
+      DCC.click.x,
+      DCC.click.y
     ].join(","));
     Redraw.call(chatroom);
   }
 
   function HandleMouseUp(e){
-    if(DCD.isDrawing){
+    if(DCC.isDrawing){
       var chatroom = dAmn.chat.get();
       if(!hasEnableToken(chatroom)) return;
       var settings = chatroom.drawSettings;
       var color = settings.color;
-      var x = DCD.click.x;
-      var y = DCD.click.y;
+      var x = DCC.click.x;
+      var y = DCC.click.y;
       var endX = e.offsetX - Math.round(chatroom.canvas.width/2);
       var endY = e.offsetY - Math.round(chatroom.canvas.height/2);
       switch(settings.tool){
@@ -272,23 +272,23 @@ function DCDScript(){
         case "line":
           dAmn.send.action(chatroom.ns,
             "draws a line in "+color+" of width "+settings.lineWidth
-            +" along <abbr title=\"("+DCD.linePath.join(";")+")\">"+DCD.linePath.length+" points</abbr>");
+            +" along <abbr title=\"("+DCC.linePath.join(";")+")\">"+DCC.linePath.length+" points</abbr>");
           break;
       }
     }
-    DCD.isDrawing = false;
+    DCC.isDrawing = false;
   }
 
   function underCharacterLimit(){
-    return DCD.linePath.join(" ").length < 3000;
+    return DCC.linePath.join(" ").length < 3000;
   }
 
   function HandleMouseMove(e){
-    if(DCD.isDrawing){
+    if(DCC.isDrawing){
       var chatroom = dAmn.chat.get();
       var settings = chatroom.drawSettings;
-      DCD.move.x = e.offsetX-Math.round(chatroom.canvas.width/2);
-      DCD.move.y = e.offsetY-Math.round(chatroom.canvas.height/2);
+      DCC.move.x = e.offsetX-Math.round(chatroom.canvas.width/2);
+      DCC.move.y = e.offsetY-Math.round(chatroom.canvas.height/2);
       switch(settings.tool){
         case "circle":
           break;
@@ -296,7 +296,7 @@ function DCDScript(){
           break;
         case "line":
           if(underCharacterLimit()){
-            DCD.linePath.push([
+            DCC.linePath.push([
               e.offsetX-Math.round(chatroom.canvas.width/2),
               e.offsetY-Math.round(chatroom.canvas.height/2)
             ].join(","));
@@ -335,11 +335,11 @@ function DCDScript(){
     if(this.drawToggle){
       this.canvas.style.display = "block";
       Redraw.call(this);
-      DCD.gui.update(true);
+      DCC.gui.update(true);
     }else{
       this.canvas.style.display = "none";
       room.style.width = "100%";
-      DCD.gui.update(false);
+      DCC.gui.update(false);
     }
     this.onResize();
 
@@ -426,13 +426,13 @@ function DCDScript(){
       drawStep(context, steps[i]);
     }
 
-    if(DCD.isDrawing){
+    if(DCC.isDrawing){
       var settings = this.drawSettings;
       var color = settings.color;
-      var x = DCD.click.x;
-      var y = DCD.click.y;
-      var endX = DCD.move.x;
-      var endY = DCD.move.y;
+      var x = DCC.click.x;
+      var y = DCC.click.y;
+      var endX = DCC.move.x;
+      var endY = DCC.move.y;
       switch(settings.tool){
         case "circle":
           var radius = Math.sqrt(Math.pow(x-endX,2) + Math.pow(y-endY,2));
@@ -446,9 +446,9 @@ function DCDScript(){
         case "line":
           if(underCharacterLimit()){
             var points = [];
-            for(var i=0; i<DCD.linePath.length; i++){
-              if(isPoint(DCD.linePath[i])){
-                points.push(toPoint(DCD.linePath[i]));
+            for(var i=0; i<DCC.linePath.length; i++){
+              if(isPoint(DCC.linePath[i])){
+                points.push(toPoint(DCC.linePath[i]));
               }
             }
             drawLine(context, settings.lineWidth, points, color);
@@ -534,7 +534,7 @@ function DCDScript(){
 
   function SetupAll(){
     dAmn.chat.events.Clear(function(){
-      if(DCD.isSetup && this.cr){
+      if(DCC.isSetup && this.cr){
         var chatroom = dAmn.chat.get(this.cr.ns);
         ClearDrawing.call(chatroom);
       }
@@ -545,7 +545,7 @@ function DCDScript(){
       var ns = this.ns;
       if(pkt.cmd=="property" && pkt.args.p == "title"){
         event.after = function(){
-          if(!DCD.isSetup) return;
+          if(!DCC.isSetup) return;
           var chatroom = dAmn.chat.get(ns);
           var found = dAmn.chat.getTitle(ns).toLowerCase().indexOf("(draw!)")>-1;
           ToggleChatroom.call(chatroom, found);
@@ -562,15 +562,15 @@ function DCDScript(){
       }
     });
     dAmn.event.listen("dAmnChat", function(event){
-      if(!DCD.isSetup){
+      if(!DCC.isSetup){
         SetupGUI();
       }
       event.after = function(){
-        if(!DCD.canvas){
+        if(!DCC.canvas){
           SetupCanvas.call(this);
         }
         SetupChatroom.call(this);
-        DCD.isSetup = true;
+        DCC.isSetup = true;
       };
     });
 
@@ -586,13 +586,13 @@ function DCDScript(){
 
     var chatrooms = dAmn.chat.chatrooms;
     if(Object.keys(chatrooms).length){
-      if(!DCD.isSetup){
+      if(!DCC.isSetup){
         SetupGUI();
       }
-      if(!DCD.canvas){
+      if(!DCC.canvas){
         SetupCanvas.call(this);
       }
-      DCD.isSetup = true;
+      DCC.isSetup = true;
     }
     for(var c in chatrooms){
       SetupChatroom.call(chatrooms[c]);
@@ -600,22 +600,22 @@ function DCDScript(){
   }
 
   function SetupGUI(){
-    DCD.gui = {};
-    DCD.gui.el = document.createElement("div");
-    DCD.gui.alignRight = function(){
-      DCD.gui.el.style.float = "right";
+    DCC.gui = {};
+    DCC.gui.el = document.createElement("div");
+    DCC.gui.alignRight = function(){
+      DCC.gui.el.style.float = "right";
     }
-    DCD.gui.el.style.marginTop = "-7px";
-    DCD.gui.alignRight();
-    DCD.gui.parent = document.getElementsByClassName("tabbar")[0];
-    DCD.gui.parent.appendChild(DCD.gui.el);
-    DCD.gui.enabled = false;
-    DCD.gui.update = function(enabled){
-      var el = DCD.gui.el;
+    DCC.gui.el.style.marginTop = "-7px";
+    DCC.gui.alignRight();
+    DCC.gui.parent = document.getElementsByClassName("tabbar")[0];
+    DCC.gui.parent.appendChild(DCC.gui.el);
+    DCC.gui.enabled = false;
+    DCC.gui.update = function(enabled){
+      var el = DCC.gui.el;
       if(typeof enabled == "undefined"){
-        enabled = DCD.gui.enabled;
+        enabled = DCC.gui.enabled;
       }else{
-        DCD.gui.enabled = enabled;
+        DCC.gui.enabled = enabled;
       }
       if(enabled){
         el.style.display = "block";
@@ -624,12 +624,12 @@ function DCDScript(){
         if(!chatroom) return;
         var settings = chatroom.drawSettings;
         if(chatroom.drawToggle){
-          var color_el = DCD.gui.makeElement("color", settings.color, function(){
+          var color_el = DCC.gui.makeElement("color", settings.color, function(){
             chatroom.drawSettings.color = this.value;
           });
           el.appendChild(color_el);
           if(settings.tool=="line"){
-            var width_el = DCD.gui.makeElement("text", "", settings.lineWidth,
+            var width_el = DCC.gui.makeElement("text", "", settings.lineWidth,
             function(){
               if(isNaN(parseInt(this.value))){
                 this.value = chatroom.drawSettings.lineWidth;
@@ -639,31 +639,31 @@ function DCDScript(){
             });
             el.appendChild(width_el);
           }
-          var line_el = DCD.gui.makeElement("toggle", "Line", settings.tool=="line",
+          var line_el = DCC.gui.makeElement("toggle", "Line", settings.tool=="line",
           function(value){
             chatroom.drawSettings.tool = "line";
-            DCD.gui.update();
+            DCC.gui.update();
           });
           el.appendChild(line_el);
-          var circle_el = DCD.gui.makeElement("toggle", "Circle", settings.tool=="circle",
+          var circle_el = DCC.gui.makeElement("toggle", "Circle", settings.tool=="circle",
           function(value){
             chatroom.drawSettings.tool = "circle";
-            DCD.gui.update();
+            DCC.gui.update();
           });
           el.appendChild(circle_el);
-          var rectangle_el = DCD.gui.makeElement("toggle", "Rectangle", settings.tool=="rectangle",
+          var rectangle_el = DCC.gui.makeElement("toggle", "Rectangle", settings.tool=="rectangle",
           function(value){
             chatroom.drawSettings.tool = "rectangle";
-            DCD.gui.update();
+            DCC.gui.update();
           });
           el.appendChild(rectangle_el);
 
         }
       }else{
-        DCD.gui.el.style.display = "none";
+        DCC.gui.el.style.display = "none";
       }
     }
-    DCD.gui.makeElement = function(type){
+    DCC.gui.makeElement = function(type){
       var args = Array.prototype.slice.call(arguments, 1);
       var el = document.createElement('span');
       el.style.marginRight = "4px";
@@ -716,7 +716,7 @@ function DCDScript(){
     SetupAll();
 });
 
-  return DCD;
+  return DCC;
 }
 
 function execute_script(script, id){
@@ -728,4 +728,4 @@ function execute_script(script, id){
 }
 execute_script("var dAmn = window.dAmn = ("+dAmnHelperScript.toString()+")();",
 "dAmnHelper_Script");
-execute_script("var DCD = window.DCD = ("+DCDScript.toString()+")();", "dAmnCollectiveDrawing_Script");
+execute_script("var DCC = window.DCC = ("+DCCScript.toString()+")();", "dAmnCollectiveDrawing_Script");
