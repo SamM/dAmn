@@ -210,13 +210,6 @@ function DCCScript(){
       lineWidth: 2,
       tool: "line"
     };
-    var chatroom = this;
-    setTimeout(function(){
-      chatroom.canvas.style.display = "block";
-      ToggleChatroom.call(chatroom, true);
-      Redraw.call(chatroom);
-    }, 1000);
-
   }
   DCC.isDrawing = false;
   DCC.click = {x:0,y:0};
