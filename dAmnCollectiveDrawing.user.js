@@ -2,7 +2,7 @@
 // @name           dAmn Collective Drawing
 // @description    Draw alongside other Deviants right from within dAmn
 // @author         Sam Mulqueen <sammulqueen.nz@gmail.com>
-// @version        1.0.1
+// @version        1.0.2
 // @include        http://chat.deviantart.com/chat/*
 // ==/UserScript==
 
@@ -398,10 +398,11 @@ function DCDScript(){
     var height = this.room_el.offsetHeight;
     this.canvas.width = width;
     this.canvas.height = height;
-    this.room_el.style.width = (this.room_el.parentNode.offsetWidth - this.room_el.offsetHeight)+"px";
+    this.room_el.style.width = this.drawToggle?(this.room_el.parentNode.offsetWidth - this.room_el.offsetHeight)+"px":"100%";
   }
 
   function Redraw(){
+    if(!this.drawToggle) return;
     var steps = this.drawingSteps;
     var canvas = this.canvas;
     if(!canvas) return;
