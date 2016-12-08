@@ -35,13 +35,14 @@ function dAmnX(){
 			var i=0;
 			function preprocessing(o){
 				if(!prep || i>=prep.length) callprocess(o);
-				i++;
-				else {try{
-					prep[i].call(self, o, preprocessing);
-				}catch(ex){
-					console.log('preprocessor error: '+ex);
-					preprocessing(o);
-				}
+				else {
+					i++;
+					try{
+						prep[i].call(self, o, preprocessing);
+					}catch(ex){
+						console.log('preprocessor error: '+ex);
+						preprocessing(o);
+					}
 				}
 			}
 			function callprocess(o){
