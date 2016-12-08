@@ -36,10 +36,11 @@ function dAmnX(){
 			function preprocessing(o){
 				if(!prep || i>=prep.length) callprocess(o);
 				else {
+					var j = i;
 					i++;
 					try{
-						if(typeof prep[i] == "function"){
-							prep[i].call(self, o, preprocessing);
+						if(typeof prep[j] == "function"){
+							prep[j].call(self, o, preprocessing);
 						}
 					}catch(ex){
 						console.log('preprocessor error: '+ex);
@@ -53,10 +54,11 @@ function dAmnX(){
 			}
 			function postprocessing(o){
 				if(Array.isArray(post) && i<post.length) {
+					var j = i;
 					i++;
 					try{
-						if(typeof post[i] == "function"){
-							post[i].call(self, o, postprocessing);
+						if(typeof post[j] == "function"){
+							post[j].call(self, o, postprocessing);
 						}
 					}catch(ex){
 						console.log('postprocessor error: '+ex);
