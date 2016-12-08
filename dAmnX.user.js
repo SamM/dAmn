@@ -38,7 +38,9 @@ function dAmnX(){
 				else {
 					i++;
 					try{
-						prep[i].call(self, o, preprocessing);
+						if(typeof prep[i] == "function"){
+							prep[i].call(self, o, preprocessing);
+						}
 					}catch(ex){
 						console.log('preprocessor error: '+ex);
 						preprocessing(o);
@@ -53,7 +55,9 @@ function dAmnX(){
 				if(Array.isArray(post) && i<post.length) {
 					i++;
 					try{
-						post[i].call(self, o, postprocessing);
+						if(typeof post[i] == "function"){
+							post[i].call(self, o, postprocessing);
+						}
 					}catch(ex){
 						console.log('postprocessor error: '+ex);
 						postprocessing(o)
