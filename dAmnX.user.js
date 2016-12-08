@@ -5,15 +5,15 @@
 // @name           dAmnX
 // @description    A tool for dAmn that makes writing plugins simple
 // @author         Sam Mulqueen <sammulqueen.nz@gmail.com>
-// @version        1.1.4
+// @version        1.1.5
 // @include        http://chat.deviantart.com/chat/*
 // ==/UserScript==
 
-// dAmnX v1.1.4
+// dAmnX v1.1.5
 
 function dAmnX(){
 	var dAmnX = DX = this;
-	this.version = "1.1.4";
+	this.version = "1.1.5";
 	this.isReady = true;
 
 	this.reinstall = function(){
@@ -35,8 +35,9 @@ function dAmnX(){
 			var i=0;
 			function preprocessing(o){
 				if(!prep || i>=prep.length) callprocess(o);
+				i++;
 				else {try{
-					prep[i++].call(self, o, preprocessing);
+					prep[i].call(self, o, preprocessing);
 				}catch(ex){
 					console.log('preprocessor error: '+ex);
 					preprocessing(o);
@@ -49,8 +50,9 @@ function dAmnX(){
 			}
 			function postprocessing(o){
 				if(Array.isArray(post) && i<post.length) {
+					i++;
 					try{
-						post[i++].call(self, o, postprocessing);
+						post[i].call(self, o, postprocessing);
 					}catch(ex){
 						console.log('postprocessor error: '+ex);
 						postprocessing(o)
