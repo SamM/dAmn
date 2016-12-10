@@ -2,7 +2,7 @@
 // @name           dAmn Chatroom Canvas
 // @description    Draw alongside other Deviants right from within dAmn
 // @author         Sam Mulqueen <sammulqueen.nz@gmail.com>
-// @version        1.5.0
+// @version        1.6.0
 // @include        http://chat.deviantart.com/chat/*
 // ==/UserScript==
 
@@ -19,6 +19,7 @@ function CCScript(){
   CC.drawing = {};
   CC.drawing.canvas = null;
   CC.drawing.isToggled = false;
+  CC.drawing.isFullscreen = false;
   CC.drawing.setup = function(){
     if(CC.drawing.canvas) return;
     var canvas = document.createElement("canvas");
@@ -28,6 +29,7 @@ function CCScript(){
     canvas.style.top = "0px";
     canvas.style.right = "0px";
     canvas.onmouseup = CC.mouse.onUp;
+    document.onmouseup = CC.mouse.onUpDoc;
     canvas.onmousedown = CC.mouse.onDown;
     canvas.onmousemove = CC.mouse.onMove;
     canvas.onclick = CC.mouse.onUp;
@@ -47,9 +49,11 @@ function CCScript(){
   CC.drawing.resize = function(width, height){
     if(!arguments.length){
       var chatroom = dAmn.chat.get();
-      var square = chatroom.room_el.parentNode.offsetHeight;
-      width = square;
-      height = square;
+      var width = chatroom.room_el.parentNode.offsetWidth;
+      var height = chatroom.room_el.parentNode.offsetHeight;
+      if(!CC.drawing.isFullscreen){
+        width = height;
+      }
     }
     var canvas = CC.drawing.canvas;
     canvas.width = width;
@@ -102,7 +106,12 @@ function CCScript(){
     if(typeof offset == "undefined"){
       offset = CC.chatroom.isToggled?0:chatroom.room_el.parentNode.offsetHeight;
     }
-    chatroom.room_el.style.right = offset+"px";
+    chatroom.room_el.style.display = "block";
+    if(CC.chatroom.isHidden){
+      chatroom.room_el.style.display = "none";
+    }else{
+      chatroom.room_el.style.right = offset+"px";
+    }
   };
   CC.chatroom.toggle = function(enable){
     var chatroom = dAmn.chat.get();
@@ -117,6 +126,44 @@ function CCScript(){
   CC.mouse = {};
   CC.mouse.click = {x:0,y:0};
   CC.mouse.position = {x:0,y:0};
+  CC.mouse.onUpDoc = function(e){
+    var chatroom = dAmn.chat.get();
+    if(CC.isDrawing){
+      var canvas = CC.drawing.canvas;
+      var channel = chatroom.ns.split(":")[1];
+      var settings = CC.draw.settings[chatroom.ns.toLowerCase()];
+      var color = settings.color;
+      var x = CC.mouse.click.x;
+      var y = CC.mouse.click.y;
+      var endX = CC.mouse.position.x;
+      var endY = CC.mouse.position.y;
+      switch(settings.tool){
+        case "circle":
+          var radius = Math.round(Math.sqrt(Math.pow(x-endX,2) + Math.pow(y-endY,2)));
+          if(radius === 0){
+            radius = settings.lineWidth;
+          }
+          dAmn.send.action(CC.home.ns,
+          "draws in #"+channel+": a circle in "+color+" of radius "+radius+" at "+x+","+y);
+          break;
+        case "rectangle":
+          if(x==endX){
+            endX = x+settings.lineWidth;
+          }
+          if(y==endY){
+            endY = y+settings.lineWidth;
+          }
+          dAmn.send.action(CC.home.ns,
+            "draws in #"+channel+": a rectangle in "+color+" from "+x+","+y+" to "+endX+","+endY);
+          break;
+        case "line":
+          dAmn.send.action(CC.home.ns,
+            "draws in #"+channel+": a line in "+color+" of width "+settings.lineWidth+" along <abbr title=\"("+CC.draw.tempLine.join(";")+")\">"+CC.draw.tempLine.length+" points</abbr>");
+          break;
+      }
+    }
+    CC.isDrawing = false;
+  };
   CC.mouse.onUp = function(e){
     var chatroom = dAmn.chat.get();
     if(CC.isDrawing){
@@ -399,7 +446,24 @@ function CCScript(){
 
   CC.onEscapeToggle = function(e){
     if(e.keyCode == 27){
-      CC.toggle();
+      var chatroom = dAmn.chat.get();
+      if(CC.isToggled){
+        if(CC.drawing.isFullscreen){
+          CC.drawing.isFullscreen = false;
+          CC.chatroom.isHidden = false;
+          CC.toggle(false);
+        }else{
+          CC.drawing.isFullscreen = true;
+          CC.chatroom.isHidden = true;
+          CC.toggle(true);
+          CC.draw.drawing(chatroom.ns);
+        }
+      }else{
+        CC.drawing.isFullscreen = false;
+        CC.chatroom.isHidden = false;
+        CC.toggle(true);
+        CC.draw.drawing(chatroom.ns);
+      }
     }
   };
 
@@ -556,7 +620,7 @@ function CCScript(){
 			var ca = document.cookie.split('; ');
 			for(var i=0;i < ca.length;i++) {
 				if(ca[i].indexOf(nameEQ)==0)
-					return ca[i].slice(nameEQ.length+1);
+					return ca[i].slice(nameEQ.length);
 			}
 			return null;
 		},
