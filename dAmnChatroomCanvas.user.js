@@ -2,7 +2,7 @@
 // @name           dAmn Chatroom Canvas
 // @description    Draw alongside other Deviants right from within dAmn
 // @author         Sam Mulqueen <sammulqueen.nz@gmail.com>
-// @version        1.6.0
+// @version        1.6.1
 // @include        http://chat.deviantart.com/chat/*
 // ==/UserScript==
 
@@ -106,11 +106,14 @@ function CCScript(){
     if(typeof offset == "undefined"){
       offset = CC.chatroom.isToggled?0:chatroom.room_el.parentNode.offsetHeight;
     }
-    chatroom.room_el.style.display = "block";
-    if(CC.chatroom.isHidden){
-      chatroom.room_el.style.display = "none";
-    }else{
-      chatroom.room_el.style.right = offset+"px";
+    for(var ns in dAmn.chat.chatrooms){
+      var cr = dAmn.chat.chatrooms[ns];
+      cr.room_el.style.display = "block";
+      if(CC.chatroom.isHidden){
+        cr.room_el.style.display = "none";
+      }else{
+        cr.room_el.style.right = offset+"px";
+      }
     }
   };
   CC.chatroom.toggle = function(enable){
