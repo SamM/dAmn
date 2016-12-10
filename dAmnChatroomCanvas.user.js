@@ -106,6 +106,11 @@ function CCScript(){
     if(typeof offset == "undefined"){
       offset = CC.chatroom.isToggled?0:chatroom.room_el.parentNode.offsetHeight;
     }
+    function fixScroll(chan){
+      setTimeout(function(){
+        chan.scroll_el.scrollTop = chan.scroll_el.scrollHeight;
+      }, 100);
+    }
     for(var ns in dAmn.chat.chatrooms){
       var cr = dAmn.chat.chatrooms[ns];
       cr.room_el.style.display = "block";
@@ -114,7 +119,8 @@ function CCScript(){
       }else{
         cr.room_el.style.right = offset+"px";
       }
-      cr.channels.main.onResize(true);
+      var chan = cr.channels.main;
+      fixScroll(chan);
     }
   };
   CC.chatroom.toggle = function(enable){
