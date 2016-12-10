@@ -68,7 +68,7 @@ function CCScript(){
   CC.home.ns = "chat:chatroomcanvas";
   CC.home.chatroom = null;
   CC.home.hasJoined = false;
-  CC.home.autoJoin = true;
+  CC.home.autojoin = true;
 
   CC.draw = {};
   CC.draw.settings = {};
@@ -394,6 +394,7 @@ function CCScript(){
     CC.drawing.toggle(enable);
     CC.chatroom.toggle(!enable);
     CC.gui.update(enable);
+    dAmn_InvalidateLayout();
   };
 
   CC.onEscapeToggle = function(e){
@@ -531,13 +532,64 @@ function CCScript(){
     CC.home.chatroom = null;
   };
 
+  CC.cookie = {
+		set: function(name, value, days) {
+			var expires;
+			if (days) {
+				var date = new Date();
+				date.setTime(date.getTime()+(days*24*60*60*1000));
+				expires = date.toGMTString();
+			}
+			else expires = "";
+
+			if(!value) value = "";
+			if(typeof value == "number") value += "";
+			if(typeof value != 'string')
+				throw new Error("Second argument `value` must be a string");
+			if(value.indexOf(";")>-1)
+				throw new Error("Second argument `value` cannot contain any semi-colons; ");
+
+			document.cookie = [name+"="+value, "expires="+expires, "path=/", "domain=chat.deviantart.com"].join("; ");
+		},
+		get: function(name) {
+			var nameEQ = name + "=";
+			var ca = document.cookie.split('; ');
+			for(var i=0;i < ca.length;i++) {
+				if(ca[i].indexOf(nameEQ)==0)
+					return ca[i].slice(nameEQ.length+1);
+			}
+			return null;
+		},
+		erase: function(name) {
+			CC.cookie.set(name,"",-1);
+		}
+	};
+
   CC.setup = function(){
+    var cookie = CC.cookie.get("CC_autojoin");
+    if(cookie != null){
+      CC.home.autojoin = cookie == "true";
+    }
 
     // Use /clearcanvas to clear the canvas of the current chatroom
     dAmn.command("clearcanvas", 0, function(args){
       if(CC.isSetup){
         CC.drawing.clear();
       }
+    });
+
+    // Use /draw to open up the home chatroom and activate drawing
+    dAmn.command("draw", 0, function(args){
+      if(!(CC.home.ns in dAmn.chat.chatrooms)){
+        dAmn.send.join(CC.home.ns);
+      }
+    });
+
+    // Use /ccautojoin to toggle whether the home chatroom is opened on startup
+    dAmn.command("ccautojoin", 0, function(args){
+      var setting = !CC.home.autojoin;
+      CC.cookie.set("CC_autojoin", setting?"true":"false", 365);
+      dAmn.chat.notice("dAmn Chatroom Canvas "+(setting?"will":"won't")+" open #"+CC.home.ns.split(":")[1]+" on startup.");
     });
 
     // On Join Channel
@@ -556,7 +608,7 @@ function CCScript(){
             var original = Object.keys(dAmn.chat.chatrooms)[0];
             setTimeout(function(){
               dAmn.chat.activate(original);
-            }, 300);
+            }, 600);
           }
           CC.isSetup = true;
         });
@@ -565,7 +617,7 @@ function CCScript(){
         event.after(function(chatroom){
           CC.chatroom.setup(chatroom);
           CC.toggle(CC.isToggled);
-          if(CC.home.autoJoin && !CC.home.hasJoined && !(CC.home.ns in dAmn.chat.chatrooms)){
+          if(CC.home.autojoin && !CC.home.hasJoined && !(CC.home.ns in dAmn.chat.chatrooms)){
             // If home hasn't been joined then automatically join it
             dAmn.send.join(CC.home.ns);
             CC.home.hasJoined = true;
