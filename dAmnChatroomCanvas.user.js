@@ -409,6 +409,7 @@ function CCScript(){
     if(CC.gui.isSetup) return;
     CC.gui.el = document.createElement("div");
     CC.gui.el.style.marginTop = "-7px";
+    CC.gui.el.style.marginRight = "30px"; // Incase superdAmn is installed
     CC.gui.el.style.float = "right";
     CC.gui.el.style.display = "none";
     CC.gui.parent = document.getElementsByClassName("tabbar")[0];
