@@ -34,6 +34,7 @@ function CCScript(){
     canvas.style.backgroundColor = "white";
     canvas.style.display = "none";
     canvas.style.position = "absolute";
+    canvas.style.cursor = "pointer";
     canvas.style.top = "0px";
     canvas.style.right = "0px";
     canvas.onmouseup = CC.mouse.onUp;
