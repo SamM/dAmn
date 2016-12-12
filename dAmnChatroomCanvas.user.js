@@ -1,4 +1,4 @@
-// ==UserScript==
+ id// ==UserScript==
 // @name           dAmn Chatroom Canvas
 // @description    Draw alongside other Deviants right from within dAmn
 // @author         Sam Mulqueen <sammulqueen.nz@gmail.com>
@@ -73,6 +73,7 @@ function CCScript(){
   CC.home.chatroom = null;
   CC.home.hasJoined = false;
   CC.home.autojoin = true;
+  CC.home.wasClosed = false;
 
   CC.draw = {};
   CC.draw.settings = {};
@@ -604,6 +605,7 @@ function CCScript(){
     CC.toggle(false);
     CC.home.hasJoined = false;
     CC.home.chatroom = null;
+    CC.home.wasClosed = true;
   };
 
   CC.cookie = {
@@ -691,7 +693,7 @@ function CCScript(){
         event.after(function(chatroom){
           CC.chatroom.setup(chatroom);
           CC.toggle(CC.isToggled);
-          if(CC.home.autojoin && !CC.home.hasJoined && !(CC.home.ns in dAmn.chat.chatrooms)){
+          if(!CC.home.wasClosed && CC.home.autojoin && !CC.home.hasJoined && !(CC.home.ns in dAmn.chat.chatrooms)){
             // If home hasn't been joined then automatically join it
             dAmn.send.join(CC.home.ns);
             CC.home.hasJoined = true;
