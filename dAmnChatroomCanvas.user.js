@@ -1,4 +1,4 @@
- id// ==UserScript==
+// ==UserScript==
 // @name           dAmn Chatroom Canvas
 // @description    Draw alongside other Deviants right from within dAmn
 // @author         Sam Mulqueen <sammulqueen.nz@gmail.com>
