@@ -2,7 +2,7 @@
 // @name           dAmn Chatroom Canvas
 // @description    Draw alongside other Deviants right from within dAmn
 // @author         Sam Mulqueen <sammulqueen.nz@gmail.com>
-// @version        1.7.4
+// @version        1.7.5
 // @include        http://chat.deviantart.com/chat/*
 // ==/UserScript==
 
@@ -575,8 +575,17 @@ function CCScript(){
         if(!settings){
           settings = CC.draw.settings.default;
         }
+        var swatches = ["#FFFFFF", "#7F7F7F", "#000000", "#FF0000", "#00FF00", "#0000FF"];
+        swatches.forEach(function(color){
+          var swatch_el = CC.gui.makeElement("swatch", color, function(){
+            CC.draw.settings[ns].color = color;
+            CC.gui.update();
+          });
+          el.appendChild(swatch_el);
+        })
         var color_el = CC.gui.makeElement("color", settings.color, function(){
           CC.draw.settings[ns].color = this.value;
+          CC.gui.update();
         });
         el.appendChild(color_el);
         if(settings.tool=="line"){
@@ -653,11 +662,23 @@ function CCScript(){
         el.style.border = "1px solid rgba(255,255,255,0.4)";
         el.style.color = "white";
         el.style.padding = "3px 6px";
+        el.style.cursor = "pointer";
         if(enabled){
           el.style.border = "1px solid white";
           el.style.backgroundColor = "rgba(255,255,255,0.6)";
           el.style.fontWeight = "bold";
+          el.style.cursor = "";
         }
+        break;
+      case "swatch":
+        var color = args[0];
+        var onClick = args[1];
+        el.onclick = onClick;
+        el.style.backgroundColor = color;
+        el.style.border = "2px solid #DDDDDD";
+        el.style.padding = "3px 6px";
+        el.style.width = el.style.height = "25px";
+        el.style.cursor = "pointer";
         break;
     }
     return el;
