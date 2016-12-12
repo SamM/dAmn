@@ -2,7 +2,7 @@
 // @name           dAmn Chatroom Canvas
 // @description    Draw alongside other Deviants right from within dAmn
 // @author         Sam Mulqueen <sammulqueen.nz@gmail.com>
-// @version        1.6.6
+// @version        1.7.0
 // @include        http://chat.deviantart.com/chat/*
 // ==/UserScript==
 
@@ -14,7 +14,15 @@ function CCScript(){
   CC.isDrawing = false;
   CC.isToggled = false;
 
+  CC.screenWidth = document.body.offsetWidth;
+
   CC.drawings = {};
+
+  CC.createCanvas = function(){
+    var canvas = document.createElement("canvas");
+    canvas.width = canvas.height = CC.screenWidth;
+    return canvas;
+  };
 
   CC.drawing = {};
   CC.drawing.canvas = null;
@@ -64,7 +72,7 @@ function CCScript(){
       ns = dAmn.chat.getActive();
     }
     ns = ns.toLowerCase();
-    CC.drawings[ns] = [];
+    CC.drawings[ns] = CC.createCanvas();
     CC.draw.drawing(ns);
   };
 
@@ -88,10 +96,10 @@ function CCScript(){
   CC.chatroom = {};
   CC.chatroom.isToggled = true;
   CC.chatroom.setup = function(chatroom){
-    chatroom = chatroom || dAmn.chat.get();
+    chatroom = chatroom ? chatroom : dAmn.chat.get();
     if(!chatroom) return;
     ns = chatroom.ns.toLowerCase();
-    CC.drawings[ns] = CC.drawings[ns]?CC.drawings[ns]:[];
+    CC.drawings[ns] = CC.drawings[ns]?CC.drawings[ns]:CC.createCanvas();
     var defaultSettings = CC.draw.settings.default;
     CC.draw.settings[ns] = CC.draw.settings[ns]?CC.draw.settings[ns]:{
       color: defaultSettings.color,
@@ -289,21 +297,23 @@ function CCScript(){
     ns = ns.toLowerCase();
     // Only redraw if redraw is being requested for active chatroom
     if(ns == dAmn.chat.getActive().toLowerCase()){
-      var steps = CC.drawings[ns];
-      if(!steps) return;
-      var canvas = CC.drawing.canvas;
+      var canvas = CC.drawings[ns];
       if(!canvas) return;
+      var workingCanvas = CC.drawing.canvas;
+      if(!workingCanvas) return;
 
-      var context = canvas.getContext("2d");
+      var workingContext = workingCanvas.getContext("2d");
       CC.resize();
-      context.clearRect(0,0,canvas.width, canvas.height);
+      workingContext.clearRect(0,0,workingCanvas.width, workingCanvas.height);
 
-      context.save();
-      context.translate(canvas.width/2, canvas.height/2);
+      // Draw canvas on to workingCanvas
+      workingContext.save();
+      workingContext.translate(Math.round(workingCanvas.width/2 - canvas.width/2), Math.round(workingCanvas.height/2 - canvas.height/2));
+      workingContext.drawImage(canvas, 0, 0);
+      workingContext.restore();
 
-      for(var i=0; i<steps.length; i++){
-        CC.draw.step(context, steps[i]);
-      }
+      workingContext.save();
+      workingContext.translate(Math.round(workingCanvas.width/2), Math.round(workingCanvas.height/2));
 
       if(CC.isDrawing){
         var settings = CC.draw.settings[ns];
@@ -318,12 +328,12 @@ function CCScript(){
         switch(settings.tool){
           case "circle":
             var radius = Math.sqrt(Math.pow(x-endX,2) + Math.pow(y-endY,2));
-            CC.draw.circle(context, x, y, radius, color);
+            CC.draw.circle(workingContext, x, y, radius, color);
             break;
           case "rectangle":
             var width = endX-x;
             var height = endY-y;
-            CC.draw.rectangle(context, x, y, width, height, color);
+            CC.draw.rectangle(workingContext, x, y, width, height, color);
             break;
           case "line":
             if(CC.underCharacterLimit()){
@@ -333,12 +343,12 @@ function CCScript(){
                   points.push(CC.toPoint(CC.draw.tempLine[i]));
                 }
               }
-              CC.draw.line(context, settings.lineWidth, points, color);
+              CC.draw.line(workingContext, settings.lineWidth, points, color);
             }
             break;
         }
       }
-      context.restore();
+      workingContext.restore();
     }
   };
 
@@ -416,9 +426,9 @@ function CCScript(){
     var word = str.split(" ");
     // Chatroom NS is "chat:" + first word in lowercase without trailing ":"
     var ns = "chat:"+word.shift().toLowerCase().slice(0,-1);
-    if(!Array.isArray(CC.drawings[ns])){
+    if(!CC.drawings[ns]){
       // Create new array to store drawing instructions for this new chatroom
-      CC.drawings[ns] = [];
+      CC.drawings[ns] = CC.createCanvas();
     }
     var args = [];
     if(word[0] != "a") return;
@@ -467,7 +477,15 @@ function CCScript(){
     }
     if(args.length){
       // Add drawing instructions to list of the specified chatroom
-      CC.drawings[ns].push(args.join(";"));
+      //CC.drawings[ns].push(args.join(";"));
+      var canvas = CC.drawings[ns];
+      var context = canvas.getContext("2d");
+
+      context.save();
+      context.translate(Math.round(canvas.width/2), Math.round(canvas.height/2));
+      CC.draw.step(context, args.join(";"));
+      context.restore();
+
       CC.draw.drawing(ns);
     }
   };
@@ -686,6 +704,8 @@ function CCScript(){
 	};
 
   CC.setup = function(){
+    CC.screenWidth = document.body.offsetWidth;
+
     var cookie = CC.cookie.get("CC_autojoin");
     if(cookie != null){
       CC.home.autojoin = cookie == "true";
