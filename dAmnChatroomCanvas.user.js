@@ -279,10 +279,6 @@ function CCScript(){
     return false;
   };
 
-  CC.underCharacterLimit = function(){
-    return CC.draw.tempLine.join(" ").length < 3000;
-  };
-
   CC.mouse.onMove = function(e){
     var canvas = CC.drawing.canvas;
     CC.mouse.position.x = e.offsetX-Math.round(canvas.width/2);
@@ -290,7 +286,11 @@ function CCScript(){
     if(CC.isDrawing){
       var chatroom = dAmn.chat.get();
       var settings = CC.draw.settings[chatroom.ns.toLowerCase()];
-      if(settings.tool == "line" && CC.draw.tempLine.length < 300){
+      if(settings.tool == "line"){
+        if(CC.draw.tempLine.length > 300){
+          CC.draw.linePointsDrawn -= 150;
+          CC.draw.tempLine = CC.draw.tempLine.slice(150);
+        }
         CC.draw.tempLine.push([
           e.offsetX-Math.round(canvas.width/2),
           e.offsetY-Math.round(canvas.height/2)
@@ -349,15 +349,13 @@ function CCScript(){
             CC.draw.rectangle(workingContext, x, y, width, height, color);
             break;
           case "line":
-            if(CC.underCharacterLimit()){
-              var points = [];
-              for(i=0; i<CC.draw.tempLine.length; i++){
-                if(CC.isPoint(CC.draw.tempLine[i])){
-                  points.push(CC.toPoint(CC.draw.tempLine[i]));
-                }
+            var points = [];
+            for(i=0; i<CC.draw.tempLine.length; i++){
+              if(CC.isPoint(CC.draw.tempLine[i])){
+                points.push(CC.toPoint(CC.draw.tempLine[i]));
               }
-              CC.draw.line(workingContext, settings.lineWidth, points, color);
             }
+            CC.draw.line(workingContext, settings.lineWidth, points, color);
             break;
         }
       }
