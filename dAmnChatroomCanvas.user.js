@@ -72,7 +72,7 @@ function CCScript(){
   CC.home.ns = "chat:chatroomcanvas";
   CC.home.chatroom = null;
   CC.home.hasJoined = false;
-  CC.home.autojoin = true;
+  CC.home.autojoin = false;
   CC.home.wasClosed = false;
 
   CC.draw = {};
