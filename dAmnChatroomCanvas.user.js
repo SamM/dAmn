@@ -169,11 +169,13 @@ function CCScript(){
             "draws in #"+channel+": a rectangle in "+color+" from "+x+","+y+" to "+endX+","+endY);
           break;
         case "line":
-          var index = CC.draw.linePointsDrawn;
-          index = index == 0?0:index-1;
-          var segment = CC.draw.tempLine.slice(index);
-          dAmn.send.action(CC.home.ns,
-            "draws in #"+channel+": a line in "+color+" of width "+settings.lineWidth+" along <abbr title=\"("+segment.join(";")+")\">"+segment.length+" point"+(segment.length==1?"":"s")+"</abbr>");
+          if(CC.draw.tempLine.length-CC.draw.linePointsDrawn>0){
+            var index = CC.draw.linePointsDrawn;
+            index = index == 0?0:index-1;
+            var segment = CC.draw.tempLine.slice(index);
+            dAmn.send.action(CC.home.ns,
+              "draws in #"+channel+": a line in "+color+" of width "+settings.lineWidth+" along <abbr title=\"("+segment.join(";")+")\">"+segment.length+" point"+(segment.length==1?"":"s")+"</abbr>");
+          }
           CC.draw.linePointsDrawn = 0;
           CC.draw.tempLine = [];
           break;
@@ -186,7 +188,7 @@ function CCScript(){
       var ns = dAmn.chat.getActive();
       var settings = CC.draw.settings[ns.toLowerCase()];
       var channel = ns.split(":")[1];
-      if(settings.tool == "line" && CC.draw.tempLine.length>2){
+      if(settings.tool == "line" && CC.draw.tempLine.length-CC.draw.linePointsDrawn>2){
         var index = CC.draw.linePointsDrawn;
         index = index == 0?0:index-1;
         var segment = CC.draw.tempLine.slice(index);
@@ -227,11 +229,13 @@ function CCScript(){
             "draws in #"+channel+": a rectangle in "+color+" from "+x+","+y+" to "+endX+","+endY);
           break;
         case "line":
-          var index = CC.draw.linePointsDrawn;
-          index = index == 0?0:index-1;
-          var segment = CC.draw.tempLine.slice(index);
-          dAmn.send.action(CC.home.ns,
-            "draws in #"+channel+": a line in "+color+" of width "+settings.lineWidth+" along <abbr title=\"("+segment.join(";")+")\">"+segment.length+" point"+(segment.length==1?"":"s")+"</abbr>");
+          if(CC.draw.tempLine.length-CC.draw.linePointsDrawn>0){
+            var index = CC.draw.linePointsDrawn;
+            index = index == 0?0:index-1;
+            var segment = CC.draw.tempLine.slice(index);
+            dAmn.send.action(CC.home.ns,
+              "draws in #"+channel+": a line in "+color+" of width "+settings.lineWidth+" along <abbr title=\"("+segment.join(";")+")\">"+segment.length+" point"+(segment.length==1?"":"s")+"</abbr>");
+          }
           CC.draw.linePointsDrawn = 0;
           CC.draw.tempLine = [];
         break;
