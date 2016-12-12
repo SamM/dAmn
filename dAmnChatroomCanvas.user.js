@@ -2,7 +2,7 @@
 // @name           dAmn Chatroom Canvas
 // @description    Draw alongside other Deviants right from within dAmn
 // @author         Sam Mulqueen <sammulqueen.nz@gmail.com>
-// @version        1.6.3
+// @version        1.6.5
 // @include        http://chat.deviantart.com/chat/*
 // ==/UserScript==
 
@@ -79,10 +79,11 @@ function CCScript(){
   CC.draw.settings = {};
   CC.draw.settings.default = {
     color: "#7F7F7F",
-    lineWidth: 2,
+    lineWidth: 1,
     tool: "line"
   };
   CC.draw.tempLine = [];
+  CC.draw.linePointsDrawn = 0;
 
   CC.chatroom = {};
   CC.chatroom.isToggled = true;
@@ -168,12 +169,32 @@ function CCScript(){
             "draws in #"+channel+": a rectangle in "+color+" from "+x+","+y+" to "+endX+","+endY);
           break;
         case "line":
+          var index = CC.draw.linePointsDrawn;
+          index = index == 0?0:index-1;
+          var segment = CC.draw.tempLine.slice(index);
           dAmn.send.action(CC.home.ns,
-            "draws in #"+channel+": a line in "+color+" of width "+settings.lineWidth+" along <abbr title=\"("+CC.draw.tempLine.join(";")+")\">"+CC.draw.tempLine.length+" points</abbr>");
+            "draws in #"+channel+": a line in "+color+" of width "+settings.lineWidth+" along <abbr title=\"("+segment.join(";")+")\">"+segment.length+" point"+(segment.length==1?"":"s")+"</abbr>");
+          CC.draw.linePointsDrawn = 0;
+          CC.draw.tempLine = [];
           break;
       }
     }
     CC.isDrawing = false;
+  };
+  CC.onInterval = function(){
+    if(CC.isDrawing){
+      var ns = dAmn.chat.getActive();
+      var settings = CC.draw.settings[ns.toLowerCase()];
+      var channel = ns.split(":")[1];
+      if(settings.tool == "line" && CC.draw.tempLine.length>2){
+        var index = CC.draw.linePointsDrawn;
+        index = index == 0?0:index-1;
+        var segment = CC.draw.tempLine.slice(index);
+        dAmn.send.action(CC.home.ns,
+          "draws in #"+channel+": a line in "+settings.color+" of width "+settings.lineWidth+" along <abbr title=\"("+segment.join(";")+")\">"+segment.length+" point"+(segment.length==1?"":"s")+"</abbr>");
+        CC.draw.linePointsDrawn += segment.length-1;
+      }
+    }
   };
   CC.mouse.onUp = function(e){
     var chatroom = dAmn.chat.get();
@@ -206,9 +227,14 @@ function CCScript(){
             "draws in #"+channel+": a rectangle in "+color+" from "+x+","+y+" to "+endX+","+endY);
           break;
         case "line":
+          var index = CC.draw.linePointsDrawn;
+          index = index == 0?0:index-1;
+          var segment = CC.draw.tempLine.slice(index);
           dAmn.send.action(CC.home.ns,
-            "draws in #"+channel+": a line in "+color+" of width "+settings.lineWidth+" along <abbr title=\"("+CC.draw.tempLine.join(";")+")\">"+CC.draw.tempLine.length+" points</abbr>");
-          break;
+            "draws in #"+channel+": a line in "+color+" of width "+settings.lineWidth+" along <abbr title=\"("+segment.join(";")+")\">"+segment.length+" point"+(segment.length==1?"":"s")+"</abbr>");
+          CC.draw.linePointsDrawn = 0;
+          CC.draw.tempLine = [];
+        break;
       }
     }
     CC.isDrawing = false;
@@ -221,6 +247,7 @@ function CCScript(){
     CC.mouse.position.x = CC.mouse.click.x = e.offsetX-Math.round(canvas.width/2);
     CC.mouse.position.y = CC.mouse.click.y = e.offsetY-Math.round(canvas.height/2);
     CC.draw.tempLine = [];
+    CC.draw.linePointsDrawn = 0;
     CC.draw.tempLine.push([
       CC.mouse.click.x,
       CC.mouse.click.y
@@ -239,7 +266,7 @@ function CCScript(){
     if(CC.isDrawing){
       var chatroom = dAmn.chat.get();
       var settings = CC.draw.settings[chatroom.ns.toLowerCase()];
-      if(settings.tool == "line" && CC.underCharacterLimit()){
+      if(settings.tool == "line" && CC.draw.tempLine.length < 300){
         CC.draw.tempLine.push([
           e.offsetX-Math.round(canvas.width/2),
           e.offsetY-Math.round(canvas.height/2)
@@ -734,8 +761,9 @@ function CCScript(){
         }
       }
     });
-  };
 
+    setInterval(CC.onInterval, 300);
+  };
 
   DWait.ready(['jms/pages/chat07/chatpage.js', 'jms/pages/chat07/dAmn.js', 'jms/pages/chat07/dAmnChat.js'], function() {
     CC.setup();
