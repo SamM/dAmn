@@ -2,7 +2,7 @@
 // @name           dAmn Chatroom Canvas
 // @description    Draw alongside other Deviants right from within dAmn
 // @author         Sam Mulqueen <sammulqueen.nz@gmail.com>
-// @version        1.7.3
+// @version        1.7.4
 // @include        http://chat.deviantart.com/chat/*
 // ==/UserScript==
 
@@ -133,6 +133,7 @@ function CCScript(){
       var chan = cr.channels.main;
       fixScroll(chan);
     }
+    CC.draw.drawing(chatroom.ns);
   };
   CC.chatroom.toggle = function(enable){
     var chatroom = dAmn.chat.get();
@@ -315,7 +316,7 @@ function CCScript(){
       if(!workingCanvas) return;
 
       var workingContext = workingCanvas.getContext("2d");
-      CC.resize();
+
       workingContext.clearRect(0,0,workingCanvas.width, workingCanvas.height);
 
       // Draw canvas on to workingCanvas
@@ -754,6 +755,7 @@ function CCScript(){
           CC.home.chatroom = chatroom;
           CC.drawing.setup();
           CC.chatroom.setup(chatroom);
+          CC.resize();
           CC.gui.setup();
           CC.toggle(true);
           if(!CC.isSetup){
@@ -797,6 +799,10 @@ function CCScript(){
 
     // When you press Esacpe, toggle between chat & drawing mode
     window.addEventListener("keyup", CC.onEscapeToggle, false);
+
+    dAmn.event.listen("onresize", function(){
+      CC.resize();
+    });
 
     // Whenever client recieves an action (via /me chat command)
     dAmn.chat.events.onAction(function(event){
