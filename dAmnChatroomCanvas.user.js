@@ -2,7 +2,7 @@
 // @name           dAmn Chatroom Canvas
 // @description    Draw alongside other Deviants right from within dAmn
 // @author         Sam Mulqueen <sammulqueen.nz@gmail.com>
-// @version        1.7.2
+// @version        1.7.3
 // @include        http://chat.deviantart.com/chat/*
 // ==/UserScript==
 
@@ -254,6 +254,7 @@ function CCScript(){
   };
 
   CC.mouse.onDown = function(e){
+    if(e.which!=1) return;
     var chatroom = dAmn.chat.get();
     var canvas = CC.drawing.canvas;
     CC.isDrawing = true;
