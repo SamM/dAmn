@@ -2,7 +2,7 @@
 // @name           dAmn Chatroom Canvas
 // @description    Draw alongside other Deviants right from within dAmn
 // @author         Sam Mulqueen <sammulqueen.nz@gmail.com>
-// @version        1.7.5
+// @version        1.7.6
 // @include        http://chat.deviantart.com/chat/*
 // ==/UserScript==
 
@@ -146,6 +146,7 @@ function CCScript(){
   };
 
   CC.mouse = {};
+  CC.mouse.interval = null;
   CC.mouse.click = {x:0,y:0};
   CC.mouse.position = {x:0,y:0};
   CC.mouse.onUpDoc = function(e){
@@ -684,6 +685,7 @@ function CCScript(){
 
   CC.shutdown = function(){
     CC.toggle(false);
+    clearInterval(CC.mouse.interval);
     CC.home.hasJoined = false;
     CC.home.chatroom = null;
     CC.home.wasClosed = true;
@@ -783,6 +785,7 @@ function CCScript(){
               dAmn.chat.activate(original);
             }, 600);
           }
+          CC.mouse.interval = setInterval(CC.onInterval, 300);
           CC.isSetup = true;
         });
       }else{
@@ -837,7 +840,6 @@ function CCScript(){
       }
     });
 
-    setInterval(CC.onInterval, 300);
   };
 
   DWait.ready(['jms/pages/chat07/chatpage.js', 'jms/pages/chat07/dAmn.js', 'jms/pages/chat07/dAmnChat.js'], function() {
