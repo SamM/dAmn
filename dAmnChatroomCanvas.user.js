@@ -2,7 +2,7 @@
 // @name           dAmn Chatroom Canvas
 // @description    Draw alongside other Deviants right from within dAmn
 // @author         Sam Mulqueen <sammulqueen.nz@gmail.com>
-// @version        1.7.6
+// @version        1.7.8
 // @include        http://chat.deviantart.com/chat/*
 // ==/UserScript==
 
@@ -56,8 +56,10 @@ function CCScript(){
     CC.drawing.canvas.style.display = enable?"block":"none";
   };
   CC.drawing.resize = function(width, height){
+    if(!CC.isSetup) return;
     if(!arguments.length){
       var chatroom = dAmn.chat.get();
+      if(!chatroom) return;
       var width = chatroom.room_el.parentNode.offsetWidth;
       var height = chatroom.room_el.parentNode.offsetHeight;
       if(!CC.drawing.isFullscreen){
@@ -119,6 +121,10 @@ function CCScript(){
     }
     function fixScroll(chan){
       setTimeout(function(){
+        dAmnChatbase_onResize();
+      }, 100);
+      return;
+      setTimeout(function(){
         chan.scroll_el.scrollTop = chan.scroll_el.scrollHeight;
       }, 100);
     }
@@ -142,7 +148,6 @@ function CCScript(){
       enable = !CC.chatroom.isToggled;
     }
     CC.chatroom.isToggled = enable;
-    CC.chatroom.resize();
   };
 
   CC.mouse = {};
@@ -150,8 +155,8 @@ function CCScript(){
   CC.mouse.click = {x:0,y:0};
   CC.mouse.position = {x:0,y:0};
   CC.mouse.onUpDoc = function(e){
-    var chatroom = dAmn.chat.get();
     if(CC.isDrawing){
+      var chatroom = dAmn.chat.get();
       var canvas = CC.drawing.canvas;
       var channel = chatroom.ns.split(":")[1];
       var settings = CC.draw.settings[chatroom.ns.toLowerCase()];
@@ -513,7 +518,8 @@ function CCScript(){
     CC.drawing.toggle(enable);
     CC.chatroom.toggle(!enable);
     CC.gui.update(enable);
-    dAmn_InvalidateLayout();
+    CC.resize();
+    //dAmn_InvalidateLayout();
   };
 
   CC.onEscapeToggle = function(e){
@@ -523,16 +529,16 @@ function CCScript(){
         if(CC.drawing.isFullscreen){
           CC.drawing.isFullscreen = false;
           CC.chatroom.isHidden = false;
-          CC.toggle(false);
-        }else{
-          CC.drawing.isFullscreen = true;
-          CC.chatroom.isHidden = true;
           CC.toggle(true);
           CC.draw.drawing(chatroom.ns);
+        }else{
+          CC.drawing.isFullscreen = false;
+          CC.chatroom.isHidden = false;
+          CC.toggle(false);
         }
       }else{
-        CC.drawing.isFullscreen = false;
-        CC.chatroom.isHidden = false;
+        CC.drawing.isFullscreen = true;
+        CC.chatroom.isHidden = true;
         CC.toggle(true);
         CC.draw.drawing(chatroom.ns);
       }
@@ -812,11 +818,13 @@ function CCScript(){
 
     // On switch tab/chatroom
     dAmn.event.listen("dAmnChatTabs_activate", function(event){
-      event.after(function(){
-        var chatroom = dAmn.chat.get();
-        CC.toggle(CC.isToggled);
-        CC.draw.drawing(chatroom.ns);
-      });
+      if (dAmnChatTab_active && dAmnChatTab_active != event.args[0]) {
+        event.after(function(){
+          var chatroom = dAmn.chat.get();
+          CC.toggle(CC.isToggled);
+          CC.draw.drawing(chatroom.ns);
+        });
+      }
     });
 
     // When you press Esacpe, toggle between chat & drawing mode
