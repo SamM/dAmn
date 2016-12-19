@@ -2,7 +2,7 @@
 // @name           dAmn Chatroom Canvas
 // @description    Draw alongside other Deviants right from within dAmn
 // @author         Sam Mulqueen <sammulqueen.nz@gmail.com>
-// @version        1.7.8
+// @version        1.8.0
 // @include        http://chat.deviantart.com/chat/*
 // ==/UserScript==
 
@@ -324,7 +324,8 @@ function CCScript(){
       var workingContext = workingCanvas.getContext("2d");
 
       workingContext.clearRect(0,0,workingCanvas.width, workingCanvas.height);
-
+      workingContext.fillStyle = "#FFFFFF";
+      workingContext.fillRect(0,0,workingCanvas.width, workingCanvas.height);
       // Draw canvas on to workingCanvas
       workingContext.save();
       workingContext.translate(Math.round(workingCanvas.width/2 - canvas.width/2), Math.round(workingCanvas.height/2 - canvas.height/2));
