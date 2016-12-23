@@ -364,8 +364,8 @@ function dAmnGoodies_Script(){
     new DG.Goodie("swap", {
       enabled: true,
       pairs: {
-        "dAmn Goodies": ":thumb110193573:",
-        "dAmnGoodies": ":thumb110193573:"
+        "dAmn Goodies": ":thumb652858070:",
+        "dAmnGoodies": ":thumb652858070:"
       }
     },
     function(settings){
