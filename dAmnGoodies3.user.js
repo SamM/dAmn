@@ -2,7 +2,7 @@
 // @name           dAmnGoodies
 // @description    Novelty features for dAmn chat.
 // @author         Sam Mulqueen <sammulqueen.nz@gmail.com>
-// @version        3.0.0
+// @version        3.0.1
 // @include        http://chat.deviantart.com/chat/*
 // ==/UserScript==
 
@@ -10,7 +10,7 @@ function dAmnGoodies_Script(){
   var DG = {};
   window.DG = DG;
 
-  DG.version = "3.0.0";
+  DG.version = "3.0.1";
 
   //var audio = new Audio("http://soundbible.com/grab.php?id=2156&type=wav");
   //audio.play();
@@ -1104,6 +1104,10 @@ function dAmnGoodies_Script(){
     new DG.Goodie("stylesheets", {enabled: true}, function(settings){
       dAmn.command("stylesheets", 1, function(args){
         DG.standardToggle(settings, args, "Chatroom Stylesheets are enabled.", "Chatroom Stylesheets are disabled.");
+        if(args == "off" && DG.stylesheet){
+          DG.stylesheet.parentNode.removeChild(DG.stylesheet);
+          DG.stylesheet = null;
+        }
       });
 
       var stylesheet_regex = /<abbr title="stylesheet:(.*)">(.*)<\/abbr>/gi;
@@ -1138,6 +1142,16 @@ function dAmnGoodies_Script(){
             var title = dAmn.chat.getTitle(event.args[0]);
             checkTitle(title);
           });
+        }
+      });
+
+      dAmn.event.listen("dAmnChanMainChat.prototype.onEvent", function(event){
+        if(!settings.enabled) return;
+        var pkt = event.args[0];
+        if(pkt.cmd == "property" && pkt.args.p == "title"){
+          if(pkt.param == dAmn.chat.getActive()){
+            checkTitle(dAmn.chat.getTitle());
+          }
         }
       });
     });
