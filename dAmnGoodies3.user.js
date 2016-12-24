@@ -2,7 +2,7 @@
 // @name           dAmnGoodies
 // @description    Novelty features for dAmn chat.
 // @author         Sam Mulqueen <sammulqueen.nz@gmail.com>
-// @version        3.0.2
+// @version        3.0.3
 // @include        http://chat.deviantart.com/chat/*
 // ==/UserScript==
 
@@ -10,7 +10,7 @@ function dAmnGoodies_Script(){
   var DG = {};
   window.DG = DG;
 
-  DG.version = "3.0.2";
+  DG.version = "3.0.3";
 
   //var audio = new Audio("http://soundbible.com/grab.php?id=2156&type=wav");
   //audio.play();
@@ -1031,7 +1031,8 @@ function dAmnGoodies_Script(){
     });
 
     new DG.Goodie("colors", {enabled: true, name: false, msg: false}, function(settings){
-      var match_color_tag = /&abbr\tcolors:([A-Fa-f0-9]{6}):([A-Fa-f0-9]{6})\t/;
+      var match_color_tablump = /&abbr\tcolors:([A-Fa-f0-9]{6}):([A-Fa-f0-9]{6})\t/;
+      var match_color_tag = /<abbr title="colors:([A-Fa-f0-9]{6}):([A-Fa-f0-9]{6})">/;
       var default_color = "393d3c";
 
       dAmn.command("color", 1, function(args){
@@ -1070,24 +1071,21 @@ function dAmnGoodies_Script(){
 
       function doColors(event){
         if(!settings.enabled) return;
-        var msg = event.args[1];
-        var index=msg.indexOf("&abbr\tcolors:");
+        var el = event.args[0];
+        var msg = el.innerHTML;
+        var index=msg.indexOf("<abbr title=\"colors:");
         if(index>-1){
           var colors = match_color_tag.exec(msg);
-          var main = this;
-          event.after(function(){
-            var div = [].slice.call(main.chat_el.children).slice(-1)[0];
-            var from = div.getElementsByClassName("from")[0];
-            from.style.color = "#"+colors[1];
-            var text = div.getElementsByClassName("text")[0];
-            text.style.color = "#"+colors[2];
-          });
+          var from = el.getElementsByClassName("from")[0];
+          from.style.color = "#"+colors[1];
+          var text = el.getElementsByClassName("text")[0];
+          text.style.color = "#"+colors[2];
         }
       }
 
-
-      dAmn.chat.events.onMsg(doColors);
-      dAmn.chat.events.onAction(doColors);
+      dAmn.event.listen("dAmnChanChat.prototype.addDiv", doColors);
+      //dAmn.chat.events.onMsg(doColors);
+      //dAmn.chat.events.onAction(doColors);
 
       dAmn.chat.events.Send(function(event){
         if(!settings.enabled) return;
