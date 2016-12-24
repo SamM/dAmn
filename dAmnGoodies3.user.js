@@ -2,7 +2,7 @@
 // @name           dAmnGoodies
 // @description    Novelty features for dAmn chat.
 // @author         Sam Mulqueen <sammulqueen.nz@gmail.com>
-// @version        3.0.3
+// @version        3.0.4
 // @include        http://chat.deviantart.com/chat/*
 // ==/UserScript==
 
@@ -10,7 +10,7 @@ function dAmnGoodies_Script(){
   var DG = {};
   window.DG = DG;
 
-  DG.version = "3.0.3";
+  DG.version = "3.0.4";
 
   //var audio = new Audio("http://soundbible.com/grab.php?id=2156&type=wav");
   //audio.play();
@@ -116,9 +116,7 @@ function dAmnGoodies_Script(){
     // e.g. "something like this" becomes "Something Like This"
     new DG.Goodie("capitals", {enabled: false}, function(settings){
       dAmn.chat.events.Send(function(event){
-        if(DG.goodies.safe && DG.goodies.safe.count){
-          return;
-        }
+        if(DG.goodies.safe && DG.goodies.safe.count) return;
         if(event.args[0]!="msg"&&event.args[0]!="action") return;
         if(settings.enabled){
           event.args[2] = toTitleCase(event.args[2]);
@@ -292,12 +290,16 @@ function dAmnGoodies_Script(){
 
       function findTab(event){
         if(!settings.enabled) return;
-        var user = event.args[0],
-        text = event.args[1];
-        if(user != dAmn_Client_Username){
-          if(text.toLowerCase().search(dAmn_Client_Username.toLowerCase())>-1){
-            DG.quicklist.add(user);
+        try{
+          var user = event.args[0],
+          text = event.args[1];
+          if(user != dAmn_Client_Username){
+            if(text.toLowerCase().search(dAmn_Client_Username.toLowerCase())>-1){
+              DG.quicktab.add(user);
+            }
           }
+        }catch(ex){
+          console.log("QuickTab, onMsg error: ",ex);
         }
       }
       dAmn.chat.events.onMsg(findTab);
@@ -567,10 +569,15 @@ function dAmnGoodies_Script(){
       });
 
       dAmn.chat.events.onMsg(function(event){
+        if(!settings.enabled) return;
         if(!settings.tagsEnabled) return;
-        var username = event.args[0].toLowerCase();
-        if(settings.nicknames[username]){
-          event.args[0] = "<abbr title=\""+event.args[0]+"\">"+settings.nicknames[username]+"</abbr>";
+        try{
+          var username = event.args[0].toLowerCase();
+          if(settings.nicknames[username]){
+            event.args[0] = "<abbr title=\""+event.args[0]+"\">"+settings.nicknames[username]+"</abbr>";
+          }
+        }catch(ex){
+          console.log("Nicknames onMsg error: ",ex);
         }
       });
     });
@@ -589,7 +596,6 @@ function dAmnGoodies_Script(){
             dAmn.chat.notice("The next "+(count==0||count>1?count+" messages":"message")+" sent will be safe from being altered by dAmn Goodies.");
           }
         }
-        console.log(settings.count, DG.goodies.safe.count);
       });
       dAmn.chat.events.Send(function(event){
         if(event.args[0]!="msg"&&event.args[0]!="action"&&event.args[0]!="npmsg") return;
@@ -1014,13 +1020,21 @@ function dAmnGoodies_Script(){
 
       function doYouTube(event){
         if(settings.enabled){
-          var msg = event.args[1];
-          var ytid = DG.youtube.getYoutubeId(msg);
-          if(ytid){
-            var ns = this.cr.ns;
-            event.after(function(){
-              DG.youtube.embedYouTubePlayer(ns, ytid);
-            });
+          try{
+            var msg = event.args[1];
+            var ytid = DG.youtube.getYoutubeId(msg);
+            if(ytid){
+              var ns = this.cr.ns;
+              event.after(function(){
+                try{
+                  DG.youtube.embedYouTubePlayer(ns, ytid);
+                }catch(ex){
+                  console.log("Youtube after onMsg error: ", ex);
+                }
+              });
+            }
+          }catch(ex){
+            console.log("Youtube onMsg error: ",ex);
           }
         }
       }
@@ -1035,10 +1049,13 @@ function dAmnGoodies_Script(){
       var match_color_tag = /<abbr title="colors:([A-Fa-f0-9]{6}):([A-Fa-f0-9]{6})">/;
       var default_color = "393d3c";
 
-      dAmn.command("color", 1, function(args){
-        DG.standardToggle(settings, args, "Custom message colors enabled.", "Custom message colors disabled.");
+      dAmn.command("colors", 1, function(args){
         var split = args.split(" ");
         switch(split[0]){
+          case "on":
+          case "off":
+            DG.standardToggle(settings, args, "Custom message colors enabled.", "Custom message colors disabled.");
+            break;
           case "none":
             settings.name = false;
             settings.msg = false;
@@ -1048,12 +1065,12 @@ function dAmnGoodies_Script(){
           case "name":
           case "msg":
             if(!split[1]){
-              dAmn.chat.notice("Usage: /color "+split[0]+" #FF0000 (This sets the color to red)");
+              dAmn.chat.notice("Usage: /colors "+split[0]+" #FF0000 (This sets the color to red)");
               return;
             }
             color = split[1].replace("#", "");
             if(color.length != 6){
-              dAmn.chat.notice("Usage: /color "+split[0]+" #FF0000 (This sets the color to red)");
+              dAmn.chat.notice("Usage: /colors "+split[0]+" #FF0000 (This sets the color to red)");
               return;
             }
             settings[split[0]] = color;
@@ -1064,7 +1081,7 @@ function dAmnGoodies_Script(){
             dAmn.chat.notice("Your name is set to <b style=\"color:#"+settings.name+"\">#"+settings.name+"</b>, your message color is set to <b style=\"color:#"+settings.msg+"\">#"+settings.msg+"</b>")
             break;
           default:
-            dAmn.chat.notice("Usage: /color [on|off|none|name|msg|show]");
+            dAmn.chat.notice("Usage: /colors [on|off|none|name|msg|show]");
             break;
         }
       });
