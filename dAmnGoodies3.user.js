@@ -2,7 +2,7 @@
 // @name           dAmnGoodies
 // @description    Novelty features for dAmn chat.
 // @author         Sam Mulqueen <sammulqueen.nz@gmail.com>
-// @version        3.0.5
+// @version        3.0.6
 // @include        http://chat.deviantart.com/chat/*
 // ==/UserScript==
 
@@ -10,7 +10,7 @@ function dAmnGoodies_Script(){
   var DG = {};
   window.DG = DG;
 
-  DG.version = "3.0.5";
+  DG.version = "3.0.6";
 
   //var audio = new Audio("http://soundbible.com/grab.php?id=2156&type=wav");
   //audio.play();
