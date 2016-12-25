@@ -2,7 +2,7 @@
 // @name           dAmnGoodies
 // @description    Novelty features for dAmn chat.
 // @author         Sam Mulqueen <sammulqueen.nz@gmail.com>
-// @version        3.1.0
+// @version        3.1.1
 // @include        http://chat.deviantart.com/chat/*
 // @grant GM_setValue
 // @grant GM_getValue
@@ -12,7 +12,7 @@ function dAmnGoodies_Script(){
   var DG = {};
   window.DG = DG;
 
-  DG.version = "3.1.0";
+  DG.version = "3.1.1";
 
   DG.goodies = {};
   DG.Goodie = function(name, defaultData, setup){
@@ -1160,6 +1160,11 @@ function dAmnGoodies_Script(){
                 settings.hilite = {name:false, msg:false, bg: false};
                 DG.save();
                 dAmn.chat.notice("Removed custom formatting for hilites.");
+                break;
+              case "show":
+              case "preview":
+                dAmn.chat.notice("Preview: <span style=\"background-color:#"+(settings.hilite.bg?settings.hilite.bg:"")+"\"> <b style=\"color:"+(settings.hilite.name?"#"+settings.hilite.name:"")+"\">&lt;Username&gt;</b> <span style=\"color:"+(settings.hilite.msg?"#"+settings.hilite.msg:"")+"\">Example of message text</span> </span>");
+                break;
               default:
                 dAmn.chat.notice("Usage: /colors "+split[0]+" [name|msg|bg|none]");
                 break;
