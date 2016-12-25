@@ -2,7 +2,7 @@
 // @name           dAmnGoodies
 // @description    Novelty features for dAmn chat.
 // @author         Sam Mulqueen <sammulqueen.nz@gmail.com>
-// @version        3.0.9
+// @version        3.1.0
 // @include        http://chat.deviantart.com/chat/*
 // @grant GM_setValue
 // @grant GM_getValue
@@ -12,10 +12,7 @@ function dAmnGoodies_Script(){
   var DG = {};
   window.DG = DG;
 
-  DG.version = "3.0.9";
-
-  //var audio = new Audio("http://soundbible.com/grab.php?id=2156&type=wav");
-  //audio.play();
+  DG.version = "3.1.0";
 
   DG.goodies = {};
   DG.Goodie = function(name, defaultData, setup){
@@ -1096,10 +1093,15 @@ function dAmnGoodies_Script(){
 
     });
 
-    new DG.Goodie("colors", {enabled: true, name: false, msg: false}, function(settings){
+    new DG.Goodie("colors", {enabled: true, name: false, msg: false, hilite: {name:false,msg:false,bg:false}}, function(settings){
       var match_color_tablump = /&abbr\tcolors:([A-Fa-f0-9]{6}):([A-Fa-f0-9]{6})\t/;
       var match_color_tag = /<abbr title="colors:([A-Fa-f0-9]{6}):([A-Fa-f0-9]{6})">/;
       var default_color = "393d3c";
+
+      if(!settings.hilite){
+        settings.hilite = {name:false, msg: false, bg: false};
+        DG.save();
+      }
 
       dAmn.command("colors", 1, function(args){
         var split = args.split(" ");
@@ -1109,6 +1111,7 @@ function dAmnGoodies_Script(){
             DG.standardToggle(settings, args, "Custom message colors enabled.", "Custom message colors disabled.");
             break;
           case "none":
+          case "reset":
             settings.name = false;
             settings.msg = false;
             DG.save();
@@ -1129,6 +1132,39 @@ function dAmnGoodies_Script(){
             DG.save();
             dAmn.chat.notice("Set color for your "+(split[0]=="name"?"username":"message")+" to <b style=\"color:#"+color+"\">#"+color+"</b>");
             break;
+          case "hilite":
+          case "hilight":
+            if(!split[1]){
+              dAmn.chat.notice("Usage: /colors "+split[0]+" [name|msg|bg|none]");
+              return;
+            }
+            switch(split[1]){
+              case "name":
+              case "msg":
+              case "bg":
+                if(!split[2]){
+                  dAmn.chat.notice("Usage: /colors "+split[0]+" "+split[1]+" #FF0000 (This sets the color to red)");
+                  return;
+                }
+                color = split[2].replace("#", "");
+                if(color.length != 6){
+                  dAmn.chat.notice("Usage: /colors "+split[0]+" "+split[1]+" #FF0000 (This sets the color to red)");
+                  return;
+                }
+                settings.hilite[split[1]] = color;
+                DG.save();
+                dAmn.chat.notice("Set color for hilite "+(split[1]=="name"?"username":split[1]=="msg"?"message":"background")+" to <b style=\"color:#"+color+"\">#"+color+"</b>");
+                break;
+              case "none":
+              case "reset":
+                settings.hilite = {name:false, msg:false, bg: false};
+                DG.save();
+                dAmn.chat.notice("Removed custom formatting for hilites.");
+              default:
+                dAmn.chat.notice("Usage: /colors "+split[0]+" [name|msg|bg|none]");
+                break;
+            }
+            break;
           case "show":
             dAmn.chat.notice("Your name is set to <b style=\"color:#"+settings.name+"\">#"+settings.name+"</b>, your message color is set to <b style=\"color:#"+settings.msg+"\">#"+settings.msg+"</b>")
             break;
@@ -1144,12 +1180,34 @@ function dAmnGoodies_Script(){
           var el = event.args[0];
           var msg = el.innerHTML;
           var index=msg.indexOf("<abbr title=\"colors:");
+          var hilite = [].slice.call(el.classList).indexOf("other-hl")>-1;
+          var text = el.getElementsByClassName("text")[0];
+          var from = el.getElementsByClassName("from")[0];
+          if(!from || !text) return;
+          var spans = [].slice.call(text.getElementsByTagName("span"));
+          var links = [].slice.call(text.getElementsByTagName("a"));
           if(index>-1){
             var colors = match_color_tag.exec(msg);
-            var from = el.getElementsByClassName("from")[0];
             from.style.color = "#"+colors[1];
-            var text = el.getElementsByClassName("text")[0];
             text.style.color = "#"+colors[2];
+          }
+          if(hilite){
+            if(settings.hilite.bg){
+              el.style.backgroundColor = "#"+settings.hilite.bg;
+              from.children[0].style.backgroundColor = "#"+settings.hilite.bg;
+              spans.forEach(function(span){
+                span.style.backgroundColor = "#"+settings.hilite.bg;
+              });
+            }
+            if(settings.hilite.name){
+              from.style.color = "#"+settings.hilite.name;
+            }
+            if(settings.hilite.msg){
+              text.style.color = "#"+settings.hilite.msg;
+              links.forEach(function(span){
+                span.style.color = "#"+settings.hilite.msg;
+              });
+            }
           }
         }catch(ex){
           console.log("dAmnGoodies Error (colors.addDiv): ", ex);
