@@ -49,15 +49,19 @@ function dAmnGoodies_Script(){
           loaded = {};
         }else{
           //Import config from dAmnGoodies v2
-          loaded.klat.enabled = load.klat.on;
-          delete loaded.klat.on;
-          loaded.nick = loaded.nickname;
-          delete loaded.nickname;
-          loaded.nick.nicknames = loaded.nick.nicks;
-          loaded.nick.tagsEnabled = loaded.nick.switchTags;
-          delete loaded.nick.nicks;
-          delete loaded.nick.switchTags;
-          delete loaded.safe;
+          try{
+            loaded.klat.enabled = load.klat.on;
+            delete loaded.klat.on;
+            loaded.nick = loaded.nickname;
+            delete loaded.nickname;
+            loaded.nick.nicknames = loaded.nick.nicks;
+            loaded.nick.tagsEnabled = loaded.nick.switchTags;
+            delete loaded.nick.nicks;
+            delete loaded.nick.switchTags;
+            delete loaded.safe;
+          }catch(ex){
+            console.log("dAmnGoodies Error (Import Config): ", ex);
+          }
         }
       }
       DG.goodies = loaded;
@@ -249,7 +253,11 @@ function dAmnGoodies_Script(){
         }
         if(event.args[0]!="msg"&&event.args[0]!="action") return;
         if(settings.enabled){
-          event.args[2] = toMessedUp(event.args[2]);
+          try{
+            event.args[2] = toMessedUp(event.args[2]);
+          }catch(ex){
+            console.log("dAmnGoodies Error (drunk.Send): ", ex);
+          }
         }
       });
       dAmn.command("drunk", 0, function(args){
@@ -265,15 +273,19 @@ function dAmnGoodies_Script(){
       qt.tabindex = -1;
       qt.add = function(user){
         var list = [];
-        qt.tablist.forEach(function(name, i){
-          if(i<20 && name.toLowerCase() != user.toLowerCase()){
-            list.push(name);
-          }
-        });
-        list.unshift(user);
-        qt.tablist = list;
-        settings.tablist = list;
-        DG.save();
+        try{
+          qt.tablist.forEach(function(name, i){
+            if(i<20 && name.toLowerCase() != user.toLowerCase()){
+              list.push(name);
+            }
+          });
+          list.unshift(user);
+          qt.tablist = list;
+          settings.tablist = list;
+          DG.save();
+        }catch(ex){
+          console.log("dAmnGoodies Error (quicktab.add): ", ex);
+        }
       }
 
       dAmn.command("quicktab", 0, function(args){
@@ -299,66 +311,74 @@ function dAmnGoodies_Script(){
             }
           }
         }catch(ex){
-          console.log("QuickTab, onMsg error: ",ex);
+          console.log("dAmnGoodies Error (QuickTab.onMsg): ",ex);
         }
       }
       dAmn.chat.events.onMsg(findTab);
       dAmn.chat.events.onAction(findTab);
       dAmn.event.listen("dAmnChatInput.prototype.onKey", function(event){
         if(!settings.enabled) return;
-        var e = event.args[0];
-        var kc = event.args[1];
-        var force = event.args[2];
-        var el = this.chatinput_el;
-        var qt = DG.quicktab;
-        if(kc == 9){
-          if(el.value == "" || (el.value.slice(-1) == " " && qt.tabindex>-1)){
-            if(qt.tablist.length && qt.tabindex > -1){
-              qt.tabindex++;
-              qt.tabindex%=qt.tablist.length;
-              el.value = el.value.slice(0,qt.tabstart)+qt.tablist[qt.tabindex]+(qt.tabstart===0?": ":" ");
-              event.preventDefault();
-              event.returnValue = false;
-            }else{
-              if(!this.tablist){
-                qt.tabstart = 0;
-                qt.tabindex = 0;
-                if(qt.tablist.length){
-                  el.value = el.value.slice(0,qt.tabstart)+qt.tablist[qt.tabindex]+": ";
-                }
+        try{
+          var e = event.args[0];
+          var kc = event.args[1];
+          var force = event.args[2];
+          var el = this.chatinput_el;
+          var qt = DG.quicktab;
+          if(kc == 9){
+            if(el.value == "" || (el.value.slice(-1) == " " && qt.tabindex>-1)){
+              if(qt.tablist.length && qt.tabindex > -1){
+                qt.tabindex++;
+                qt.tabindex%=qt.tablist.length;
+                el.value = el.value.slice(0,qt.tabstart)+qt.tablist[qt.tabindex]+(qt.tabstart===0?": ":" ");
                 event.preventDefault();
                 event.returnValue = false;
+              }else{
+                if(!this.tablist){
+                  qt.tabstart = 0;
+                  qt.tabindex = 0;
+                  if(qt.tablist.length){
+                    el.value = el.value.slice(0,qt.tabstart)+qt.tablist[qt.tabindex]+": ";
+                  }
+                  event.preventDefault();
+                  event.returnValue = false;
+                }
               }
+            }else{
+              qt.tabindex = -1;
             }
           }else{
             qt.tabindex = -1;
           }
-        }else{
-          qt.tabindex = -1;
+        }catch(ex){
+          console.log("dAmnGoodies Error (quicktab.onKey): ", ex);
         }
       });
 
       dAmn.chat.events.Send(function(event){
         if(!settings.enabled) return;
         if(event.args[0]!="msg") return;
-        var msg = event.args[2];
-        var colon = msg.indexOf(":");
-        var space = msg.indexOf(" ");
-        if(colon>-1){
-          if((space>-1 && space > colon) || space==-1){
-            var name = msg.slice(0,colon);
-            var chatroom = dAmn.chat.get();
-            var members = Object.keys(chatroom.members.members);
-            var found = false;
-            members.forEach(function(member){
-              if(member.toLowerCase() == name.toLowerCase()){
-                found = member;
+        try{
+          var msg = event.args[2];
+          var colon = msg.indexOf(":");
+          var space = msg.indexOf(" ");
+          if(colon>-1){
+            if((space>-1 && space > colon) || space==-1){
+              var name = msg.slice(0,colon);
+              var chatroom = dAmn.chat.get();
+              var members = Object.keys(chatroom.members.members);
+              var found = false;
+              members.forEach(function(member){
+                if(member.toLowerCase() == name.toLowerCase()){
+                  found = member;
+                }
+              });
+              if(found){
+                DG.quicktab.add(found);
               }
-            });
-            if(found){
-              DG.quicktab.add(found);
             }
           }
+        }catch(ex){
+          console.log("dAmnGoodies Error (quicktab.Send): ", ex);
         }
       });
     });
@@ -466,14 +486,18 @@ function dAmnGoodies_Script(){
         }
         if(event.args[0]!="msg"&&event.args[0]!="action") return;
         if(settings.enabled){
-          var msg = " "+event.args[2]+" ";
-          for(var word in settings.pairs){
-            re = new RegExp("\\s"+DG.escapeRegExp(word)+"\\s", "g");
-            if(msg.search(re) > -1){
-              msg = msg.replace(re, " "+settings.pairs[word]+" ");
+          try{
+            var msg = " "+event.args[2]+" ";
+            for(var word in settings.pairs){
+              re = new RegExp("\\s"+DG.escapeRegExp(word)+"\\s", "g");
+              if(msg.search(re) > -1){
+                msg = msg.replace(re, " "+settings.pairs[word]+" ");
+              }
             }
+            event.args[2] = msg.slice(1,-1);
+          }catch(ex){
+            console.log("dAmnGoodies Error (swap.Send): ", ex);
           }
-          event.args[2] = msg.slice(1,-1);
         }
       });
     });
@@ -557,14 +581,18 @@ function dAmnGoodies_Script(){
         }
         if(event.args[0]!="msg"&&event.args[0]!="action") return;
         if(settings.enabled){
-          var msg = event.args[2];
-          for(var user in settings.nicknames){
-            re = new RegExp("\\b"+DG.escapeRegExp(user)+"\\b", "gi");
-            if(msg.search(re) > -1){
-              msg = msg.replace(re, "<abbr title=\""+user+"\">"+settings.nicknames[user]+"</abbr>");
+          try{
+            var msg = event.args[2];
+            for(var user in settings.nicknames){
+              re = new RegExp("\\b"+DG.escapeRegExp(user)+"\\b", "gi");
+              if(msg.search(re) > -1){
+                msg = msg.replace(re, "<abbr title=\""+user+"\">"+settings.nicknames[user]+"</abbr>");
+              }
             }
+            event.args[2] = msg;
+          }catch(ex){
+            console.log("dAmnGoodies Error (nicknames.Send): ", ex);
           }
-          event.args[2] = msg;
         }
       });
 
@@ -577,7 +605,7 @@ function dAmnGoodies_Script(){
             event.args[0] = "<abbr title=\""+event.args[0]+"\">"+settings.nicknames[username]+"</abbr>";
           }
         }catch(ex){
-          console.log("Nicknames onMsg error: ",ex);
+          console.log("dAmnGoodies Error (Nicknames.onMsg): ",ex);
         }
       });
     });
@@ -657,11 +685,15 @@ function dAmnGoodies_Script(){
       dAmn.chat.events.onSelfEvent(function(event){
         if(!settings.enabled) return;
         if(event.args[0] == "kicked"){
-          var ns = this.cr.ns.toLowerCase().replace("chat:","");
-          if(settings.exceptions.indexOf(ns) == -1){
-            setTimeout(function(){
-              dAmn.send.join(this.cr.ns);
-            }, settings.delay*1000)
+          try{
+            var ns = this.cr.ns.toLowerCase().replace("chat:","");
+            if(settings.exceptions.indexOf(ns) == -1){
+              setTimeout(function(){
+                dAmn.send.join(this.cr.ns);
+              }, settings.delay*1000)
+            }
+          }catch(ex){
+            console.log("dAmnGoodies Error (antikick.onSelfEvent): ", ex);
           }
         }
       });
@@ -747,20 +779,24 @@ function dAmnGoodies_Script(){
         if(!settings.enabled || !settings.chatrooms.length) return;
         var cmd = event.args[0];
         if(cmd == "join"){
-          if(!DG.autojoined){
-            DG.autojoin_ns = this.cr.ns;
-            settings.chatrooms.forEach(function(chatroom){
-              DG.autojoined++;
-              dAmn.send.join("chat:"+chatroom);
-            });
-          }else{
-            if(!DG.autojoin_tab_reset){
-              clearTimeout(DG.autojoin_timeout);
-              DG.autojoin_timeout = setTimeout(function(){
-                dAmn.chat.activate(DG.autojoin_ns);
-                DG.autojoin_tab_reset = true;
-              }, 500);
+          try{
+            if(!DG.autojoined){
+              DG.autojoin_ns = this.cr.ns;
+              settings.chatrooms.forEach(function(chatroom){
+                DG.autojoined++;
+                dAmn.send.join("chat:"+chatroom);
+              });
+            }else{
+              if(!DG.autojoin_tab_reset){
+                clearTimeout(DG.autojoin_timeout);
+                DG.autojoin_timeout = setTimeout(function(){
+                  dAmn.chat.activate(DG.autojoin_ns);
+                  DG.autojoin_tab_reset = true;
+                }, 500);
+              }
             }
+          }catch(ex){
+            console.log("dAmnGoodies Error (autojoin.onSelfEvent): ", ex);
           }
         }
       });
@@ -803,113 +839,121 @@ function dAmnGoodies_Script(){
     }
 
     dAmn.command("multi", 1, function(args){
-      var split = clumpBrackets(args.split(" "));
-      var list, text;
-      switch(split[0]){
-        case "msg":
-        case "action":
-        case "join":
-        case "part":
-        case "clear":
-        case "title":
-        case "topic":
-          if(!split[1]){
-            return;
-          }
-          list = split[1][0]=="("&&split[1].slice(-1)==")"?split[1].slice(1,-1).split(" "):[split[1]];
-          if(list.length == 1 && list[0] == "{}"){
-            list = Object.keys(dAmn.chat.chatrooms);
-          }
-          text = split.slice(2).join(" ");
-          list.forEach(function(room){
-            room = "chat:"+room.replace("#", "").replace("chat:", "");
-            dAmn.send[split[0]](room, text);
-          });
-          break;
-        case "kick":
-        case "ban":
-        case "unban":
-        case "promote":
-        case "demote":
-          if(!split[1]) return;
-          list = [];
-          temp = split[1][0]=="("&&split[1].slice(-1)==")"?split[1].slice(1,-1).split(" "):[split[1]];
-          if(temp.length == 1 && temp[0] == "{}"){
-            list = Object.keys(dAmn.chat.get().members.members);
-          }else{
-            temp.forEach(function(name){
-              if(name[0] == "*"){
-                addMembers(name.slice(1), list);
-              }else{
-                list.push(name);
-              }
+      try{
+        var split = clumpBrackets(args.split(" "));
+        var list, text;
+        switch(split[0]){
+          case "msg":
+          case "action":
+          case "join":
+          case "part":
+          case "clear":
+          case "title":
+          case "topic":
+            if(!split[1]){
+              return;
+            }
+            list = split[1][0]=="("&&split[1].slice(-1)==")"?split[1].slice(1,-1).split(" "):[split[1]];
+            if(list.length == 1 && list[0] == "{}"){
+              list = Object.keys(dAmn.chat.chatrooms);
+            }
+            text = split.slice(2).join(" ");
+            list.forEach(function(room){
+              room = "chat:"+room.replace("#", "").replace("chat:", "");
+              dAmn.send[split[0]](room, text);
             });
-          }
-          text = split.slice(2).join(" ");
-          list.forEach(function(name){
-            dAmn.send[split[0]](false, name, text);
-          });
-          break;
-        case "whois":
-          list = [];
-          temp = split[1][0]=="("&&split[1].slice(-1)==")"?split[1].slice(1,-1).split(" "):[split[1]];
-          if(temp.length == 1 && temp[0] == "{}"){
-            list = Object.keys(dAmn.chat.get().members.members);
-          }else{
-            temp.forEach(function(name){
-              if(name[0] == "*"){
-                addMembers(name.slice(1), list);
-              }else{
-                list.push(name);
-              }
+            break;
+          case "kick":
+          case "ban":
+          case "unban":
+          case "promote":
+          case "demote":
+            if(!split[1]) return;
+            list = [];
+            temp = split[1][0]=="("&&split[1].slice(-1)==")"?split[1].slice(1,-1).split(" "):[split[1]];
+            if(temp.length == 1 && temp[0] == "{}"){
+              list = Object.keys(dAmn.chat.get().members.members);
+            }else{
+              temp.forEach(function(name){
+                if(name[0] == "*"){
+                  addMembers(name.slice(1), list);
+                }else{
+                  list.push(name);
+                }
+              });
+            }
+            text = split.slice(2).join(" ");
+            list.forEach(function(name){
+              dAmn.send[split[0]](false, name, text);
             });
-          }
-          list.forEach(function(name){
-            dAmn.send.whois(name);
-          });
-          break;
-        case "display":
-          list = [];
-          temp = split[1][0]=="("&&split[1].slice(-1)==")"?split[1].slice(1,-1).split(" "):[split[1]];
-          if(temp.length == 1 && temp[0] == "{}"){
-            list = Object.keys(dAmn.chat.get().members.members);
-          }else{
-            temp.forEach(function(name){
-              if(name[0] == "*"){
-                addMembers(name.slice(1), list);
-              }else{
-                list.push(name);
-              }
+            break;
+          case "whois":
+            list = [];
+            temp = split[1][0]=="("&&split[1].slice(-1)==")"?split[1].slice(1,-1).split(" "):[split[1]];
+            if(temp.length == 1 && temp[0] == "{}"){
+              list = Object.keys(dAmn.chat.get().members.members);
+            }else{
+              temp.forEach(function(name){
+                if(name[0] == "*"){
+                  addMembers(name.slice(1), list);
+                }else{
+                  list.push(name);
+                }
+              });
+            }
+            list.forEach(function(name){
+              dAmn.send.whois(name);
             });
-          }
-          dAmn.chat.notice(list.join(" "),10);
-          break;
+            break;
+          case "display":
+            list = [];
+            temp = split[1][0]=="("&&split[1].slice(-1)==")"?split[1].slice(1,-1).split(" "):[split[1]];
+            if(temp.length == 1 && temp[0] == "{}"){
+              list = Object.keys(dAmn.chat.get().members.members);
+            }else{
+              temp.forEach(function(name){
+                if(name[0] == "*"){
+                  addMembers(name.slice(1), list);
+                }else{
+                  list.push(name);
+                }
+              });
+            }
+            dAmn.chat.notice(list.join(" "),10);
+            break;
+        }
+      }catch(ex){
+        console.log("dAmnGoodies Error (multi.command): ", ex);
       }
     });
 
     dAmn.command("boot", 1, function(args){
-      var split = args.split(" "),
-        user = split[0],
-        reason = split.slice(1).join(" ");
-      if(!user) return;
-      var pc;
-      var members = dAmn.chat.get().members.members;
-      for(var name in members){
-        if(name.toLowerCase() == user.toLowerCase()){
-          user = name;
-          pc = members[name].info.pc;
+      try{
+        var split = args.split(" "),
+          user = split[0],
+          reason = split.slice(1).join(" ");
+        if(!user) return;
+        var pc;
+        var members = dAmn.chat.get().members.members;
+        for(var name in members){
+          if(name.toLowerCase() == user.toLowerCase()){
+            user = name;
+            pc = members[name].info.pc;
+          }
         }
+        if(!pc){
+          dAmn.chat.notice("User `"+user+"` not found.",2);
+          return;
+        }
+        dAmn.send.kick(false, user, reason?reason:"You have been booted!");
+        dAmn.send.ban(false, user);
+        setTimeout(function(){
+          dAmn.send.unban(false, user);
+          dAmn.send.promote(false, user, pc);
+        }, 2000);
+      }catch(ex){
+        console.log("dAmnGoodies Error (boot.command): ", ex);
       }
-      if(!pc){
-        dAmn.chat.notice("User `"+user+"` not found.",2);
-        return;
-      }
-      dAmn.send.kick(false, user, reason?reason:"You have been booted!");
-      dAmn.send.ban(false, user);
-      setTimeout(function(){
-        dAmn.send.unban(false, user);
-        dAmn.send.promote(false, user, pc);
-      }, 2000);
     });
 
     new DG.Goodie("notify", {enabled: true, sound_url: "http://soundbible.com/grab.php?id=2156&type=wav"}, function(settings){
@@ -951,11 +995,15 @@ function dAmnGoodies_Script(){
 
       dAmn.event.listen("dAmnChatTabs_newData", function(event){
         if(!settings.enabled) return;
-        var hilite = event.args[1];
-        if(hilite === 2 && (!document.hasFocus() || dAmn.chat.getActive() != event.args[0])){
-          DG.notification_sound.pause();
-          DG.notification_sound.currentTime = 0;
-          DG.notification_sound.play();
+        try{
+          var hilite = event.args[1];
+          if(hilite === 2 && (!document.hasFocus() || dAmn.chat.getActive() != event.args[0])){
+            DG.notification_sound.pause();
+            DG.notification_sound.currentTime = 0;
+            DG.notification_sound.play();
+          }
+        }catch(ex){
+          console.log("dAmnGoodies Error (notify.newData): ", ex);
         }
       })
 
@@ -967,18 +1015,22 @@ function dAmnGoodies_Script(){
       DG.youtube.onPlayerReady = function(event){};
       DG.youtube.onPlayerStateChange = function(event){};
       DG.youtube.loadVideo = function(elId){
-        if(YT && YT.Player){
-          var player = new YT.Player(elId, {
-            height: '240',
-            width: '320',
-            videoId: elId.split(".")[1],
-            events: {
-              'onReady': DG.youtube.onPlayerReady,
-              'onStateChange': DG.youtube.onPlayerStateChange
-            }
-          });
-          DG.youtube.videos[elId] = player;
-          return player;
+        try{
+          if(YT && YT.Player){
+            var player = new YT.Player(elId, {
+              height: '240',
+              width: '320',
+              videoId: elId.split(".")[1],
+              events: {
+                'onReady': DG.youtube.onPlayerReady,
+                'onStateChange': DG.youtube.onPlayerStateChange
+              }
+            });
+            DG.youtube.videos[elId] = player;
+            return player;
+          }
+        }catch(ex){
+          console.log("dAmnGoodies Error (youtube.loadVideo): ", ex);
         }
       };
 
@@ -993,11 +1045,14 @@ function dAmnGoodies_Script(){
       dAmn.command("youtube", 1, function(args){
         DG.standardToggle(settings, args, "Youtube Videos enabled in chat.", "Youtube Videos disabled in chat.");
       });
-
-      var tag = document.createElement('script');
-      tag.src = "https://www.youtube.com/iframe_api";
-      var firstScriptTag = document.getElementsByTagName('script')[0];
-      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+      try{
+        var tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+      }catch(ex){
+        console.log("dAmnGoodies Error (youtube.iframe_api): ", ex);
+      }
 
       DG.youtube.getYoutubeId = function(msg){
         var result = /(http(s)?\:\/\/)?(((www\.)?youtube\.com|youtu\.?be)\/(watch\?v=)?)([\-_\w]+)/gi.exec(msg);
@@ -1011,11 +1066,15 @@ function dAmnGoodies_Script(){
       DG.youtube.embedYouTubePlayer = function(ns, id){
         var chatroom = dAmn.chat.get(ns);
         if(!chatroom) return;
-        var player = document.createElement("div");
-        player.id = "youtube."+id+"."+(new Date()).getTime();
-        chatroom.channels.main.addDiv(player, null, 0);
-        DG.youtube.videos[player.id] = null;
-        DG.youtube.loadVideo(player.id);
+        try{
+          var player = document.createElement("div");
+          player.id = "youtube."+id+"."+(new Date()).getTime();
+          chatroom.channels.main.addDiv(player, null, 0);
+          DG.youtube.videos[player.id] = null;
+          DG.youtube.loadVideo(player.id);
+        }catch(ex){
+          console.log("dAmnGoodies Error (youtube.embedPlayer): ", ex);
+        }
       };
 
       function doYouTube(event){
@@ -1034,7 +1093,7 @@ function dAmnGoodies_Script(){
               });
             }
           }catch(ex){
-            console.log("Youtube onMsg error: ",ex);
+            console.log("dAmnGoodies Error (Youtube.onMsg): ",ex);
           }
         }
       }
@@ -1088,15 +1147,19 @@ function dAmnGoodies_Script(){
 
       function doColors(event){
         if(!settings.enabled) return;
-        var el = event.args[0];
-        var msg = el.innerHTML;
-        var index=msg.indexOf("<abbr title=\"colors:");
-        if(index>-1){
-          var colors = match_color_tag.exec(msg);
-          var from = el.getElementsByClassName("from")[0];
-          from.style.color = "#"+colors[1];
-          var text = el.getElementsByClassName("text")[0];
-          text.style.color = "#"+colors[2];
+        try{
+          var el = event.args[0];
+          var msg = el.innerHTML;
+          var index=msg.indexOf("<abbr title=\"colors:");
+          if(index>-1){
+            var colors = match_color_tag.exec(msg);
+            var from = el.getElementsByClassName("from")[0];
+            from.style.color = "#"+colors[1];
+            var text = el.getElementsByClassName("text")[0];
+            text.style.color = "#"+colors[2];
+          }
+        }catch(ex){
+          console.log("dAmnGoodies Error (colors.addDiv): ", ex);
         }
       }
 
@@ -1109,9 +1172,13 @@ function dAmnGoodies_Script(){
         if(DG.goodies.safe && DG.goodies.safe.count) return;
         if(!settings.name && !settings.msg) return;
         if(event.args[0]!="msg"&&event.args[0]!="action") return;
-        var name = settings.name?settings.name:default_color;
-        var msg = settings.msg?settings.msg:default_color;
-        event.args[2] += "<abbr title=\"colors:"+name.toUpperCase()+":"+msg.toUpperCase()+"\"></abbr>";
+        try{
+          var name = settings.name?settings.name:default_color;
+          var msg = settings.msg?settings.msg:default_color;
+          event.args[2] += "<abbr title=\"colors:"+name.toUpperCase()+":"+msg.toUpperCase()+"\"></abbr>";
+        }catch(ex){
+          console.log("dAmnGoodies Error (colors.Send): ", ex);
+        }
       });
 
     });
@@ -1129,24 +1196,28 @@ function dAmnGoodies_Script(){
       DG.stylesheet = null;
 
       function checkTitle(title){
-        var match = stylesheet_regex.exec(title);
-        var stylesheet;
-        if(match!==null){
-          stylesheet = "http://"+match[1];
-          if(DG.stylesheet){
-            DG.stylesheet.href = stylesheet;
+        try{
+          var match = stylesheet_regex.exec(title);
+          var stylesheet;
+          if(match!==null){
+            stylesheet = "http://"+match[1];
+            if(DG.stylesheet){
+              DG.stylesheet.href = stylesheet;
+            }else{
+              DG.stylesheet = document.createElement("link");
+              DG.stylesheet.href = stylesheet;
+              DG.stylesheet.rel = "stylesheet";
+              DG.stylesheet.type = "text/css";
+              document.body.appendChild(DG.stylesheet);
+            }
           }else{
-            DG.stylesheet = document.createElement("link");
-            DG.stylesheet.href = stylesheet;
-            DG.stylesheet.rel = "stylesheet";
-            DG.stylesheet.type = "text/css";
-            document.body.appendChild(DG.stylesheet);
+            if(DG.stylesheet){
+              DG.stylesheet.parentNode.removeChild(DG.stylesheet);
+              DG.stylesheet = null;
+            }
           }
-        }else{
-          if(DG.stylesheet){
-            DG.stylesheet.parentNode.removeChild(DG.stylesheet);
-            DG.stylesheet = null;
-          }
+        }catch(ex){
+          console.log("dAmnGoodies Error (stylesheets.checkTitle): ", ex);
         }
       }
 
@@ -1162,11 +1233,15 @@ function dAmnGoodies_Script(){
 
       dAmn.event.listen("dAmnChanMainChat.prototype.onEvent", function(event){
         if(!settings.enabled) return;
-        var pkt = event.args[0];
-        if(pkt.cmd == "property" && pkt.args.p == "title"){
-          if(pkt.param == dAmn.chat.getActive()){
-            checkTitle(dAmn.chat.getTitle());
+        try{
+          var pkt = event.args[0];
+          if(pkt.cmd == "property" && pkt.args.p == "title"){
+            if(pkt.param == dAmn.chat.getActive()){
+              checkTitle(dAmn.chat.getTitle());
+            }
           }
+        }catch(ex){
+          console.log("dAmnGoodies Error (stylesheets.onEvent): ", ex);
         }
       });
     });
