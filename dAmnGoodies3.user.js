@@ -2,7 +2,7 @@
 // @name           dAmnGoodies
 // @description    Novelty features for dAmn chat.
 // @author         Sam Mulqueen <sammulqueen.nz@gmail.com>
-// @version        3.0.8
+// @version        3.0.9
 // @include        http://chat.deviantart.com/chat/*
 // @grant GM_setValue
 // @grant GM_getValue
@@ -12,7 +12,7 @@ function dAmnGoodies_Script(){
   var DG = {};
   window.DG = DG;
 
-  DG.version = "3.0.8";
+  DG.version = "3.0.9";
 
   //var audio = new Audio("http://soundbible.com/grab.php?id=2156&type=wav");
   //audio.play();
@@ -1073,10 +1073,13 @@ function dAmnGoodies_Script(){
             var msg = event.args[1];
             var ytid = DG.youtube.getYoutubeId(msg);
             if(ytid){
+              var chatroom = this;
               var ns = this.cr.ns;
               event.after(function(){
                 try{
                   DG.youtube.embedYouTubePlayer(ns, ytid);
+                  chatroom.scroll_once = true;
+                  dAmn_InvalidateLayout();
                 }catch(ex){
                   console.log("Youtube after onMsg error: ", ex);
                 }
