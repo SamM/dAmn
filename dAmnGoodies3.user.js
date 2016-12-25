@@ -2,7 +2,7 @@
 // @name           dAmnGoodies
 // @description    Novelty features for dAmn chat.
 // @author         Sam Mulqueen <sammulqueen.nz@gmail.com>
-// @version        3.0.7
+// @version        3.0.8
 // @include        http://chat.deviantart.com/chat/*
 // @grant GM_setValue
 // @grant GM_getValue
@@ -12,7 +12,7 @@ function dAmnGoodies_Script(){
   var DG = {};
   window.DG = DG;
 
-  DG.version = "3.0.7";
+  DG.version = "3.0.8";
 
   //var audio = new Audio("http://soundbible.com/grab.php?id=2156&type=wav");
   //audio.play();
@@ -377,7 +377,6 @@ function dAmnGoodies_Script(){
     new DG.Goodie("swap", {
       enabled: true,
       pairs: {
-        "dAmn Goodies": ":thumb652858070:",
         "dAmnGoodies": ":thumb652858070:"
       }
     },
