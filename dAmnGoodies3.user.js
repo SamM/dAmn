@@ -2,7 +2,7 @@
 // @name           dAmnGoodies
 // @description    Novelty features for dAmn chat.
 // @author         Sam Mulqueen <sammulqueen.nz@gmail.com>
-// @version        3.1.1
+// @version        3.1.2
 // @include        http://chat.deviantart.com/chat/*
 // @grant GM_setValue
 // @grant GM_getValue
@@ -12,7 +12,7 @@ function dAmnGoodies_Script(){
   var DG = {};
   window.DG = DG;
 
-  DG.version = "3.1.1";
+  DG.version = "3.1.2";
 
   DG.goodies = {};
   DG.Goodie = function(name, defaultData, setup){
@@ -1124,6 +1124,12 @@ function dAmnGoodies_Script(){
               return;
             }
             color = split[1].replace("#", "");
+            if(color == "none" || color == "reset"){
+              dAmn.chat.notice("Reset color to default for your "+(split[0]=="name"?"username":"message"));
+              settings[split[0]] = false;
+              DG.save();
+              return;
+            }
             if(color.length != 6){
               dAmn.chat.notice("Usage: /colors "+split[0]+" #FF0000 (This sets the color to red)");
               return;
@@ -1147,6 +1153,12 @@ function dAmnGoodies_Script(){
                   return;
                 }
                 color = split[2].replace("#", "");
+                if(color == "none" || color == "reset"){
+                  dAmn.chat.notice("Reset color to default for hilite "+(split[1]=="name"?"username":split[1]=="msg"?"message":"background"));
+                  settings.hilite[split[1]] = false;
+                  DG.save();
+                  return;
+                }
                 if(color.length != 6){
                   dAmn.chat.notice("Usage: /colors "+split[0]+" "+split[1]+" #FF0000 (This sets the color to red)");
                   return;
