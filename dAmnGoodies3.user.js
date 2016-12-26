@@ -2,7 +2,7 @@
 // @name           dAmnGoodies
 // @description    Novelty features for dAmn chat.
 // @author         Sam Mulqueen <sammulqueen.nz@gmail.com>
-// @version        3.1.2
+// @version        3.1.3
 // @include        http://chat.deviantart.com/chat/*
 // @grant GM_setValue
 // @grant GM_getValue
@@ -12,7 +12,7 @@ function dAmnGoodies_Script(){
   var DG = {};
   window.DG = DG;
 
-  DG.version = "3.1.2";
+  DG.version = "3.1.3";
 
   DG.goodies = {};
   DG.Goodie = function(name, defaultData, setup){
@@ -1093,13 +1093,21 @@ function dAmnGoodies_Script(){
 
     });
 
-    new DG.Goodie("colors", {enabled: true, name: false, msg: false, hilite: {name:false,msg:false,bg:false}}, function(settings){
+    new DG.Goodie("colors", {enabled: true, name: false, msg: false, hilite: {name:false,msg:false,bg:false}, enableOthers: true, enableSelf: true}, function(settings){
       var match_color_tablump = /&abbr\tcolors:([A-Fa-f0-9]{6}):([A-Fa-f0-9]{6})\t/;
       var match_color_tag = /<abbr title="colors:([A-Fa-f0-9]{6}):([A-Fa-f0-9]{6})">/;
       var default_color = "393d3c";
 
       if(!settings.hilite){
         settings.hilite = {name:false, msg: false, bg: false};
+        DG.save();
+      }
+      if(typeof settings.enableOthers == "undefined"){
+        settings.enableOthers = true;
+        DG.save();
+      }
+      if(typeof settings.enableSelf == "undefined"){
+        settings.enableSelf = true;
         DG.save();
       }
 
@@ -1109,6 +1117,21 @@ function dAmnGoodies_Script(){
           case "on":
           case "off":
             DG.standardToggle(settings, args, "Custom message colors enabled.", "Custom message colors disabled.");
+            break;
+          case "toggle":
+            switch(split[1]){
+              case "others":
+                settings.enableOthers = !settings.enableOthers;
+                dAmn.chat.notice(settings.enableOthers?"Enabled colors in other people's messages.":"Disabled colors in other people's messages.");
+                break;
+              case "self":
+                settings.enableSelf = !settings.enableSelf;
+                dAmn.chat.notice(settings.enableSelf?"Enabled colors for your messages.":"Disabled colors for your messages.");
+                break;
+              default:
+                dAmn.chat.notice("Usage: /colors toggle [others|self]");
+                break;
+            }
             break;
           case "none":
           case "reset":
@@ -1198,9 +1221,11 @@ function dAmnGoodies_Script(){
           var msg = el.innerHTML;
           var index=msg.indexOf("<abbr title=\"colors:");
           var hilite = [].slice.call(el.classList).indexOf("other-hl")>-1;
+          var self_msg = [].slice.call(el.classList).indexOf("self-hl")>-1;
           var text = el.getElementsByClassName("text")[0];
           var from = el.getElementsByClassName("from")[0];
           if(!from || !text) return;
+          if(!settings.enableOthers && !self_msg) return;
           var spans = [].slice.call(text.getElementsByTagName("span"));
           var links = [].slice.call(text.getElementsByTagName("a"));
           if(index>-1){
@@ -1232,11 +1257,10 @@ function dAmnGoodies_Script(){
       }
 
       dAmn.event.listen("dAmnChanChat.prototype.addDiv", doColors);
-      //dAmn.chat.events.onMsg(doColors);
-      //dAmn.chat.events.onAction(doColors);
 
       dAmn.chat.events.Send(function(event){
         if(!settings.enabled) return;
+        if(!settings.enableSelf) return;
         if(DG.goodies.safe && DG.goodies.safe.count) return;
         if(!settings.name && !settings.msg) return;
         if(event.args[0]!="msg"&&event.args[0]!="action") return;
