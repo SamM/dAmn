@@ -2,7 +2,7 @@
 // @name           dAmnGoodies
 // @description    Novelty features for dAmn chat.
 // @author         Sam Mulqueen <sammulqueen.nz@gmail.com>
-// @version        3.2.1
+// @version        3.2.2
 // @include        http://chat.deviantart.com/chat/*
 // @grant GM_setValue
 // @grant GM_getValue
@@ -13,7 +13,7 @@ function dAmnGoodies_Script(){
   var DG = {};
   window.DG = DG;
 
-  DG.version = "3.2.1";
+  DG.version = "3.2.2";
 
   DG.goodies = {};
   DG.Goodie = function(name, defaultData, setup){
@@ -1123,10 +1123,12 @@ function dAmnGoodies_Script(){
             switch(split[1]){
               case "others":
                 settings.enableOthers = !settings.enableOthers;
+                DG.save();
                 dAmn.chat.notice(settings.enableOthers?"Enabled colors in other people's messages.":"Disabled colors in other people's messages.");
                 break;
               case "self":
                 settings.enableSelf = !settings.enableSelf;
+                DG.save();
                 dAmn.chat.notice(settings.enableSelf?"Enabled colors for your messages.":"Disabled colors for your messages.");
                 break;
               default:
@@ -1226,13 +1228,14 @@ function dAmnGoodies_Script(){
           var text = el.getElementsByClassName("text")[0];
           var from = el.getElementsByClassName("from")[0];
           if(!from || !text) return;
-          if(!settings.enableOthers && !self_msg) return;
-          var spans = [].slice.call(text.getElementsByTagName("span"));
-          var links = [].slice.call(text.getElementsByTagName("a"));
-          if(index>-1){
-            var colors = match_color_tag.exec(msg);
-            from.style.color = "#"+colors[1];
-            text.style.color = "#"+colors[2];
+          if(!(!settings.enableOthers && !self_msg)){
+            var spans = [].slice.call(text.getElementsByTagName("span"));
+            var links = [].slice.call(text.getElementsByTagName("a"));
+            if(index>-1){
+              var colors = match_color_tag.exec(msg);
+              from.style.color = "#"+colors[1];
+              text.style.color = "#"+colors[2];
+            }
           }
           if(hilite){
             if(settings.hilite.bg){
@@ -1362,25 +1365,29 @@ function dAmnGoodies_Script(){
         if(error){
           console.error(error);
         }else{
-          var profile = document.implementation.createHTMLDocument("profile");
-          profile.documentElement.innerHTML = response;
-          var user_info = profile.body.getElementsByClassName("super-secret-why-short")[0];
-          var user_info_spans = user_info.getElementsByTagName("span");
-          var name_etc = user_info_spans[3].innerHTML;
-          var output = [];
-          var name = name_etc.split(">")[1].split("<")[0];
-          output.push(name);
-          var asl = name_etc.split("</strong>")[1];
-          while(asl.slice(-1) == " "){
-            asl = asl.slice(0,-1);
+          try{
+            var profile = document.implementation.createHTMLDocument("profile");
+            profile.documentElement.innerHTML = response;
+            var user_info = profile.body.getElementsByClassName("super-secret-why-short")[0];
+            var user_info_spans = user_info.getElementsByTagName("span");
+            var name_etc = user_info_spans[3].innerHTML;
+            var output = [];
+            var name = name_etc.split(">")[1].split("<")[0];
+            output.push(name);
+            var asl = name_etc.split("</strong>")[1];
+            while(asl.slice(-1) == " "){
+              asl = asl.slice(0,-1);
+            }
+            output.push(asl);
+            var artist_type_etc = user_info_spans[2].getElementsByTagName("strong");
+            [].slice.call(artist_type_etc).forEach(function(el){
+              if(el.innerText && el.innerText != " ") output.push(el.innerText);
+            })
+            var output_str = output.join(", ");
+            dAmn.chat.notice(username+": "+output.join(", "), 7);
+          }catch(ex){
+            console.log("dAmn Goodies Error (stalk): "+ex);
           }
-          output.push(asl);
-          var artist_type_etc = user_info_spans[2].getElementsByTagName("strong");
-          [].slice.call(artist_type_etc).forEach(function(el){
-            if(el.innerText && el.innerText != " ") output.push(el.innerText);
-          })
-          var output_str = output.join(", ");
-          dAmn.chat.notice(username+": "+output.join(", "), 7);
         }
       };
     });
