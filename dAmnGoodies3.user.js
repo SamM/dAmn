@@ -1228,9 +1228,9 @@ function dAmnGoodies_Script(){
           var text = el.getElementsByClassName("text")[0];
           var from = el.getElementsByClassName("from")[0];
           if(!from || !text) return;
+          var spans = [].slice.call(text.getElementsByTagName("span"));
+          var links = [].slice.call(text.getElementsByTagName("a"));
           if(!(!settings.enableOthers && !self_msg)){
-            var spans = [].slice.call(text.getElementsByTagName("span"));
-            var links = [].slice.call(text.getElementsByTagName("a"));
             if(index>-1){
               var colors = match_color_tag.exec(msg);
               from.style.color = "#"+colors[1];
