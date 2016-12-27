@@ -2,17 +2,18 @@
 // @name           dAmnGoodies
 // @description    Novelty features for dAmn chat.
 // @author         Sam Mulqueen <sammulqueen.nz@gmail.com>
-// @version        3.1.3
+// @version        3.2.0
 // @include        http://chat.deviantart.com/chat/*
 // @grant GM_setValue
 // @grant GM_getValue
+// @grant GM_xmlhttpRequest
 // ==/UserScript==
 
 function dAmnGoodies_Script(){
   var DG = {};
   window.DG = DG;
 
-  DG.version = "3.1.3";
+  DG.version = "3.2.0";
 
   DG.goodies = {};
   DG.Goodie = function(name, defaultData, setup){
@@ -1350,6 +1351,39 @@ function dAmnGoodies_Script(){
       };
     });
 
+    DG.request = {};
+    DG.request.url = null;
+    DG.request.callback = null;
+
+    dAmn.command("stalk", 1, function(args){
+      var username = args;
+      DG.request.url = "http://"+username+".deviantart.com";
+      DG.request.callback = function(error, response){
+        if(error){
+          console.error(error);
+        }else{
+          var profile = document.implementation.createHTMLDocument("profile");
+          profile.documentElement.innerHTML = response;
+          var user_info = profile.body.getElementsByClassName("super-secret-why-short")[0];
+          var user_info_spans = user_info.getElementsByTagName("span");
+          var name_etc = user_info_spans[3].innerHTML;
+          var output = [];
+          var name = name_etc.split(">")[1].split("<")[0];
+          output.push(name);
+          var asl = name_etc.split("</strong>")[1];
+          while(asl.slice(-1) == " "){
+            asl = asl.slice(0,-1);
+          }
+          var artist_type_etc = user_info_spans[2].getElementsByTagName("strong");
+          [].slice.call(artist_type_etc).forEach(function(el){
+            if(el.innerText && el.innerText != " ") output.push(el.innerText);
+          })
+          var output_str = output.join(", ");
+          dAmn.chat.notice(username+": "+output.join(", "), 7);
+        }
+      };
+    });
+
     DG.save();
   };
 
@@ -1698,3 +1732,34 @@ function execute_script(id, script){
 }
 execute_script("dAmnHelper_Script", dAmnHelper_Script);
 execute_script("dAmnGoodies_Script", dAmnGoodies_Script);
+
+// HttpRequests Workaround
+
+var requestInterval = null;
+var $w = unsafeWindow;
+function checkRequests(){
+  if($w.DG && $w.DG.request && $w.DG.request.url && $w.DG.request.callback){
+    var url = $w.DG.request.url;
+    var callback = $w.DG.request.callback;
+    $w.DG.request.url = null;
+    $w.DG.request.callback = null;
+    var xhr = new GM_xmlhttpRequest({
+      method: "GET",
+      url: url,
+      onload: function(xhr){
+        if(xhr.readyState === 4){
+          if(xhr.status === 200){
+            callback(null, xhr.responseText);
+          }else{
+            callback(xhr.statusText);
+          }
+        }
+      },
+      onerror: function(xhr){
+        callback(xhr.statusText);
+      }
+    });
+  }
+}
+
+requestInterval = setInterval(checkRequests, 500);
