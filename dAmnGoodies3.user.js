@@ -23,7 +23,7 @@ function dAmnGoodies_Script(){
       try{
         newData = setup.call(this, DG.goodies[name], name);
       }catch(ex){
-        console.log("dAmnGoodies Error (goodies_setup) : "+ex.message);
+        console.error("dAmnGoodies Error (goodies_setup) : "+ex.message);
       }
     }
     if(typeof newData == "object"){
@@ -35,7 +35,7 @@ function dAmnGoodies_Script(){
     try{
       localStorage.setItem("dAmnGoodies3", JSON.stringify(DG.goodies));
     }catch(ex){
-      console.log("dAmnGoodies Error (save_goodies) : "+ex.message);
+      console.error("dAmnGoodies Error (save_goodies) : "+ex.message);
     }
     return DG;
   };
@@ -45,7 +45,7 @@ function dAmnGoodies_Script(){
     try{
       loaded = localStorage.getItem("dAmnGoodies3");
     }catch(ex){
-      console.log("dAmnGoodies Error (load_goodies) : "+ex.message);
+      console.error("dAmnGoodies Error (load_goodies) : "+ex.message);
     }
     try{
       if(!loaded){
@@ -245,7 +245,7 @@ function dAmnGoodies_Script(){
           try{
             event.args[2] = toMessedUp(event.args[2]);
           }catch(ex){
-            console.log("dAmnGoodies Error (drunk.Send): ", ex);
+            console.error("dAmnGoodies Error (drunk.Send): ", ex);
           }
         }
       });
@@ -273,7 +273,7 @@ function dAmnGoodies_Script(){
           settings.tablist = list;
           DG.save();
         }catch(ex){
-          console.log("dAmnGoodies Error (quicktab.add): ", ex);
+          console.error("dAmnGoodies Error (quicktab.add): ", ex);
         }
       }
 
@@ -300,7 +300,7 @@ function dAmnGoodies_Script(){
             }
           }
         }catch(ex){
-          console.log("dAmnGoodies Error (QuickTab.onMsg): ",ex);
+          console.error("dAmnGoodies Error (QuickTab.onMsg): ",ex);
         }
       }
       dAmn.chat.events.onMsg(findTab);
@@ -339,7 +339,7 @@ function dAmnGoodies_Script(){
             qt.tabindex = -1;
           }
         }catch(ex){
-          console.log("dAmnGoodies Error (quicktab.onKey): ", ex);
+          console.error("dAmnGoodies Error (quicktab.onKey): ", ex);
         }
       });
 
@@ -367,7 +367,7 @@ function dAmnGoodies_Script(){
             }
           }
         }catch(ex){
-          console.log("dAmnGoodies Error (quicktab.Send): ", ex);
+          console.error("dAmnGoodies Error (quicktab.Send): ", ex);
         }
       });
     });
@@ -484,7 +484,7 @@ function dAmnGoodies_Script(){
             }
             event.args[2] = msg.slice(1,-1);
           }catch(ex){
-            console.log("dAmnGoodies Error (swap.Send): ", ex);
+            console.error("dAmnGoodies Error (swap.Send): ", ex);
           }
         }
       });
@@ -579,7 +579,7 @@ function dAmnGoodies_Script(){
             }
             event.args[2] = msg;
           }catch(ex){
-            console.log("dAmnGoodies Error (nicknames.Send): ", ex);
+            console.error("dAmnGoodies Error (nicknames.Send): ", ex);
           }
         }
       });
@@ -593,7 +593,7 @@ function dAmnGoodies_Script(){
             event.args[0] = "<abbr title=\""+event.args[0]+"\">"+settings.nicknames[username]+"</abbr>";
           }
         }catch(ex){
-          console.log("dAmnGoodies Error (Nicknames.onMsg): ",ex);
+          console.error("dAmnGoodies Error (Nicknames.onMsg): ",ex);
         }
       });
     });
@@ -681,7 +681,7 @@ function dAmnGoodies_Script(){
               }, settings.delay*1000)
             }
           }catch(ex){
-            console.log("dAmnGoodies Error (antikick.onSelfEvent): ", ex);
+            console.error("dAmnGoodies Error (antikick.onSelfEvent): ", ex);
           }
         }
       });
@@ -784,7 +784,7 @@ function dAmnGoodies_Script(){
               }
             }
           }catch(ex){
-            console.log("dAmnGoodies Error (autojoin.onSelfEvent): ", ex);
+            console.error("dAmnGoodies Error (autojoin.onSelfEvent): ", ex);
           }
         }
       });
@@ -911,7 +911,7 @@ function dAmnGoodies_Script(){
             break;
         }
       }catch(ex){
-        console.log("dAmnGoodies Error (multi.command): ", ex);
+        console.error("dAmnGoodies Error (multi.command): ", ex);
       }
     });
 
@@ -940,7 +940,7 @@ function dAmnGoodies_Script(){
           dAmn.send.promote(false, user, pc);
         }, 2000);
       }catch(ex){
-        console.log("dAmnGoodies Error (boot.command): ", ex);
+        console.error("dAmnGoodies Error (boot.command): ", ex);
       }
     });
 
@@ -991,7 +991,7 @@ function dAmnGoodies_Script(){
             DG.notification_sound.play();
           }
         }catch(ex){
-          console.log("dAmnGoodies Error (notify.newData): ", ex);
+          console.error("dAmnGoodies Error (notify.newData): ", ex);
         }
       })
 
@@ -1018,7 +1018,7 @@ function dAmnGoodies_Script(){
             return player;
           }
         }catch(ex){
-          console.log("dAmnGoodies Error (youtube.loadVideo): ", ex);
+          console.error("dAmnGoodies Error (youtube.loadVideo): ", ex);
         }
       };
 
@@ -1039,7 +1039,7 @@ function dAmnGoodies_Script(){
         var firstScriptTag = document.getElementsByTagName('script')[0];
         firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
       }catch(ex){
-        console.log("dAmnGoodies Error (youtube.iframe_api): ", ex);
+        console.error("dAmnGoodies Error (youtube.iframe_api): ", ex);
       }
 
       DG.youtube.getYoutubeId = function(msg){
@@ -1061,7 +1061,7 @@ function dAmnGoodies_Script(){
           DG.youtube.videos[player.id] = null;
           DG.youtube.loadVideo(player.id);
         }catch(ex){
-          console.log("dAmnGoodies Error (youtube.embedPlayer): ", ex);
+          console.error("dAmnGoodies Error (youtube.embedPlayer): ", ex);
         }
       };
 
@@ -1079,12 +1079,12 @@ function dAmnGoodies_Script(){
                   chatroom.scroll_once = true;
                   dAmn_InvalidateLayout();
                 }catch(ex){
-                  console.log("Youtube after onMsg error: ", ex);
+                  console.error("dAmn Goodies Error (Youtube after onMsg): ", ex);
                 }
               });
             }
           }catch(ex){
-            console.log("dAmnGoodies Error (Youtube.onMsg): ",ex);
+            console.error("dAmnGoodies Error (Youtube.onMsg): ",ex);
           }
         }
       }
@@ -1256,7 +1256,7 @@ function dAmnGoodies_Script(){
             }
           }
         }catch(ex){
-          console.log("dAmnGoodies Error (colors.addDiv): ", ex);
+          console.error("dAmnGoodies Error (colors.addDiv): ", ex);
         }
       }
 
@@ -1273,7 +1273,7 @@ function dAmnGoodies_Script(){
           var msg = settings.msg?settings.msg:default_color;
           event.args[2] += "<abbr title=\"colors:"+name.toUpperCase()+":"+msg.toUpperCase()+"\"></abbr>";
         }catch(ex){
-          console.log("dAmnGoodies Error (colors.Send): ", ex);
+          console.error("dAmnGoodies Error (colors.Send): ", ex);
         }
       });
 
@@ -1313,7 +1313,7 @@ function dAmnGoodies_Script(){
             }
           }
         }catch(ex){
-          console.log("dAmnGoodies Error (stylesheets.checkTitle): ", ex);
+          console.error("dAmnGoodies Error (stylesheets.checkTitle): ", ex);
         }
       }
 
@@ -1337,7 +1337,7 @@ function dAmnGoodies_Script(){
             }
           }
         }catch(ex){
-          console.log("dAmnGoodies Error (stylesheets.onEvent): ", ex);
+          console.error("dAmnGoodies Error (stylesheets.onEvent): ", ex);
         }
       });
     });
@@ -1386,7 +1386,7 @@ function dAmnGoodies_Script(){
             var output_str = output.join(", ");
             dAmn.chat.notice(username+": "+output.join(", "), 7);
           }catch(ex){
-            console.log("dAmn Goodies Error (stalk): "+ex);
+            console.error("dAmn Goodies Error (stalk): "+ex);
           }
         }
       };
