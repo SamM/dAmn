@@ -643,8 +643,10 @@ function CCScript(){
         input.type = "color";
         input.value = color;
         input.onchange = onChange;
-        if($ && $.spectrum){
-          $.spectrum(input);
+        if(typeof $ == "function"){
+          $(input).spectrum({
+            showPalette: true
+          });
         }
         el.appendChild(input);
         break;
