@@ -643,12 +643,12 @@ function CCScript(){
         input.type = "color";
         input.value = color;
         input.onchange = onChange;
+        el.appendChild(input);
         if(typeof $ == "function"){
           $(input).spectrum({
             showPalette: true
           });
         }
-        el.appendChild(input);
         break;
       case "text":
         var label = args[0];
