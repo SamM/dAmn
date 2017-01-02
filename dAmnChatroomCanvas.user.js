@@ -752,6 +752,17 @@ function CCScript(){
       CC.home.autojoin = cookie == "true";
     }
 
+    // Custom Color Picker
+    var spectrum_script = document.createElement("script");
+    spectrum_script.type = "text/javascript";
+    spectrum_script.src = "http://bgrins.github.io/spectrum/spectrum.js";
+    document.head.appendChild(spectrum_script);
+
+    var spectrum_css = document.createElement("link");
+    spectrum_css.rel = "stylesheet";
+    spectrum_css.href = "http://bgrins.github.io/spectrum/spectrum.css";
+    document.head.appendChild(spectrum_css);
+
     // Use /clearcanvas to clear the canvas of the current chatroom
     dAmn.command("clearcanvas", 0, function(args){
       if(CC.isSetup){
