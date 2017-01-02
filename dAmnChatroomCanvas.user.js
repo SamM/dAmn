@@ -643,6 +643,9 @@ function CCScript(){
         input.type = "color";
         input.value = color;
         input.onchange = onChange;
+        if($ && $.spectrum){
+          $.spectrum(input);
+        }
         el.appendChild(input);
         break;
       case "text":
