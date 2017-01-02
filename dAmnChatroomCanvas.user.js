@@ -640,13 +640,18 @@ function CCScript(){
         var color = args[0];
         onChange = args[1];
         input = document.createElement("input");
-        input.type = "color";
+        input.type = "text";
         input.value = color;
         input.onchange = onChange;
+        input.id = "colorPicker";
         el.appendChild(input);
         if(typeof $ == "function"){
           $(input).spectrum({
-            showPalette: true
+            showPalette: true,
+            palette: [
+              ["white", "black", "#7F7F7F"],
+              ["#FF0000", "#00FF00", "#0000FF"]
+            ]
           });
         }
         break;
