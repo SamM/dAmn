@@ -648,6 +648,8 @@ function CCScript(){
         if(typeof $ == "function"){
           $(input).spectrum({
             showPalette: true,
+            showInput: true,
+            preferredFormat: "hex",
             palette: [
               ["white", "black", "#7F7F7F"],
               ["#FF0000", "#00FF00", "#0000FF"]
