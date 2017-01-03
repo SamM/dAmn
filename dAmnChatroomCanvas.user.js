@@ -2,7 +2,7 @@
 // @name           dAmn Chatroom Canvas
 // @description    Draw alongside other Deviants right from within dAmn
 // @author         Sam Mulqueen <sammulqueen.nz@gmail.com>
-// @version        1.9.0
+// @version        1.9.1
 // @include        http://chat.deviantart.com/chat/*
 // ==/UserScript==
 
@@ -640,12 +640,13 @@ function CCScript(){
         var color = args[0];
         onChange = args[1];
         input = document.createElement("input");
-        input.type = "text";
+        input.type = "color";
         input.value = color;
         input.onchange = onChange;
         input.id = "colorPicker";
         el.appendChild(input);
         if(typeof $ == "function" && typeof $(input).spectrum == "function"){
+          input.type = "text";
           $(input).spectrum({
             showPalette: true,
             showInput: true,
