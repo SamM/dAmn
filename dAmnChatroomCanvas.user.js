@@ -645,7 +645,7 @@ function CCScript(){
         input.onchange = onChange;
         input.id = "colorPicker";
         el.appendChild(input);
-        if(typeof $ == "function"){
+        if(typeof $ == "function" && typeof $(input).spectrum == "function"){
           $(input).spectrum({
             showPalette: true,
             showInput: true,
@@ -771,12 +771,12 @@ function CCScript(){
     var spectrum_script = document.createElement("script");
     spectrum_script.type = "text/javascript";
     spectrum_script.src = "http://bgrins.github.io/spectrum/spectrum.js";
-    document.head.appendChild(spectrum_script);
+    document.body.appendChild(spectrum_script);
 
     var spectrum_css = document.createElement("link");
     spectrum_css.rel = "stylesheet";
     spectrum_css.href = "http://bgrins.github.io/spectrum/spectrum.css";
-    document.head.appendChild(spectrum_css);
+    document.body.appendChild(spectrum_css);
 
     // Use /clearcanvas to clear the canvas of the current chatroom
     dAmn.command("clearcanvas", 0, function(args){
