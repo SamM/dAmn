@@ -2,7 +2,7 @@
 // @name           dAmnGoodies
 // @description    Novelty features for dAmn chat.
 // @author         Sam Mulqueen <sammulqueen.nz@gmail.com>
-// @version        3.2.3
+// @version        3.2.4
 // @include        http://chat.deviantart.com/chat/*
 // @grant GM_setValue
 // @grant GM_getValue
@@ -13,7 +13,7 @@ function dAmnGoodies_Script(){
   var DG = {};
   window.DG = DG;
 
-  DG.version = "3.2.3";
+  DG.version = "3.2.4";
 
   DG.goodies = {};
   DG.Goodie = function(name, defaultData, setup){
@@ -948,9 +948,12 @@ function dAmnGoodies_Script(){
       DG.notification_sound = new Audio(settings.sound_url);
 
       dAmn.command("notify", 1, function(args){
-        DG.standardToggle(settings, args, "Sound notifications enabled.", "Sound notifications disabled.");
         var split = args.split(" ");
         switch(split[0]){
+          case "on":
+          case "off":
+            DG.standardToggle(settings, args, "Sound notifications enabled.", "Sound notifications disabled.");
+            break;
           case "set":
             if(!split[1]){
               dAmn.chat.notice("Usage: /notify set [default|<i>http://url.to/soundfile.wav</i>]")
