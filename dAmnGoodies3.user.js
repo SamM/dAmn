@@ -323,10 +323,11 @@ function dAmnGoodies_Script(){
                 event.returnValue = false;
               }else{
                 if(!this.tablist){
-                  qt.tabstart = 0;
+                  qt.tabstart = el.value.lastIndexOf(" ");
+                  qt.tabstart = qt.tabstart == -1?0:qt.tabstart;
                   qt.tabindex = 0;
                   if(qt.tablist.length){
-                    el.value = el.value.slice(0,qt.tabstart)+qt.tablist[qt.tabindex]+": ";
+                    el.value = el.value.slice(0,qt.tabstart)+qt.tablist[qt.tabindex]+(qt.tabstart>0?" ":": ");
                   }
                   event.preventDefault();
                   event.returnValue = false;
