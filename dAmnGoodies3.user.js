@@ -258,6 +258,7 @@ function dAmnGoodies_Script(){
       qt.tablist = settings.tablist;
       qt.tabstart = -1;
       qt.tabindex = -1;
+      qt.skip = false;
       qt.add = function(user){
         var list = [];
         try{
@@ -312,6 +313,30 @@ function dAmnGoodies_Script(){
           var el = this.chatinput_el;
           var qt = DG.quicktab;
           if(kc == 9){
+            if (e.ctrlKey || e.shiftKey) {
+                dAmnChatTabs_activateNext();
+                event.preventDefault();
+                event.returnValue = false;
+            }
+            if(!this.tablist){
+              var tabstart = el.value.lastIndexOf(' ') + 1;
+              var tabstr = el.value.substr( tabstart );
+              if (tabstr.length) {
+                var a;
+                if (tabstr.charAt(0) != '/') {
+                  a = this.cr.members.MatchMembers( RegExp( '^'+tabstr+'\\S*', "i" ) );
+                  if (0==tabstart) {
+                    var i = a.length;
+                    while (i--) {
+                      a[i]+=': ';
+                    }
+                  }
+                }
+                if (a.length == 1) {
+                  qt.skip = true;
+                }
+              }
+            }
             if(el.value == "" || (el.value.slice(-1) == " ")){
               if(qt.tablist.length && qt.tabindex > -1){
                 qt.tabindex++;
@@ -320,10 +345,8 @@ function dAmnGoodies_Script(){
                 event.preventDefault();
                 event.returnValue = false;
               }else{
-                console.log(this.tablist, this.tabindex, this.tabstart);
-                if(!this.tablist){
-                  qt.tabstart = el.value.lastIndexOf(" ");
-                  qt.tabstart = qt.tabstart == -1?0:qt.tabstart+1;
+                if(!this.tablist && !qt.skip){
+                  qt.tabstart = el.value.lastIndexOf(" ")+1;
                   qt.tabindex = 0;
                   if(qt.tablist.length){
                     el.value = el.value.slice(0,qt.tabstart)+qt.tablist[qt.tabindex]+(qt.tabstart>0?" ":": ");
@@ -337,6 +360,7 @@ function dAmnGoodies_Script(){
             }
           }else{
             qt.tabindex = -1;
+            qt.skip = false;
           }
         }catch(ex){
           console.error("dAmnGoodies Error (quicktab.onKey): ", ex);
