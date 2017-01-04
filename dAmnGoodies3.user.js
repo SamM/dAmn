@@ -2,10 +2,8 @@
 // @name           dAmnGoodies
 // @description    Novelty features for dAmn chat.
 // @author         Sam Mulqueen <sammulqueen.nz@gmail.com>
-// @version        3.2.5
+// @version        3.2.6
 // @include        http://chat.deviantart.com/chat/*
-// @grant GM_setValue
-// @grant GM_getValue
 // @grant GM_xmlhttpRequest
 // ==/UserScript==
 
@@ -13,7 +11,7 @@ function dAmnGoodies_Script(){
   var DG = {};
   window.DG = DG;
 
-  DG.version = "3.2.5";
+  DG.version = "3.2.6";
 
   DG.goodies = {};
   DG.Goodie = function(name, defaultData, setup){
@@ -322,6 +320,7 @@ function dAmnGoodies_Script(){
                 event.preventDefault();
                 event.returnValue = false;
               }else{
+                console.log(this.tablist, this.tabindex, this.tabstart);
                 if(!this.tablist){
                   qt.tabstart = el.value.lastIndexOf(" ");
                   qt.tabstart = qt.tabstart == -1?0:qt.tabstart+1;
