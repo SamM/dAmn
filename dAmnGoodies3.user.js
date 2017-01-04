@@ -314,7 +314,7 @@ function dAmnGoodies_Script(){
           var el = this.chatinput_el;
           var qt = DG.quicktab;
           if(kc == 9){
-            if(el.value == "" || (el.value.slice(-1) == " " && qt.tabindex>-1)){
+            if(el.value == "" || (el.value.slice(-1) == " ")){
               if(qt.tablist.length && qt.tabindex > -1){
                 qt.tabindex++;
                 qt.tabindex%=qt.tablist.length;
