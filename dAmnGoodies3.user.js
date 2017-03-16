@@ -2,7 +2,7 @@
 // @name           dAmnGoodies
 // @description    Novelty features for dAmn chat.
 // @author         Sam Mulqueen <sammulqueen.nz@gmail.com>
-// @version        3.3.0
+// @version        3.3.1
 // @include        http://chat.deviantart.com/chat/*
 // @grant GM_xmlhttpRequest
 // ==/UserScript==
@@ -11,7 +11,7 @@ function dAmnGoodies_Script(){
   var DG = {};
   window.DG = DG;
 
-  DG.version = "3.3.0";
+  DG.version = "3.3.1";
 
   DG.goodies = {};
   DG.Goodie = function(name, defaultData, setup){
@@ -612,6 +612,7 @@ function dAmnGoodies_Script(){
         if(DG.goodies.safe && DG.goodies.safe.count){
           return;
         }
+        if(!settings.sendEnabled) return;
         if(event.args[0]!="msg"&&event.args[0]!="action") return;
         if(settings.enabled){
           try{
