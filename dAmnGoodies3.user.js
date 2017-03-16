@@ -2,7 +2,7 @@
 // @name           dAmnGoodies
 // @description    Novelty features for dAmn chat.
 // @author         Sam Mulqueen <sammulqueen.nz@gmail.com>
-// @version        3.2.7
+// @version        3.3.0
 // @include        http://chat.deviantart.com/chat/*
 // @grant GM_xmlhttpRequest
 // ==/UserScript==
@@ -11,7 +11,7 @@ function dAmnGoodies_Script(){
   var DG = {};
   window.DG = DG;
 
-  DG.version = "3.2.7";
+  DG.version = "3.3.0";
 
   DG.goodies = {};
   DG.Goodie = function(name, defaultData, setup){
@@ -520,10 +520,15 @@ function dAmnGoodies_Script(){
     new DG.Goodie("nick", {
       enabled: true,
       tagsEnabled: false,
+      sendEnabled: true,
       nicknames: {
         sumopiggy: "Sam"
       }
     }, function(settings){
+      if(typeof settings.sendEnabled == "undefined"){
+        settings.sendEnabled = true;
+        DG.save();
+      }
       dAmn.command("nick", 1, function(args){
         var username, nickname;
         var split = args.split(" ");
@@ -582,6 +587,19 @@ function dAmnGoodies_Script(){
               DG.save();
             }else{
               dAmn.chat.notice("Usage: /nick tags [on|off]");
+            }
+            break;
+          case "send":
+            if(split[1] == "on"){
+              settings.sendEnabled = true;
+              dAmn.chat.notice("dAmn Goodies will alter the messages you send to replace nicknames");
+              DG.save();
+            }else if(split[1] == "off"){
+              settings.sendEnabled = false;
+              dAmn.chat.notice("dAmn Goodies will NOT alter the messages you send to replace nicknames");
+              DG.save();
+            }else{
+              dAmn.chat.notice("Usage: /nick send [on|off]");
             }
             break;
           default:
