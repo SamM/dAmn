@@ -4,6 +4,7 @@
 // @author         Sam Mulqueen <sammulqueen.nz@gmail.com>
 // @version        3.3.1
 // @include        http://chat.deviantart.com/chat/*
+// @include        https://chat.deviantart.com/chat/*
 // @grant GM_xmlhttpRequest
 // ==/UserScript==
 
